@@ -1,0 +1,73 @@
+Rustdesk installing guide, cudo to u/Zehnpae on r/rustdesk
+
+If you have Windows firewall running don't forget to open the required ports.
+
+-----
+
+Part 1 - Getting the files in the right places:
+
+Create a folder on your C:\ called "Source". We're going to download and work out of there.
+
+Download NSSM to your source folder.
+
+Download the free open source windows server from GIT to your source folder. You may have to expand the list, it's usually near the bottom. 'rustdesk-server-windows-x86_64-unsigned.zip'
+
+Extract NSSM from the zip file to your source folder.
+
+Extract RustDesk Server from the zip file to your source folder.
+
+Open a new explorer window and navigate to C:\Program Files (Not x86)
+
+Create two new folders. One called 'nssm' and one called 'RustDesk Server'
+
+In your source folder, dig down to C;\Source\nssm-2.24\win64\ and copy 'nssm.exe' to the 'nssm' folder you just created in program files. Windows may complain about this.
+
+In your source folder, dig down to C:\Source\rustdesk-server-windows-x86_64\x86_64 and copy the contents to the 'RustDesk Server' folder you created. Should be 4 files in all.
+
+-----
+
+Part 2 - NSSM as a path variable
+
+To make life easier on ourselves, we going to create a path variable for nssm. Hit the windows key to bring up windows search and type in 'system variables' and the best match should be 'Edit the system environment variables.' Click on that.
+
+You should see near the bottom of the new window, 'Environment Variables'. Click on that.
+
+In the new window near the bottom is the System Variables. Find the entry called 'Path' and highlight it, then click on edit.
+
+In this new window, click on 'new' on the right. A blank line will appear at the bottom. Type in 'C:\Program Files\nssm' and then hit enter.
+
+VERY IMPORTANT Click ok to close each of the windows you had opened for this. Do not x out. That should be 3 ok's you click on.
+
+Test if it worked. Make sure all command prompt windows you might have open are closed, then open a new one. Type in 'nssm' and then hit enter. It should spit out a bunch of help information. If it does, we're in the home stretch.
+
+-----
+
+Part 3 - Setting up the services.
+
+Open a new command prompt now as administrator.
+
+Enter the following command exactly (including quotes) and then hit enter
+
+nssm install "RustDesk hbbs service" "C:\Program Files\RustDesk Server\hbbs.exe" -k _
+
+Do it again with this one:
+
+nssm install "RustDesk hbbr service" "C:\Program Files\RustDesk Server\hbbr.exe" -k _
+
+Now start the services. Open up services.msc and start the 'RustDesk hbbr service' and 'RustDesk hbbs service'
+
+If Windows complains about it and gives you 'error code 4' or whatever, then you'll have to change the 'log on as' username to an account with local administrative privileges.
+
+-----
+
+Part 4 - Configuring the clients
+
+Go into your RustDesk Server folder. There is going to be a new .pub file. Open that with notepad. This is your key.
+
+On each client, open the rust desk software and go into your client settings. Go to the network section. You'll have to 'unlock' it and then for ID server you put in the IP of your host. In the Key section you copy your key you got. You can ignore relay/api server stuff.
+
+Do this on every client that wants to connect to each other. Same IP/key on each.
+
+-----
+open 21115:21119 UDP and TCP in Windows Firewall.
+ ![demo](https://i.imgur.com/rGbKsda.png)
