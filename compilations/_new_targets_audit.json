@@ -1,0 +1,1393 @@
+{
+  "anders": [
+    {
+      "url": "https://andersbrownworth.com/blockchain/",
+      "status": 200,
+      "final_url": "https://andersbrownworth.com/blockchain/",
+      "title": "Blockchain Demo",
+      "h1": "Blockchain Demo",
+      "scripts": [
+        "https://andersbrownworth.com/blockchain/javascripts/lib/jquery.min.js",
+        "https://andersbrownworth.com/blockchain/javascripts/lib/bootstrap.min.js",
+        "https://andersbrownworth.com/blockchain/javascripts/lib/spin.min.js",
+        "https://andersbrownworth.com/blockchain/javascripts/lib/ladda.min.js",
+        "https://andersbrownworth.com/blockchain/javascripts/lib/ie10-viewport-bug-workaround.js",
+        "https://andersbrownworth.com/blockchain/javascripts/lib/sha256.js",
+        "https://andersbrownworth.com/blockchain/javascripts/blockchain.js"
+      ],
+      "script_count": 7,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 0,
+        "button": 1,
+        "video": 0,
+        "audio": 0,
+        "iframe": 2
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 0,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 4
+      },
+      "headings": [
+        "Blockchain Demo",
+        "Blockchain Demo - Part 2 - Public / Private Keys & Signing"
+      ],
+      "interactive_sentences": [
+        "Blockchain Demo Toggle navigation Blockchain Demo Hash Block Blockchain Distributed Tokens Coinbase Blockchain Demo Blockchain Demo - Part 2 - Public / Private Keys & Signing by Anders Brownworth BTC: 1K3NvcuZzVTueHW1qhkG2Cm3viRkh2EXJp ETH: 0x84a90e21d9d02e30ddcea56d618aa75ba90331ff"
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://andersbrownworth.com/blockchain/public-private-keys/",
+      "status": 200,
+      "final_url": "https://andersbrownworth.com/blockchain/public-private-keys/",
+      "title": "Blockchain Demo: Public / Private Keys & Signing",
+      "h1": "Blockchain Demo: Public / Private Keys & Signing",
+      "scripts": [
+        "https://andersbrownworth.com/blockchain/public-private-keys/javascripts/lib/jquery.min.js",
+        "https://andersbrownworth.com/blockchain/public-private-keys/javascripts/lib/popper.min.js",
+        "https://andersbrownworth.com/blockchain/public-private-keys/javascripts/lib/bootstrap.min.js",
+        "https://andersbrownworth.com/blockchain/public-private-keys/javascripts/lib/js.cookie.min.js",
+        "https://andersbrownworth.com/blockchain/public-private-keys/javascripts/lib/BigInteger.min.js",
+        "https://andersbrownworth.com/blockchain/public-private-keys/javascripts/lib/Buffer.js",
+        "https://andersbrownworth.com/blockchain/public-private-keys/javascripts/lib/elliptic.js",
+        "https://andersbrownworth.com/blockchain/public-private-keys/javascripts/lib/spin.min.js",
+        "https://andersbrownworth.com/blockchain/public-private-keys/javascripts/lib/ladda.min.js",
+        "https://andersbrownworth.com/blockchain/public-private-keys/javascripts/lib/sha256.js",
+        "https://andersbrownworth.com/blockchain/public-private-keys/javascripts/blockchain.js"
+      ],
+      "script_count": 11,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 0,
+        "button": 1,
+        "video": 0,
+        "audio": 0,
+        "iframe": 2
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 0,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 4
+      },
+      "headings": [
+        "Blockchain Demo: Public / Private Keys & Signing",
+        "Blockchain Demo - Part 1"
+      ],
+      "interactive_sentences": [],
+      "notes": []
+    },
+    {
+      "url": "https://andersbrownworth.com/zero-knowledge-proof-demo",
+      "status": 200,
+      "final_url": "https://andersbrownworth.com/zero-knowledge-proof-demo/",
+      "title": "Zero Knowledge Proof Demo",
+      "h1": "Video",
+      "scripts": [
+        "https://andersbrownworth.com/zero-knowledge-proof-demo/js/lib/bootstrap.bundle.min.js",
+        "https://andersbrownworth.com/zero-knowledge-proof-demo/js/lib/jquery.min.js"
+      ],
+      "script_count": 2,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 0,
+        "button": 1,
+        "video": 0,
+        "audio": 0,
+        "iframe": 1
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 0,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 2
+      },
+      "headings": [
+        "Video",
+        "Try it yourself!"
+      ],
+      "interactive_sentences": [],
+      "notes": []
+    }
+  ],
+  "setosa_ev": [
+    {
+      "url": "https://setosa.io/ev/conditional-probability/",
+      "status": 200,
+      "final_url": "https://setosa.io/ev/conditional-probability/",
+      "title": "Conditional probability explained visually",
+      "h1": "Conditional probability",
+      "scripts": [
+        "https://setosa.io/ev/scripts/d3.js",
+        "https://setosa.io/ev/scripts/angular.js",
+        "https://setosa.io/ev/scripts/common.js"
+      ],
+      "script_count": 3,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 7,
+        "button": 3,
+        "video": 0,
+        "audio": 0,
+        "iframe": 1
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 0,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 0
+      },
+      "headings": [
+        "Conditional probability",
+        "Explained Visually"
+      ],
+      "interactive_sentences": [],
+      "notes": []
+    },
+    {
+      "url": "https://setosa.io/ev/markov-chains/",
+      "status": 200,
+      "final_url": "https://setosa.io/ev/markov-chains/",
+      "title": "Markov Chains explained visually",
+      "h1": "Markov Chains",
+      "scripts": [
+        "https://setosa.io/ev/scripts/d3.js",
+        "https://setosa.io/ev/scripts/angular.js",
+        "https://setosa.io/ev/scripts/common.js"
+      ],
+      "script_count": 3,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 10,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 2
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 0,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 2
+      },
+      "headings": [
+        "Markov Chains",
+        "Explained Visually"
+      ],
+      "interactive_sentences": [
+        "Therefore, every day in our simulation will have a fifty percent chance of rain.\" This rule would generate the following sequence in simulation: Did you notice how the above sequence doesn't look quite like the original?"
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://setosa.io/ev/exponentiation/",
+      "status": 200,
+      "final_url": "https://setosa.io/ev/exponentiation/",
+      "title": "Exponentiation explained visually",
+      "h1": "Exponentiation",
+      "scripts": [
+        "https://setosa.io/ev/scripts/d3.js",
+        "https://setosa.io/ev/scripts/angular.js",
+        "https://setosa.io/ev/scripts/common.js"
+      ],
+      "script_count": 3,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 10,
+        "button": 4,
+        "video": 0,
+        "audio": 0,
+        "iframe": 1
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 0,
+        "playback": 4,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 0
+      },
+      "headings": [
+        "Exponentiation",
+        "Explained Visually",
+        "Linear growth",
+        "Exponential growth",
+        "Example"
+      ],
+      "interactive_sentences": [
+        "Restart rate: steps: {{opts.steps}} speed: {{opts.speed}} Linear growth Most of us already have an intuition for linear growth.",
+        "restart rate: steps: {{opts.steps}} speed: {{opts.speed}} Exponential growth With exponential growth, on the other hand, each step multiplies the total by a fixed amount.",
+        "restart rate: steps: {{opts.steps}} speed: {{opts.speed}} Example The following is a naive model of the spread of a virus in a population.",
+        "restart speed: {{opts.speed}} For more explanations, visit the Explained Visually project homepage."
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://setosa.io/ev/sine-and-cosine/",
+      "status": 200,
+      "final_url": "https://setosa.io/ev/sine-and-cosine/",
+      "title": "Sine and Cosine explained visually",
+      "h1": "Sine and Cosine",
+      "scripts": [
+        "https://setosa.io/ev/scripts/d3.js",
+        "https://setosa.io/ev/scripts/angular.js",
+        "https://setosa.io/ev/scripts/common.js",
+        "http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=default",
+        "https://setosa.io/ev/sine-and-cosine/script.js"
+      ],
+      "script_count": 5,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 3,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 1
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 1,
+        "playback": 2,
+        "scroll": 0,
+        "chart": 1,
+        "simulation": 0
+      },
+      "headings": [
+        "Sine and Cosine",
+        "Explained Visually",
+        "Sin(θ)",
+        "Cos(θ)"
+      ],
+      "interactive_sentences": [
+        "Below, click play to see this process unfold.",
+        "Play with the figures below to see real-time conversion between Cartesian (i.e., x/y coordinates) and polar coordinates."
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://setosa.io/ev/pi/",
+      "status": 200,
+      "final_url": "https://setosa.io/ev/pi/",
+      "title": "Pi (π) explained visually",
+      "h1": "Pi (π)",
+      "scripts": [
+        "https://setosa.io/ev/scripts/d3.js",
+        "https://setosa.io/ev/scripts/angular.js",
+        "https://setosa.io/ev/scripts/common.js",
+        "https://setosa.io/ev/pi/script.js"
+      ],
+      "script_count": 4,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 5,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 1
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 0,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 0
+      },
+      "headings": [
+        "Pi (π)",
+        "Explained Visually"
+      ],
+      "interactive_sentences": [
+        "The distance from the center point is called the and the distance along the outer edge of the circle is called the ."
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://setosa.io/ev/eigenvectors-and-eigenvalues/",
+      "status": 200,
+      "final_url": "https://setosa.io/ev/eigenvectors-and-eigenvalues/",
+      "title": "Eigenvectors and Eigenvalues explained visually",
+      "h1": "Eigenvectors and Eigenvalues",
+      "scripts": [
+        "https://setosa.io/ev/scripts/d3.js",
+        "https://setosa.io/ev/scripts/angular.js",
+        "https://setosa.io/ev/scripts/common.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML",
+        "https://setosa.io/ev/scripts/topojson.js",
+        "https://setosa.io/ev/eigenvectors-and-eigenvalues/script.js"
+      ],
+      "script_count": 6,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 4,
+        "button": 2,
+        "video": 0,
+        "audio": 0,
+        "iframe": 1
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 3,
+        "click": 0,
+        "playback": 1,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 0
+      },
+      "headings": [
+        "Eigenvectors and Eigenvalues",
+        "Explained Visually",
+        "What are eigenvalues/vectors good for?",
+        "Fibonacci Sequence",
+        "Steady States",
+        "Complex eigenvalues",
+        "Learning more"
+      ],
+      "interactive_sentences": [
+        "Below, change the columns of $A$ and drag $v$ to be an eigenvector.",
+        "reset forward {{opt.pos[opt.curGen][0]}} {{opt.pos[opt.curGen][0] === 1 ?",
+        "Drag the circles to decide these fractions and the number starting in each state.",
+        "Hover over the animation to see the system go to the steady state.",
+        "To see this, drag $A$'s columns (the arrows) around until you get a spiral."
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://setosa.io/ev/image-kernels/",
+      "status": 200,
+      "final_url": "https://setosa.io/ev/image-kernels/",
+      "title": "Image Kernels explained visually",
+      "h1": "Image Kernels",
+      "scripts": [
+        "https://setosa.io/ev/scripts/d3.js",
+        "https://setosa.io/ev/scripts/angular.js",
+        "https://setosa.io/ev/scripts/common.js",
+        "https://setosa.io/ev/scripts/exif.js",
+        "https://setosa.io/ev/image-kernels/script.js"
+      ],
+      "script_count": 5,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 4,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 1
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 0,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 1
+      },
+      "headings": [
+        "Image Kernels",
+        "Explained Visually"
+      ],
+      "interactive_sentences": [
+        "Hover over a pixel on either image to see how its value is computed.",
+        "One way to fix this is to extend the edge values out by one in the original image while keeping our new image the same size.",
+        "An outline kernel (also called an \"edge\" kernel) is used to highlight large differences in pixel values."
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://setosa.io/ev/principal-component-analysis/",
+      "status": 200,
+      "final_url": "https://setosa.io/ev/principal-component-analysis/",
+      "title": "Principal Component Analysis explained visually",
+      "h1": "Principal Component Analysis",
+      "scripts": [
+        "https://setosa.io/ev/scripts/d3.js",
+        "https://setosa.io/ev/scripts/angular.js",
+        "https://setosa.io/ev/scripts/common.js",
+        "https://setosa.io/ev/scripts/three.js",
+        "https://setosa.io/ev/scripts/OrthographicTrackballControls.js",
+        "https://setosa.io/ev/scripts/numeric.js",
+        "https://setosa.io/ev/principal-component-analysis/script.js"
+      ],
+      "script_count": 7,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 3,
+        "button": 2,
+        "video": 0,
+        "audio": 0,
+        "iframe": 1
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 1,
+        "click": 1,
+        "playback": 1,
+        "scroll": 0,
+        "chart": 4,
+        "simulation": 0
+      },
+      "headings": [
+        "Principal Component Analysis",
+        "Explained Visually",
+        "2D example",
+        "3D example",
+        "Eating in the UK (a 17D example)"
+      ],
+      "interactive_sentences": [
+        "Drag the points around in the following visualization to see PC coordinate system adjusts.",
+        "To see the \"official\" PCA transformation, click the \"Show PCA\" button.",
+        "show PCA reset Eating in the UK (a 17D example) Original example from Mark Richardson's class notes Principal Component Analysis What if our data have way more than 3-dimensions?",
+        "Here's the plot of the data along the first principal component."
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://setosa.io/ev/ordinary-least-squares-regression/",
+      "status": 200,
+      "final_url": "https://setosa.io/ev/ordinary-least-squares-regression/",
+      "title": "Ordinary Least Squares Regression explained visually",
+      "h1": "Ordinary Least Squares Regression",
+      "scripts": [
+        "https://setosa.io/ev/_build/js/common-shared.js",
+        "https://setosa.io/ev/ordinary-least-squares-regression/_bundle.js"
+      ],
+      "script_count": 2,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 3,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 1
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 0,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 0
+      },
+      "headings": [
+        "Ordinary Least Squares Regression",
+        "Explained Visually"
+      ],
+      "interactive_sentences": [],
+      "notes": []
+    }
+  ],
+  "nyt": [
+    {
+      "url": "https://www.nytimes.com/interactive/2017/04/02/technology/uber-drivers-psychological-tricks.html?_r=0",
+      "status": 200,
+      "final_url": "https://www.nytimes.com/interactive/2017/04/02/technology/uber-drivers-psychological-tricks.html?_r=0",
+      "title": "How Uber Uses Psychological Tricks to Push Its Drivers’ Buttons - The New York Times",
+      "h1": "How Uber Uses Psychological Tricks to Push Its Drivers’ Buttons",
+      "scripts": [
+        "https://www.nytimes.com/vi-assets/static-assets/nyt5/decom-userinfo/js/framework.js",
+        "https://cdn.optimizely.com/public/3013110282/s/article_prod.js"
+      ],
+      "script_count": 2,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 1,
+        "button": 7,
+        "video": 0,
+        "audio": 0,
+        "iframe": 0
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 1,
+        "playback": 6,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 2
+      },
+      "headings": [
+        "The New York Times",
+        "Technology",
+        "Site Search Navigation",
+        "Site Navigation",
+        "Site Mobile Navigation",
+        "How Uber Uses Psychological Tricks to Push Its Drivers’ Buttons",
+        "Faster pickup times mean more idle drivers.",
+        "What motivates you more: seeing gains or fearing losses?",
+        "Ride-share companies can benefit if they get drivers to focus on dollar targets, instead of working only during the busiest times.",
+        "Having more drivers on the road benefits ride-share companies, but drivers profit from surge pricing and scarcity in their ranks.",
+        "Inside Uber’s Aggressive, Unrestrained Workplace Culture",
+        "Uber Has Deceived Officials for Years With Secret Tool",
+        "Uber Board Stands by Travis Kalanick as It Reveals Plans to Repair Its Image",
+        "Two More Uber Executives Are Departing",
+        "Uber, in Damage Control, Releases Diversity Report",
+        "Site Information Navigation"
+      ],
+      "interactive_sentences": [
+        "Change the number of drivers in this ride-share simulation.",
+        "“But any driver can stop work literally at the tap of a button — the decision whether or not to drive is 100 percent theirs.” Uber’s recent emphasis on drivers is no accident.",
+        "“I think there’s something to that, but ultimately Zynga should worry mostly about how fun its games are rather than trying to get you to play a little bit more by some trick,” he said.",
+        "Amid the uproar, Uber introduced a pause button.",
+        "“In the middle of the trip, you can say, ‘Stop giving me requests.’ So you can have more control over when you want to stop driving.” It is true that drivers can pause the services’ automatic queuing feature if they need to refill their tanks, or empty them, as the case may be.",
+        "To disable it, they would have to pause it every time they picked up a new passenger.",
+        "By contrast, even Netflix allows users to permanently turn off its automatic queuing feature, known as Post-Play.",
+        "Making Post-Play the default can have the same effect.",
+        "Simulation details: There are 20 drivers."
+      ],
+      "notes": []
+    }
+  ],
+  "music_learning": [
+    {
+      "url": "https://learningmusic.ableton.com/",
+      "status": 200,
+      "final_url": "https://learningmusic.ableton.com/",
+      "title": "Get started | Learning Music",
+      "h1": "Get started making music",
+      "scripts": [
+        "https://learningmusic.ableton.com/third-party/polyfills/polyfills.js",
+        "https://learningmusic.ableton.com/third-party/tone/tone.min.js",
+        "https://learningmusic.ableton.com/third-party/microevent/microevent.js",
+        "https://learningmusic.ableton.com/widgets/build/widgets.min.js",
+        "https://www.ableton.com/biscuits.js",
+        "https://learningmusic.ableton.com/widgets/build/SimpleSession.js"
+      ],
+      "script_count": 6,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 1,
+        "input": 0,
+        "button": 9,
+        "video": 0,
+        "audio": 0,
+        "iframe": 0
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 1,
+        "playback": 7,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 0
+      },
+      "headings": [
+        "Get started making music"
+      ],
+      "interactive_sentences": [
+        "Beat and tempo Tempo and genre Backbeats Bars Rock and house “We Will Rock You” “Single Ladies” Play with beats Notes and scales ‹ Chapters Lessons Explore pitch Make patterns with pitch Keys and scales Minor scales Adding more notes Play with notes and scales Chords ‹ Chapters Lessons Make some chords Major triads Minor triads “Get Up, Stand Up” “Mary Had a Little Lamb” 1-5-6-4 Play with chords Basslines ‹ Chapters Lessons Make basslines “Good Life” “Around the World” “Under Mi Sleng Teng” “Never Tell You” “Oblivion” Play with basslines Melodies ‹ Chapters Lessons Make melodies “Love Will Tear Us Apart” “Tour de France” “Praxis” “Ride” “Ride” variations Play with melodies Song structure ‹ Chapters Lessons Play with song structures “Bury It” “Award Tour” “Ni - Ten - Ichi - Ryu” The playground Advanced topics ‹ Chapters Lessons Advanced topics Building major scales Building minor scales Modes Pentatonic Whole tone Octatonic Pelog 19-tone Diatonic triads Triads in every key Inversions Voicings Seventh chords “Mommy What's a Record” Where to go from here Get started making music In these lessons, you'll learn the basics of music making.",
+        "English عربي 简体中文 繁體中文 Deutsch Español Français עִבְרִית Bahasa Indonesia Italiano 日本語 한국어 Nederlands Português Pусский Suomi ไทย Türkçe Tiếng Việt Reset all lessons Go to Ableton.com › Privacy Policy › Imprint ›"
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://learningsynths.ableton.com/",
+      "status": 200,
+      "final_url": "https://learningsynths.ableton.com/",
+      "title": "Learning Synths",
+      "h1": null,
+      "scripts": [
+        "https://www.ableton.com/biscuits.js",
+        "https://learningsynths.ableton.com/js/externals/react.production.min.js",
+        "https://learningsynths.ableton.com/js/externals/react-dom.production.min.js",
+        "https://learningsynths.ableton.com/js/musiclab.js"
+      ],
+      "script_count": 4,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 0,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 0
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 0,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 0
+      },
+      "headings": [],
+      "interactive_sentences": [
+        "Please try using a recent version of Chrome, Firefox, Safari, Edge, or Opera."
+      ],
+      "notes": []
+    }
+  ],
+  "ncase_sites": [
+    {
+      "url": "https://ncase.me/loopy/",
+      "status": 200,
+      "final_url": "https://ncase.me/loopy/",
+      "title": "LOOPY: a tool for thinking in systems",
+      "h1": null,
+      "scripts": [],
+      "script_count": 0,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 0,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 2
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 1,
+        "click": 0,
+        "playback": 3,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 1
+      },
+      "headings": [],
+      "interactive_sentences": [
+        "a tool to make interactive simulations may not be that much help.",
+        "play with simulations It's the ancient, time-honored way of learning: messing around and seeing what happens.",
+        "Play with simulations to ask \"what if\" questions, and get an intuition for how the system works!",
+        "NOW PLAY WITH AN EXAMPLE: OR, MAKE A MODEL FROM SCRATCH → Like duct tape, you can use LOOPY for all sorts of things: However you choose to use LOOPY, hopefully it can give you not just the software tools, but also the mental tools to understand the complex systems of the world around us."
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://ncase.me/trust/",
+      "status": 200,
+      "final_url": "https://ncase.me/trust/",
+      "title": "The Evolution of Trust",
+      "h1": null,
+      "scripts": [
+        "https://ncase.me/trust/js/lib/helpers.js?v11",
+        "https://ncase.me/trust/js/lib/pegasus.js?v11",
+        "https://ncase.me/trust/js/lib/minpubsub.src.js?v11",
+        "https://ncase.me/trust/js/lib/q.js?v11",
+        "https://ncase.me/trust/js/lib/pixi.min.js?v11",
+        "https://ncase.me/trust/js/lib/howler.js?v11",
+        "https://ncase.me/trust/js/lib/tweenjs-0.6.2.min.js?v11",
+        "https://ncase.me/trust/js/lib/sharing.js?v11",
+        "https://ncase.me/trust/js/core/Loader.js?v11",
+        "https://ncase.me/trust/js/core/Slideshow.js?v11",
+        "https://ncase.me/trust/js/core/SlideSelect.js?v11",
+        "https://ncase.me/trust/js/core/Button.js?v11",
+        "https://ncase.me/trust/js/core/TextBox.js?v11",
+        "https://ncase.me/trust/js/core/Words.js?v11",
+        "https://ncase.me/trust/js/core/IncDecNumber.js?v11",
+        "https://ncase.me/trust/js/core/Slider.js?v11",
+        "https://ncase.me/trust/js/core/Scratcher.js?v11",
+        "https://ncase.me/trust/js/core/Background.js?v11",
+        "https://ncase.me/trust/js/core/ImageBox.js?v11",
+        "https://ncase.me/trust/js/core/PayoffsUI.js?v11"
+      ],
+      "script_count": 36,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 0,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 0
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 0,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 0
+      },
+      "headings": [],
+      "interactive_sentences": [],
+      "notes": []
+    },
+    {
+      "url": "https://ncase.itch.io/wbwwb",
+      "status": 200,
+      "final_url": "https://ncase.itch.io/wbwwb",
+      "title": "We Become What We Behold by Nicky Case!",
+      "h1": "We Become What We Behold",
+      "scripts": [
+        "https://static.itch.io/lib.min.js?1772936114",
+        "https://static.itch.io/bundle.min.js?1772936114",
+        "https://static.itch.io/lib/jquery.maskMoney.js",
+        "https://static.itch.io/game.min.js?1772936114"
+      ],
+      "script_count": 4,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 7,
+        "input": 0,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 1
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 1,
+        "click": 0,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 0
+      },
+      "headings": [
+        "We Become What We Behold"
+      ],
+      "interactive_sentences": [],
+      "notes": []
+    },
+    {
+      "url": "https://ncase.me/remember/",
+      "status": 200,
+      "final_url": "https://ncase.me/remember/",
+      "title": "How To Remember Anything Forever-ish",
+      "h1": null,
+      "scripts": [
+        "https://ncase.me/remember/js/howler.core.min.js",
+        "https://ncase.me/remember/js/minpubsub.src.js",
+        "https://ncase.me/remember/js/comic.js"
+      ],
+      "script_count": 3,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 1,
+        "input": 0,
+        "button": 0,
+        "video": 0,
+        "audio": 2,
+        "iframe": 7
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 3,
+        "playback": 13,
+        "scroll": 1,
+        "chart": 8,
+        "simulation": 11
+      },
+      "headings": [],
+      "interactive_sentences": [
+        "How To Remember Anything Forever-ish HOW TO REMEMBER ANYTHING FOREVER-ISH play/read time: 20 minutes by nicky case · oct 2018 In Greek mythology, Mnemosyne, the goddess of Memory...",
+        "What if I said there's a memory card game you can play, for 20 minutes a day, to store anything you choose into long-term memory, forever?* * until you die And it's awesome .",
+        "teacher's coming That's why I made this badly-drawn interactive comic.",
+        "Here’s a playable simulation of the Forgetting Curve.",
+        "Here’s the simulation again, with a single active recall session.",
+        "Same simulation as before, but now it shows the sweet spot – where you’ve forgotten just a little bit.",
+        "It's like a card game you play against yourself!",
+        "Here's a step-by-step simulation of the Leitner Box: (we'll see a month-by-month sim later) Each daily review takes 20-30 minutes.",
+        "Instead of watching a TV episode, you could play a card game – and remember anything you want for life .",
+        "na na na na na na na na na katamari damacy Now, here's the month-by-month simulation.",
+        "(context: slang) * Obviously, paper cards can't play sounds.",
+        "play the ukulele read french comics make a web game Inevitably, I'll get stuck.",
+        "That's why, in the final part of this interactive comic, you're going to make your own cards!",
+        "So for a Spaced Repetition habit, our question is: For example, you could play the Spaced Repetition game...",
+        "(Tip: whenever I try to create a new habit, I draw a circle on a calendar for each day I successfully do it) (It's a game I play with myself!",
+        "let's download some COOL GOODIES FIRST: to remind you to play the Spaced Repetition game daily!",
+        "(click to download ↓) SECOND: And finally, THIRD: a .zip of all the flashcards you've been practicing in this interactive comic!",
+        "Further reading & credits below!) ↓ ↓ ↓ ↓ ↓ Written, drawn, and programmed by Nicky Case Also, this interactive comic is PUBLIC DOMAIN meaning you can freely use this thing for educational, personal, or even commercial purposes.",
+        "Click here!) Further Reading Something something shoulders of giants.",
+        "(P.S: Chris makes interactive stuff , too!) 🐞 Thank you Omar Rizwan for helping me figure out Mobile Safari's endless pit of bugs 🔊 This project was made with Creative Commons assets from Wikimedia Commons and FreeSounds."
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://ncase.me/polygons/",
+      "status": 200,
+      "final_url": "https://ncase.me/polygons/",
+      "title": "Parable of the Polygons - a playable post on the shape of society",
+      "h1": null,
+      "scripts": [
+        "https://ncase.me/polygons/js/Mouse.js",
+        "https://ncase.me/polygons/js/intro.js"
+      ],
+      "script_count": 2,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 0,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 19
+      },
+      "keyword_counts": {
+        "slider": 1,
+        "drag": 1,
+        "click": 0,
+        "playback": 2,
+        "scroll": 0,
+        "chart": 1,
+        "simulation": 2
+      },
+      "headings": [],
+      "interactive_sentences": [
+        "drag & drop unhappy polygons until nobody is unhappy: (just move them to random empty spots.",
+        "There's also a graph that tracks how much segregation there is over time.",
+        "(Or if you're feeling particularly nasty today, more bias?) use the slider to adjust the shapes' individual bias: Notice how much more segregated things become, when you increase the bias beyond 33%.",
+        "Let's see this play out on a larger scale, when we change the amount of bias and anti-bias for all shapes.",
+        "finally, a big ol' sandbox to play around in.",
+        "Male-Female Differences: A Computer Simulation shows how a small gender bias compounds as you move up the corporate ladder."
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://ncase.me/anxiety/",
+      "status": 200,
+      "final_url": "https://ncase.me/anxiety/",
+      "title": "Adventures With Anxiety!",
+      "h1": null,
+      "scripts": [
+        "https://ncase.me/anxiety/scripts/lib/createImageBitmap.js",
+        "https://ncase.me/anxiety/scripts/lib/tickable_observer.js",
+        "https://ncase.me/anxiety/scripts/lib/helpers.js",
+        "https://ncase.me/anxiety/scripts/lib/rsvp.min.js",
+        "https://ncase.me/anxiety/scripts/lib/minpubsub.min.js",
+        "https://ncase.me/anxiety/scripts/lib/howler.min.js",
+        "https://ncase.me/anxiety/scripts/game/Loader.js",
+        "https://ncase.me/anxiety/scripts/game/Game.js",
+        "https://ncase.me/anxiety/scripts/game/Sprite.js",
+        "https://ncase.me/anxiety/scripts/game/HP.js",
+        "https://ncase.me/anxiety/scripts/game/BG_Anxiety.js",
+        "https://ncase.me/anxiety/scripts/game/Character.js",
+        "https://ncase.me/anxiety/scripts/game/Sounds.js",
+        "https://ncase.me/anxiety/scripts/game/Options.js",
+        "https://ncase.me/anxiety/scripts/game/About.js",
+        "https://ncase.me/anxiety/scripts/game/ContentNotes.js",
+        "https://ncase.me/anxiety/scripts/game/Sharing.js",
+        "https://ncase.me/anxiety/scripts/intro/Intro_SceneSetup.js",
+        "https://ncase.me/anxiety/scripts/intro/Intro_BG.js",
+        "https://ncase.me/anxiety/scripts/act1/Act1_SceneSetup.js"
+      ],
+      "script_count": 40,
+      "dom_counts": {
+        "canvas": 1,
+        "svg": 0,
+        "input": 2,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 0
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 4,
+        "playback": 2,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 0
+      },
+      "headings": [],
+      "interactive_sentences": [
+        "click or spacebar tap anywhere paused click anywhere to keep freaking out Adventures With Anxiety is about, well, anxiety.",
+        "other notes: alcohol abuse, sexuality , a @✩$!load of swearing mental health tips & resources 🔗 ok mental health resources — or — play more of my shtuff throw coins at me on Patreon please your ear-holes with Monplaisir's original soundtrack close And advance on click Volume: ok Created by Nicky Case Music by Monplaisir Extra code by Spacie Full credits Fan-Made Translations!"
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://ncase.me/ballot/",
+      "status": 200,
+      "final_url": "https://ncase.me/ballot/",
+      "title": "To Build a Better Ballot",
+      "h1": "SANDBOX MODE! (link to just this)",
+      "scripts": [
+        "https://ncase.me/ballot/js/index.js"
+      ],
+      "script_count": 1,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 0,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 14
+      },
+      "keyword_counts": {
+        "slider": 1,
+        "drag": 10,
+        "click": 4,
+        "playback": 2,
+        "scroll": 0,
+        "chart": 2,
+        "simulation": 7
+      },
+      "headings": [
+        "FIRST PAST THE POST (FPTP)",
+        "RANKED VOTING",
+        "APPROVAL VOTING",
+        "SCORE VOTING",
+        "SANDBOX MODE! (link to just this)"
+      ],
+      "interactive_sentences": [
+        "( NOTE: This interactive article was written in 2016!",
+        "click & drag the candidates and the voter: It's a tough choice.",
+        "(to move voters, drag the middle of the crowd) watch how that changes the election: Now let's consider a different election.",
+        "drag to just under , and see what happens: That's right.",
+        "And though the spoiler effect didn't play a big role in 2016, its impact could still be felt.",
+        "click & drag the candidates and voter How To Count: Simply add up the votes.",
+        "RANKED VOTING again, click & drag How To Count: There's actually several different ways to count these kinds of ballots.",
+        "They're less well-known, but now, at least you'll know 'em: APPROVAL VOTING yup, stiiiiill click & drag How To Count: Simply add up the approvals.",
+        "Remember that simulation of the spoiler effect from earlier?",
+        "Here's the \"spoiler effect\" simulation again.",
+        "See how different voting systems deal with potential spoilers: drag to just under to create a spoiler effect.",
+        "drag the voters slowly up towards : What happened?",
+        "In this next simulation, you move a losing candidate closer to another losing candidate.",
+        "...I couldn't come up with a simulation to show their flaws.",
+        "So, below is a chart (source) , showing the results of 2.2 million simulations.",
+        "You can tell that a real mathematician made this chart, because it's makin' my eyes bleed: Each voting method's results is shown as an ugly-blue bar.",
+        "How would these different voting systems play out in real life?",
+        "And since it wasn't interactive, I couldn't test the many questions & scenarios that came to mind.",
+        "Every once in a while, I'll fall into an endless rabbithole – like this one on voting systems – and slowly crawl my way out, bloodied and bruised, with a new interactive thing for you!"
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://ncase.me/neurons/",
+      "status": 200,
+      "final_url": "https://ncase.me/neurons/",
+      "title": "Neurotic Neurons",
+      "h1": null,
+      "scripts": [],
+      "script_count": 0,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 0,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 1
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 0,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 3
+      },
+      "headings": [],
+      "interactive_sentences": [
+        "Neurotic Neurons NEUROTIC NEURONS: AN INTERACTIVE EXPLANATION Neurons only skims the surface of psychology/neuroscience, so if you want a deeper dive, do check out this Crash Course video on conditioning, and these Wikipedia articles on Hebbian Learning and Anti-Hebbian Learning .",
+        "The other part of Neurons is its weird interactive format, a hybrid of \"game\" and animated explainers like Vi Hart, CGP Grey, and Kurzgesagt.",
+        "I was inspired by Bret Victor's 2011 article, Explorable Explanations , another interactive hybrid."
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://ncase.me/crowds/",
+      "status": 200,
+      "final_url": "https://ncase.me/crowds/",
+      "title": "The Wisdom and/or Madness of Crowds",
+      "h1": null,
+      "scripts": [
+        "https://ncase.me/crowds/js/lib/helpers.js",
+        "https://ncase.me/crowds/js/lib/inobounce.js",
+        "https://ncase.me/crowds/js/lib/minpubsub.src.js",
+        "https://ncase.me/crowds/js/lib/howler.min.js",
+        "https://ncase.me/crowds/js/lib/Key.js",
+        "https://ncase.me/crowds/js/lib/Mouse.js",
+        "https://ncase.me/crowds/js/lib/Sprite.js",
+        "https://ncase.me/crowds/js/slideshow/Slideshow.js",
+        "https://ncase.me/crowds/js/slideshow/Pencil.js",
+        "https://ncase.me/crowds/js/slideshow/Boxes.js",
+        "https://ncase.me/crowds/js/slideshow/Scratch.js",
+        "https://ncase.me/crowds/js/slideshow/Navigation.js",
+        "https://ncase.me/crowds/js/slideshow/SimUI.js",
+        "https://ncase.me/crowds/js/slideshow/SandboxUI.js",
+        "https://ncase.me/crowds/js/slideshow/Modal.js?v=5",
+        "https://ncase.me/crowds/js/slideshow/Preloader.js",
+        "https://ncase.me/crowds/js/slideshow/Translations.js?v=5",
+        "https://ncase.me/crowds/js/sim/Peep.js?v=2",
+        "https://ncase.me/crowds/js/sim/Connection.js",
+        "https://ncase.me/crowds/js/sim/ConnectorCutter.js"
+      ],
+      "script_count": 32,
+      "dom_counts": {
+        "canvas": 2,
+        "svg": 0,
+        "input": 0,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 0
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 2,
+        "click": 0,
+        "playback": 6,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 10
+      },
+      "headings": [
+        "A quick response to James Surowiecki's The Wisdom of Crowds",
+        "What other kinds of connections are there?",
+        "What other kinds of contagions are there?",
+        "I wanna learn more! What else can I read and/or play?",
+        "“virtually all [college] students reported that their friends drank more than they did.”",
+        "“The Majority Illusion”",
+        "“strong statistical evidence that smoking, health, happiness, voting patterns, and cooperation levels are all contagious”",
+        "“some evidence that suicides are [contagious], too”",
+        "“some evidence that mass shootings are [contagious], too”",
+        "“The world's financial institutions fell for such a cascade in 2008.”",
+        "“the complex contagion theory.”",
+        "“the possum has 13 nipples”",
+        "“groupthink”",
+        "“bonding and bridging social capital”",
+        "“bridging social capital has a sweet spot”",
+        "“the small world network”",
+        "“[small world networks] describe how our neurons are connected”",
+        "“[small world networks] give rise to collective creativity”",
+        "“[small world networks] give rise to collective problem-solving”",
+        "“[small world networks] helped John F. Kennedy (barely) avoid nuclear war!”",
+        "“we influence [...] our friends' friends' friends!”",
+        "“be skeptical of ideas that flatter you”",
+        "★ Sandbox Mode ★"
+      ],
+      "interactive_sentences": [
+        "An interactive guide to human networks: 0 0.",
+        "Draw a network & run the simulation, so that everyone gets infected with the \"contagion\".",
+        "Draw Network Add Person Add \"Infected\" Drag Person Delete Person CLEAR IT ALL (...or, use keyboard shortcuts!) [1]: Add Person [2]: Add \"Infected\" [Space]: Drag [Backspace]: Delete IN CONCLUSION: it's all about...",
+        "“The great triumphs and tragedies of history are caused, not by people being fundamentally good or fundamentally bad, but by people being fundamentally people.” ~ Neil Gaiman & Terry Pratchett <3 created by NICKY CASE play my other shtuff · follow my tweeter lots of love and thanks to MY PATREON SUPPORTERS help me make more like this!",
+        "<3 see my supporters · see my playtesters ♫ music is \"Friends 2018\" and \"Friends 2068\" by Komiku </> Crowds is fully open source WIN start simulation reset & re-draw Fan-made translations: What the, no fan-made translations exist yet?!",
+        "Here's an excerpt: Preface & Chapter 1 Interactive: The Evolution of Trust by Nicky Case (me) (2017).",
+        "Interactive: Parable of the Polygons by Vi Hart and Nicky Case (also me) (2014).",
+        "Or, if you just want to see a whole gallery of interactive edu-things, here's Explorable Explanations , a hub for learning through play!",
+        "The small-world network got more mathematical meat on its bones with “Collective dynamics of small-world networks” by Watts & Strogatz (1998), which proposed an algorithm for creating networks with both low average path length (low degree of separation) and high clustering (friends have lots of mutual friends) — that is, a network that hits the sweet spot!",
+        "You can also play with the visual, interactive adaptation of that paper by Bret Victor (2011).",
+        "Seriously, you can go back to a different chapter, and edit the simulation right there."
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://ncase.me/simulating/",
+      "status": 200,
+      "final_url": "https://ncase.me/simulating/",
+      "title": "New Site Who Dis",
+      "h1": null,
+      "scripts": [],
+      "script_count": 0,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 0,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 0
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 1,
+        "playback": 0,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 0
+      },
+      "headings": [],
+      "interactive_sentences": [],
+      "notes": []
+    },
+    {
+      "url": "https://ncase.me/covid-19/",
+      "status": 200,
+      "final_url": "https://ncase.me/covid-19/",
+      "title": "What Happens Next? COVID-19 Futures, Explained With Playable Simulations",
+      "h1": null,
+      "scripts": [
+        "https://ncase.me/covid-19/js/blerp.js",
+        "https://ncase.me/covid-19/js/littlefoot.js"
+      ],
+      "script_count": 2,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 0,
+        "input": 0,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 26
+      },
+      "keyword_counts": {
+        "slider": 1,
+        "drag": 0,
+        "click": 3,
+        "playback": 13,
+        "scroll": 1,
+        "chart": 18,
+        "simulation": 15
+      },
+      "headings": [
+        "Scenario 0: Do Absolutely Nothing",
+        "Scenario 1: Flatten The Curve / Herd Immunity",
+        "Scenario 2: Months-Long Lockdown",
+        "Scenario 3: Intermittent Lockdown",
+        "Scenario 4: Test, Trace, Isolate",
+        "Scenario 4+: Masks For All, Summer, Circuit Breakers",
+        "(Click to show Feetnotes)",
+        "Feetnotes:"
+      ],
+      "interactive_sentences": [
+        "COVID-19 Futures, Explained With Playable Simulations 🕐 30 min play/read · by Marcel Salathé (epidemiologist) & Nicky Case (art/code) \"The only thing to fear is fear itself\" was stupid advice.",
+        "click this footnote!→ 1 ) is meant to give you hope and fear.",
+        "In this simulation, Infectious people can turn Susceptible people into more Infectious people: It's estimated that, at the start of a COVID-19 outbreak, the virus jumps from an to an every 4 days, on average .",
+        "You can re-play it later with different settings: (technical caveats: 3 ) This is the exponential growth curve.",
+        "Here's what that looks like, with a simulation starting with 100% : This is the opposite of exponential growth, the exponential decay curve.",
+        "7 What happens if we add that to the simulation?",
+        "(caveats: 11 ) Play with this R 0 calculator, to see how R 0 depends on recovery time & new-infection time: But remember, the fewer s there are, the slower s become s.",
+        "We'll explain later.) Now, let's play the SEIR Model again, but showing R 0 , R over time, and the herd immunity threshold: NOTE: Total cases does not stop at herd immunity, but overshoots it!",
+        "So, let's assume handwashing can reduce R by up to 25%, and distancing can reduce R by up to 70%: Play with this calculator to see how % of non- , handwashing, and distancing reduce R: (this calculator visualizes their relative effects, which is why increasing one looks like it decreases the effect of the others.",
+        "In fact, in this simulation, total cases only overshoots a tiny bit above herd immunity – the UK's plan!",
+        "A lockdown isn't a cure, it's just a restart.",
+        "20 Here's a simulation: (After playing the \"recorded scenario\", you can try simulating your own lockdown schedule, by changing the sliders while the simulation is running!",
+        "Remember you can pause & continue the sim, and change the simulation speed) This would keep cases below ICU capacity!",
+        "“A lockdown isn't a cure, it's just a restart”...",
+        "Here's a simulation of: A few-month lockdown, until we can...",
+        "That's not failure: this is what success takes.) Here's a simulation of a \"lazy case\" scenario: Lockdown, then A moderate amount of hygiene & \"Test, Trace, Isolate\", with a mild amount of \"Masks For All\", then...",
+        "Use the lockdown as a \"reset button\", keep R < 1 with case isolation + privacy-protecting contact tracing + at least cloth masks for all...",
+        "Here's a simulation starting with 100% , exponentially decaying into susceptible, no-immunity s after 1 year, on average , with variation: Return of the exponential decay!",
+        "Remember you can pause/continue the sim at any time) But here's the scarier question: What if there's no vaccine for years ?",
+        ") Reducing ICU use by 10x is the same as increasing our ICU capacity by 10x: Here's a simulation of no lasting immunity, no vaccine, and not even any interventions – just slowly increasing capacity to survive the long-term spikes: Even under the worst worst-case scenario..."
+      ],
+      "notes": []
+    },
+    {
+      "url": "https://ncase.itch.io/coming-out-simulator-2014",
+      "status": 200,
+      "final_url": "https://ncase.itch.io/coming-out-simulator-2014",
+      "title": "Coming Out Simulator 2014 by Nicky Case!",
+      "h1": "Coming Out Simulator 2014",
+      "scripts": [
+        "https://static.itch.io/lib.min.js?1772936114",
+        "https://static.itch.io/bundle.min.js?1772936114",
+        "https://static.itch.io/lib/jquery.maskMoney.js",
+        "https://static.itch.io/game.min.js?1772936114"
+      ],
+      "script_count": 4,
+      "dom_counts": {
+        "canvas": 0,
+        "svg": 8,
+        "input": 0,
+        "button": 0,
+        "video": 0,
+        "audio": 0,
+        "iframe": 1
+      },
+      "keyword_counts": {
+        "slider": 0,
+        "drag": 0,
+        "click": 1,
+        "playback": 2,
+        "scroll": 0,
+        "chart": 0,
+        "simulation": 0
+      },
+      "headings": [
+        "Coming Out Simulator 2014",
+        "Download"
+      ],
+      "interactive_sentences": [
+        "You can now play Coming Out Sim on your phone, too!",
+        "You play as a semi-fictional version of me, on a night that changed my life forever.",
+        "Download Download Now Name your own price Click download now to get access to the following files: Source_Code.zip 4.2 MB Source_Art_(Flash).zip 1.4 MB itch.io Â· View all by Nicky Case!"
+      ],
+      "notes": []
+    }
+  ],
+  "ncase_repo_meta": [
+    {
+      "repo": "loopy",
+      "html_url": "https://github.com/ncase/loopy",
+      "homepage": "http://ncase.me/loopy/",
+      "description": "A tool for thinking in systems",
+      "language": "JavaScript",
+      "stargazers_count": 1710,
+      "updated_at": "2026-03-08T08:10:49Z"
+    },
+    {
+      "repo": "trust",
+      "html_url": "https://github.com/ncase/trust",
+      "homepage": null,
+      "description": "An interactive guide to the game theory of cooperation",
+      "language": "JavaScript",
+      "stargazers_count": 6164,
+      "updated_at": "2026-03-07T18:21:26Z"
+    },
+    {
+      "repo": "wbwwb",
+      "html_url": "https://github.com/ncase/wbwwb",
+      "homepage": null,
+      "description": "We Become What We Behold – a minigame about the news!",
+      "language": "JavaScript",
+      "stargazers_count": 1372,
+      "updated_at": "2026-03-06T15:46:15Z"
+    },
+    {
+      "repo": "remember",
+      "html_url": "https://github.com/ncase/remember",
+      "homepage": null,
+      "description": "An interactive comic on Spaced Repetition",
+      "language": "HTML",
+      "stargazers_count": 342,
+      "updated_at": "2026-03-04T02:16:48Z"
+    },
+    {
+      "repo": "polygons",
+      "html_url": "https://github.com/ncase/polygons",
+      "homepage": "http://ncase.me/polygons",
+      "description": "A playable post on how harmless choices can make a harmful world.",
+      "language": "JavaScript",
+      "stargazers_count": 1345,
+      "updated_at": "2026-02-24T09:47:09Z"
+    },
+    {
+      "repo": "anxiety",
+      "html_url": "https://github.com/ncase/anxiety",
+      "homepage": null,
+      "description": null,
+      "language": "JavaScript",
+      "stargazers_count": 471,
+      "updated_at": "2026-02-21T14:08:11Z"
+    },
+    {
+      "repo": "ballot",
+      "html_url": "https://github.com/ncase/ballot",
+      "homepage": null,
+      "description": "An interactive guide to alternative voting systems",
+      "language": "HTML",
+      "stargazers_count": 220,
+      "updated_at": "2026-01-28T02:41:27Z"
+    },
+    {
+      "repo": "neurons",
+      "html_url": "https://github.com/ncase/neurons",
+      "homepage": "http://ncase.me/neurons",
+      "description": "Neurotic Neurons, an interactive explanation.",
+      "language": "JavaScript",
+      "stargazers_count": 201,
+      "updated_at": "2026-01-28T01:44:31Z"
+    },
+    {
+      "repo": "crowds",
+      "html_url": "https://github.com/ncase/crowds",
+      "homepage": "http://ncase.me/crowds",
+      "description": "The Wisdom and/or Madness of the Crowds",
+      "language": "HTML",
+      "stargazers_count": 447,
+      "updated_at": "2026-01-26T09:18:22Z"
+    },
+    {
+      "repo": "simulating",
+      "html_url": "https://github.com/ncase/simulating",
+      "homepage": "http://ncase.me/simulating",
+      "description": "An interactive guide to thinking in systems!",
+      "language": "JavaScript",
+      "stargazers_count": 188,
+      "updated_at": "2025-11-12T05:04:39Z"
+    },
+    {
+      "repo": "covid-19",
+      "html_url": "https://github.com/ncase/covid-19",
+      "homepage": null,
+      "description": "COVID-19 Futures, Explained With Playable Simulations",
+      "language": "HTML",
+      "stargazers_count": 233,
+      "updated_at": "2025-10-09T01:53:34Z"
+    },
+    {
+      "repo": "coming-out-simulator-2014",
+      "html_url": "https://github.com/ncase/coming-out-simulator-2014",
+      "homepage": null,
+      "description": "Coming Out Simulator 2014",
+      "language": "JavaScript",
+      "stargazers_count": 305,
+      "updated_at": "2026-02-24T09:48:22Z"
+    }
+  ],
+  "other_repo_meta": [
+    {
+      "repo": "anders94/blockchain-demo",
+      "html_url": "https://github.com/anders94/blockchain-demo",
+      "homepage": "",
+      "description": "A web-based demonstration of blockchain concepts.",
+      "language": "Pug",
+      "stargazers_count": 5647,
+      "updated_at": "2026-03-07T05:20:35Z"
+    },
+    {
+      "repo": "anders94/public-private-key-demo",
+      "html_url": "https://github.com/anders94/public-private-key-demo",
+      "homepage": null,
+      "description": "Demonstrates public / private key pairs and signing in a blockchain context. This is part 2 of my Blockchain 101 video explainer.",
+      "language": "JavaScript",
+      "stargazers_count": 645,
+      "updated_at": "2026-03-03T04:50:20Z"
+    },
+    {
+      "repo": "anders94/zero-knowledge-proof-demo",
+      "html_url": "https://github.com/anders94/zero-knowledge-proof-demo",
+      "homepage": null,
+      "description": "A demonstration of the core idea behind Zero Knowledge Proofs",
+      "language": "JavaScript",
+      "stargazers_count": 5,
+      "updated_at": "2026-02-08T21:37:09Z"
+    },
+    {
+      "repo": "AxelVincent/electronic-music-production",
+      "html_url": "https://github.com/AxelVincent/electronic-music-production",
+      "homepage": null,
+      "description": null,
+      "language": null,
+      "stargazers_count": 1,
+      "updated_at": "2023-09-05T12:56:34Z"
+    }
+  ]
+}

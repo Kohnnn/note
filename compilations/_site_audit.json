@@ -1,0 +1,3837 @@
+[
+  {
+    "file": "awesome-airfoil.md",
+    "title": "Airfoil",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/airfoil/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/airfoil/",
+    "page_title": "Airfoil â Bartosz Ciechanowski",
+    "headings": [
+      "Airfoil",
+      "Visualizing Flow",
+      "Velocity",
+      "Relative Velocity",
+      "Pressure",
+      "Visualizing Pressure",
+      "Airfoil Flow",
+      "Viscosity",
+      "Boundary Layer",
+      "Airfoil Shapes",
+      "Further Reading and Watching",
+      "Final Words"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/airfoil.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "webgl",
+      "canvas2d",
+      "pointer_events",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 31,
+      "drag": 33,
+      "click": 7,
+      "hover": 0,
+      "playback": 8,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 8,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 5
+    },
+    "interactive_sentences": [
+      "Using the slider to change just one property of this substance, we can end up with vastly different effects on the liveliness of that flow: Over the course of this blog post we’ll build some intuitions for why these different effects happen to airfoils and other objects placed in flowing air.",
+      "The slider lets you control the speed of time to observe in detail how the falling leaves and the bending blades of grass are visibly affected by the wind sweeping through this area: We intuitively understand that it’s the flowing air that pushes the vegetation around, but note that we only observe the effects that the wind has on other objects â we can’t see the motion of the air itself .",
+      "We can mimic this behavior with a collection of small arrows placed all over the area, as seen on the right side: Each arrow represents the direction and the speed of the flow of air at that location â the longer the arrow , the faster the flow.",
+      "Note that we have some flexibility in how the speed of wind corresponds to the length of an arrow .",
+      "I adjusted the lengths of the arrows to prevent them from visually overlapping, but I also made sure to maintain their relative lengths â if one arrow is twice as long as the other, then the flow at that location is also twice as fast.",
+      "If we wanted to, we could draw a velocity arrow at any of the seemingly empty spots on the right side.",
+      "Each marker represents an object so small and light that it instantly picks up the speed of the surrounding airflow.",
+      "In fact, the motion of each marker is equivalent to the motion of the parcel of air right around it.",
+      "If you slow down time , you’ll be able to see how each marker just moves in the direction of the arrows underneath it.",
+      "I also made each marker leave a little ghost trail behind it â this lets us track the path the air, as represented by the marker , took on the way to its current position.",
+      "Let’s pause for a second to emphasize what the grass -like arrows and leaf -like markers represent âÂ they both show the velocity of the flow of air, but in slightly different ways.",
+      "An arrow is attached to its fixed point in space, so it represents the current direction and speed of the flow at that location .",
+      "You can see the whole spectrum of colors in the scale below the plot.",
+      "Before we finish this section, let me bring up visualization of a simple airflow, but this time I’ll give you some control over its direction , which you can change using the second slider.",
+      "The first one once more controls the speed of time : Don’t be misled by the frozen arrows, the wind is actually blowing there.",
+      "Velocity Let’s take a look at the air particles in a small, marked out volume of space seen in the demonstration below â you can drag the cube around to change the viewing angle.",
+      "The slider controls the speed of time : You’re witnessing the motion of over twelve thousand air particles.",
+      "However, despite all this motion what you’re seeing here is a simulation of still air."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "slider",
+        193
+      ],
+      [
+        "canvas",
+        137
+      ],
+      [
+        "drag",
+        80
+      ],
+      [
+        "reset",
+        76
+      ],
+      [
+        "axis",
+        56
+      ],
+      [
+        "pointer",
+        52
+      ],
+      [
+        "click",
+        46
+      ],
+      [
+        "plot",
+        34
+      ],
+      [
+        "range",
+        25
+      ],
+      [
+        "pause",
+        16
+      ],
+      [
+        "animate",
+        14
+      ],
+      [
+        "play",
+        9
+      ],
+      [
+        "requestanimationframe",
+        7
+      ],
+      [
+        "key",
+        6
+      ],
+      [
+        "mousemove",
+        5
+      ]
+    ]
+  },
+  {
+    "file": "awesome-alpha-compositing.md",
+    "title": "Alpha Compositing",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/alpha-compositing/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/alpha-compositing/",
+    "page_title": "Alpha Compositing â Bartosz Ciechanowski",
+    "headings": [
+      "Alpha Compositing",
+      "Opacity",
+      "Coverage",
+      "Alpha",
+      "Simple Compositing",
+      "Intermediate Buffers",
+      "Combining Alphas",
+      "Combining Colors",
+      "Premultiplied Alpha",
+      "Filtering",
+      "Interpolation",
+      "Compositing Done Right"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/alpha_compositing.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "canvas2d",
+      "pointer_events"
+    ],
+    "dom_counts": {
+      "canvas": 2,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 6,
+      "drag": 2,
+      "click": 2,
+      "hover": 0,
+      "playback": 1,
+      "scroll": 0,
+      "tooltip": 1,
+      "toggle": 2,
+      "input": 2,
+      "chart": 10,
+      "canvas": 0,
+      "svg": 2,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "Opacity If you ever had a chance to look through rose-tinted glasses you may have experienced something akin to the simulation below.",
+      "A simulation of the behavior of regular sunglasses is much less complicated, they usually just attenuate some amount of the incoming light: These sunglasses let through only 30% of the light passing through them.",
+      "In the examples below you can drag the triangle on either zoomed or un-zoomed side, the latter lets you perform finer movements.",
+      "As an example, a simple “Cancel” button can be created by a composition of five separate elements: Compositing elements of a “Cancel” Button Compositing is often performed in multiple steps where each step combines two images.",
+      "In the chart below the slider controls the alpha value of the source, while the red, green, and blue plots depict the values of the RGB components.",
+      "More importantly, almost any image with transparency can be thought of as a partial result of some rendering that, at some later time, will be composed to its final destination: Partial composition of a button into a buffer We want to figure out how to replace the composition of semi-transparent images A and B with a single image ( A â¨ B ) that will have the same color and opacity.",
+      "The arrow symbolizes the blur operation: Blurring non-premultiplied content The final result has an ugly blue halo around it.",
+      "By dragging the slider you can rotate the quad to see how the samples pick up colors from the bitmap.",
+      "You can drag the heart around to see how the overlap of the two shapes behaves under different compositing operators.",
+      "A dirty buffer may be reset using clear which can be optimized to just filling memory with zeros."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "canvas",
+        133
+      ],
+      [
+        "axis",
+        21
+      ],
+      [
+        "slider",
+        19
+      ],
+      [
+        "drag",
+        12
+      ],
+      [
+        "click",
+        11
+      ],
+      [
+        "reset",
+        9
+      ],
+      [
+        "mousemove",
+        8
+      ],
+      [
+        "touchstart",
+        5
+      ],
+      [
+        "requestanimationframe",
+        4
+      ],
+      [
+        "plot",
+        4
+      ],
+      [
+        "range",
+        1
+      ],
+      [
+        "three",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "awesome-bicycle.md",
+    "title": "Bicycle",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/bicycle/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/bicycle/",
+    "page_title": "Bicycle â Bartosz Ciechanowski",
+    "headings": [
+      "Bicycle",
+      "Forces",
+      "Moments",
+      "Up and Down",
+      "Forwards and Backwards",
+      "Left and Right",
+      "Stability",
+      "Wheels",
+      "Simple Frame",
+      "Bending",
+      "Stresses in the Frame",
+      "Further Reading and Watching",
+      "Final Words"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/bicycle.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "webgl",
+      "canvas2d",
+      "pointer_events",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 31,
+      "drag": 6,
+      "click": 1,
+      "hover": 0,
+      "playback": 4,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 1,
+      "input": 2,
+      "chart": 29,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "In the demonstration below, you can guide the rider with the slider , and you can also drag the view around to change the camera angle: Compared to internal combustion engines or mechanical watches , bicycles are fairly simple machines â most of their parts operate in plain sight.",
+      "Before we understand these more complicated interactions, we’ll play with much simpler objects.",
+      "In the demonstration below, you can use the slider to apply a force to this box.",
+      "You can restart the simulation using the button: The red arrow represents the pushing force, which could be applied by a hand, or a strong gust of air.",
+      "The size of that arrow reflects the magnitude of that force â the bigger the arrow, the stronger the pushing action.",
+      "You can still control the magnitude of the right-pushing force with the slider, but to make our experiments a little easier, I’ll restore that force to its original magnitude after you let go: Notice, that it’s not the mere presence of forces that causes an object to accelerate â the velocity changes only when these forces are not balanced .",
+      "Recall that we’re representing the magnitude of forces using arrows of different sizes, so as long as the length of the right-pointing arrow is equal to the length of the left-pointing arrow , the box won’t change its velocity.",
+      "It’s worth pointing out once more that when the box starts to move due to force imbalance, just letting the slider go to balance the two forces again will not stop the box â it will keep moving with some velocity.",
+      "While it’s harder to visualize the balance of moments, we can still do it by drawing colored rectangles spanning the length of the acting force arrow and the force arm: The red force wants to rotate the box in the counterclockwise direction.",
+      "In the simulation below, I added Earth-like gravity that attracts the cube to the bottom of your screen.",
+      "If we tally up all the small ground forces and moments they create we can replace them with a single arrow centered at the bottom of the cube.",
+      "The weight of the rider and the bike is then carried by the ground through the two contact points under the wheels: As you’ve probably realized, the yellow slider allows you to change the posture of the rider.",
+      "Let’s see this in a vastly exaggerated form in the demonstration below where the slider controls the time progress of this event: When the rider’s position shifts, the arm lengths for the reaction of the ground also change, which creates a net torque that rotates the bicycle counter-clockwise.",
+      "In the demonstration below, you can play with a lone wheel rolling down the road.",
+      "The slider lets you scrub back and forth in time: In this free-rolling scenario, the inner and outer parts of the tire stay in sync as the wheel smoothly rolls over the road.",
+      "Just like before, you can tweak the actual angular velocity of the wheel Ï with the second slider: When the wheel rotates at the free-rolling speed of the current velocity , the slip ratio is 0.",
+      "The plot below roughly demonstrates that dependence of the output force on the slip ratio, and the vertical load , which you can control with the slider: When the wheel rotates faster than the free-rolling speed and the slip ratio is positive, the generated force is positive and it pushes the bicycle forward .",
+      "In the demonstration below, the slider controls the force applied by the rider on the rear brake lever."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "slider",
+        318
+      ],
+      [
+        "axis",
+        172
+      ],
+      [
+        "canvas",
+        129
+      ],
+      [
+        "drag",
+        45
+      ],
+      [
+        "reset",
+        32
+      ],
+      [
+        "pause",
+        21
+      ],
+      [
+        "animate",
+        17
+      ],
+      [
+        "pointer",
+        17
+      ],
+      [
+        "click",
+        12
+      ],
+      [
+        "range",
+        9
+      ],
+      [
+        "play",
+        9
+      ],
+      [
+        "requestanimationframe",
+        7
+      ],
+      [
+        "mousemove",
+        5
+      ],
+      [
+        "touchstart",
+        3
+      ],
+      [
+        "d3",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "awesome-cameras-and-lenses.md",
+    "title": "Cameras and Lenses",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/cameras-and-lenses/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/cameras-and-lenses/",
+    "page_title": "Cameras and Lenses â Bartosz Ciechanowski",
+    "headings": [
+      "Cameras and Lenses",
+      "Recording Light",
+      "Glass",
+      "Waves",
+      "Manipulating Rays",
+      "Aberrations",
+      "Further Watching and Reading",
+      "Final Words"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/lenses.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "webgl",
+      "canvas2d",
+      "pointer_events"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 18,
+      "drag": 2,
+      "click": 1,
+      "hover": 0,
+      "playback": 3,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 17,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 2
+    },
+    "interactive_sentences": [
+      "The slider below controls the flow of time: The longer the time of collection of photons the more of them are hitting the detectors and the brighter the resulting pixels in the image.",
+      "For the next demo we will also double the resolution to an astonishing 1 kilopixel arranged in a 32x32 grid: Note that the individual sensors themselves still only see the intensity, and not the color, but knowing the arrangement of the filters we can recreate the colored intensity of each sensor, as shown on the right side of the simulation.",
+      "You can drag around the demo to see it from other directions: Let’s try to see what sort of picture would be taken by a sensor that is placed near the objects without any enclosure.",
+      "In the simulation below you can witness how light from different directions hits one point on the surface of the sensor: Clearly, to obtain a discernible image we have to limit the range of directions that affect a given pixel on the sensor.",
+      "The first slider controls the diameter of the hole, while the second one controls the distance between the opening and the sensor: While not shown here, the inner sides of the walls are all black so that no light is reflected inside the box.",
+      "Observe what happens to the taken image as we tweak the diameter of the hole with the first slider, or change the distance between the opening and the sensor with the second one: There are so many interesting things happening here!",
+      "You can adjust the thickness of this pane with the gray slider below: When you look at the stick through the surface of a thick glass straight on , everything looks normal.",
+      "The red slider controls the position of the source and the gray slider controls the thickness.",
+      "You can drag the demo around to see it from different viewpoints: For some reason the rays passing through glass at an angle are deflected off their paths .",
+      "Waves It’s impossible to talk about wave propagation without involving the time component, so the simulations in this section are animated â you can play and pause them by clicking tapping on the button in their bottom left corner.",
+      "By default all animations are enabled, but if you find them distracting, or if you want to save power, you can globally pause all the following demonstrations.",
+      "In the simulation above notice the difference in sharpness between the red and green spheres.",
+      "The black slider controls the aperture, the blue slider controls the focal length, and the red slider changes the position of the object relative to the camera.",
+      "You can make the sides non-parallel by using the slider: What we perceive as white light is a combination of lights of different wavelengths.",
+      "Using the slider you can control the amount of dispersion the lens material introduces: Chromatic aberration may be corrected with an achromatic lens , usually in the form of a doublet with two different types of glass fused together.",
+      "The simple act of pressing the shutter button in a camera app on a smartphone or on the body of a high-end DSLR is effortless, but itâs at this moment when, through carefully guided rays hitting an array of photodetectors, we immortalize reality by painting with light."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "slider",
+        136
+      ],
+      [
+        "canvas",
+        44
+      ],
+      [
+        "axis",
+        21
+      ],
+      [
+        "drag",
+        19
+      ],
+      [
+        "animate",
+        14
+      ],
+      [
+        "click",
+        11
+      ],
+      [
+        "play",
+        11
+      ],
+      [
+        "pause",
+        11
+      ],
+      [
+        "requestanimationframe",
+        8
+      ],
+      [
+        "mousemove",
+        4
+      ],
+      [
+        "reset",
+        3
+      ],
+      [
+        "touchstart",
+        3
+      ],
+      [
+        "pointer",
+        2
+      ],
+      [
+        "hover",
+        1
+      ],
+      [
+        "button",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "awesome-color-spaces.md",
+    "title": "Color Spaces",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/color-spaces/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/color-spaces/",
+    "page_title": "Color Spaces â Bartosz Ciechanowski",
+    "headings": [
+      "Color Spaces",
+      "Color Pickers",
+      "Normalized Range",
+      "Intensity Mismatch",
+      "Primary Differences",
+      "Primaries Matched",
+      "Mixing Things Up",
+      "Seeing the Matrix",
+      "There and Back Again",
+      "Negative Values",
+      "The Matrix Seeing",
+      "Breaking the Boundaries"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/color_spaces.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "webgl",
+      "canvas2d",
+      "pointer_events"
+    ],
+    "dom_counts": {
+      "canvas": 2,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 35,
+      "drag": 3,
+      "click": 2,
+      "hover": 0,
+      "playback": 2,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 27,
+      "canvas": 1,
+      "svg": 0,
+      "animation": 1
+    },
+    "interactive_sentences": [
+      "Try using the one below: The gist of the behavior of that new picker is the same â the red slider controls the red component, the green slider affects the green component, and the blue slider acts on the blue component.",
+      "We can compare some of the colors for the same slider positions side by side.",
+      "Here’s a comparison of some of the colors for different slider values: A color space can specify how the numeric values of the red, green, and blue components map to intensity of the corresponding light source.",
+      "In other words, the position of a slider may not be equal to intensity of the light the slider controls.",
+      "You can drag the cubes around to see them from different angles and control the R G B color indicator using the sliders: As an experiment I encourage you to set red and green components to 0 and just play with the blue slider.",
+      "The results of the experiments were standardized as rgb color matching functions that can be presented on a graph: CIE rgb color matching functions Notice the presence of negative values.",
+      "Reading from the color matching plot we can tell that the color match required 0.16768 units of R , 0.17087 units of G and â0.00135 units of B .",
+      "If we read the color matching value for every wavelength we obtain the following plot: You may wonder why the spectrum curve doesn’t go through the pure red, green, or blue endpoints of the CIE RGB cube, but it’s simply the result of normalization and scaling applied to the color matching functions by the committee.",
+      "xy Chromaticity Diagram Three dimensional diagrams are fun to play with, but they’re often not particularly practical â a 2D plot is often easier to work with and reason about.",
+      "Rejection of z is equivalent to a flat projection onto xy plane: If we repeat that step for every combination of spectral colors we can finally present the 2D plot known as CIE xy chromaticity diagram in its full glory.",
+      "The colors on the inside of the plot are just some combinations of the spectral colors and the colors outside of the plot don’t exist .",
+      "In some areas of the plot one has to move relatively far away from a chosen color to notice the difference in chromaticity, while in some other areas the distance to change is much smaller .",
+      "We can finally present the chromaticities of primaries of both R G B and R G B color spaces in a single graph: Comparison of primaries I’ll discuss the meaning of the little cross in the middle soon, but the important fact is that a triangle depicts all representable chromaticities of a color space.",
+      "In the simulation below you can drag the slider to see how the extent of the chromaticity triangle corresponds to the representable colors.",
+      "You can click tap the image to change it: Your browser doesn't support WebGL which is required for this demo.",
+      "See what happens when you drag all the sliders to the right : The color space form the bottom half defines its white as a slightly different color than the top color space.",
+      "Tone Response Curve Let’s look at the plot of the tone response curve of the sRGB color space.",
+      "The encoded value is on the horizontal axis and it’s symbolized with a binary code: Tone response curve of sRGB While the curve may look like a single power function, in the range of 0 to 0.04045 it actually is a linear segment: (intensity value) = (encoded value)/12.92 When encoded value is larger than 0.04045 the intensity value is indeed defined by a slightly nudged power function with exponent of 2.4: (intensity value) = (((encoded value) + 0.055)/1.055) 2.4 The transition between the two parts is continuous and I marked its location on the plot with a little bump."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "slider",
+        126
+      ],
+      [
+        "canvas",
+        65
+      ],
+      [
+        "plot",
+        31
+      ],
+      [
+        "axis",
+        21
+      ],
+      [
+        "drag",
+        13
+      ],
+      [
+        "click",
+        11
+      ],
+      [
+        "mousemove",
+        8
+      ],
+      [
+        "touchstart",
+        5
+      ],
+      [
+        "requestanimationframe",
+        4
+      ],
+      [
+        "reset",
+        3
+      ],
+      [
+        "webgl",
+        1
+      ],
+      [
+        "pointer",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "awesome-curves-and-surfaces.md",
+    "title": "Curves and Surfaces",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/curves-and-surfaces/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/curves-and-surfaces/",
+    "page_title": "Curves and Surfaces â Bartosz Ciechanowski",
+    "headings": [
+      "Curves and Surfaces",
+      "Defining the Shape",
+      "Linear Segment",
+      "A Step Further",
+      "BÃ©zier Patches",
+      "Beyond Cubic",
+      "Splines",
+      "Curved Mirror on The Wall",
+      "Building the Basis",
+      "Bâspline Extravaganza",
+      "Cutting Corners",
+      "Subdivision Surfaces"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/curves.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "webgl",
+      "canvas2d",
+      "pointer_events",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 30,
+      "drag": 4,
+      "click": 6,
+      "hover": 0,
+      "playback": 1,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 8,
+      "chart": 169,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 5
+    },
+    "interactive_sentences": [
+      "Over the course of this blog post I’ll explain how this model of a mask can be very smooth despite being described by a limited number of small points that you can drag around to change the mask’s shape: Moreover, we’ll see how surfaces like that are a natural extension of plain two dimensional curves like the one below: Throughout this article I’ll keep jumping back and forth between curves and surfaces to highlight how the ideas we develop for wiggly lines can be expanded onto three dimensional shells that we can shape.",
+      "In the demonstration below I built a system that lets you change the shape of a curve by controlling its spiralâness and size : While fun to play with, this system is quite impractical.",
+      "In the demonstration below you can drag each control point shown as to change the curve’s form: Control points are often visualized with connecting lines that join them to their neighbors.",
+      "In the demonstration below you can tap click a control point to see how it affects the local shape â the redder the section of the curve the more influenced it is by that control point.",
+      "Linear Segment In the demonstration below you can drag the control points A and B around to change their position.",
+      "The slider controls a virtual red pen that is used to draw a segment between those two points: While this demo is the world’s most primitive drawing application, there are some important observations we can make here already.",
+      "The slider controls the progress of our drawing â the more advanced the slider is the further into drawing we are.",
+      "You can tap click the control points to change which one is selected: For a linear segment like that, weighting function is quite straightforward.",
+      "As we progress through the curve using the slider we decrease the weight of the point A and increase the weight of the point B : This hopefully makes intuitive sense.",
+      "The slider controls a virtual pen that paints a linear segment : By dragging that point through space we’ve created a simple linear segment placed in three dimensions.",
+      "Let’s not forget that the segment we’re dragging is itself made by dragging a point between the segment’s endpoints, so the entire surface consists of points made from all possible values of two different progresses, one along the rails and another along the dragged segment : The sliders, and thus the progresses, are independent of each other, so we can think of the choice they offer as a 1Ã1 square: One slider controls the progress t of the dragged segment and the other slider controls the progress s within that segment.",
+      "As a result, we can create the very same surface by choosing to drag either the yellow or the blue segment through space â they both end up tracing the same surface: While we’re effectively just dragging a straight stick through the air, the surface it creates, known as a hyperbolic paraboloid , at some viewing angles doesn’t look straight at all â there are some curvy shapes to be found on this surface.",
+      "You can tap click a control point to select it: There are a few interesting observations to be made here: When the progress is equal to 0 the weight function of control point A reaches 1 and all the other disappear, so the curve is guaranteed to start at point A Similarly, when the progress is equal to 1 the weight function of control point C reaches 1 and all the other disappear, so the curve is guaranteed to end at point C When progress is between those two extrema the position of the points on the curve is affected by all 3 control points It’s also worth pointing out that the “speed” of travel along the curve is no longer constant like it was for a linear segment.",
+      "We can visualize how uniform steps of progress map to the curve points: For some configurations when the slider is halfway along the progress, the curve is definitely not halfway drawn.",
+      "When you move the selected 6 th point, the section of the curve near the 2 nd control point changes as well: When we look at the plot of the weight that each point has as we progress through the curve we can notice that, to some extent, they all contribute almost the entire curve: Single BÃ©zier curves with many control points lack the property of local control , making them not as useful for expressing more complicated shapes, so for better or for worse we have to rethink our approach to designing complicated shapes.",
+      "That plane also has a perpendicular direction which we call a normal direction of the surface at that point â I’ve marked that direction with a red arrow : For two surfaces to be connected without a sharp edge we need the normals at the joining edge to be aligned in the same direction: Note that even when the surfaces don’t have any gaps it still requires a lot of adjustments to keep them connected and free of sharp edges.",
+      "By dragging the slider you can bend that surface into an arc of a circle, the black curve below shows a cross section of the mirror’s shape: Notice that as the mirror pulls away from the flat shape the reflection of the sphere gets narrower.",
+      "By dragging the slider you can witness how quickly the local direction of the curve, shown as a black arrow , changes in the areas of large curvature: A straight line has no curvature and the arrow never turns, while a tight turn has a high curvature and the arrow turns very rapidly when passing through it."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "plot",
+        216
+      ],
+      [
+        "canvas",
+        189
+      ],
+      [
+        "drag",
+        40
+      ],
+      [
+        "slider",
+        33
+      ],
+      [
+        "pointer",
+        28
+      ],
+      [
+        "axis",
+        21
+      ],
+      [
+        "click",
+        19
+      ],
+      [
+        "mousemove",
+        7
+      ],
+      [
+        "requestanimationframe",
+        5
+      ],
+      [
+        "touchstart",
+        4
+      ],
+      [
+        "range",
+        3
+      ],
+      [
+        "button",
+        3
+      ],
+      [
+        "reset",
+        2
+      ],
+      [
+        "intersectionobserver",
+        2
+      ],
+      [
+        "webgl",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "awesome-earth-and-sun.md",
+    "title": "Earth and Sun",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/earth-and-sun/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/earth-and-sun/",
+    "page_title": "Earth and Sun â Bartosz Ciechanowski",
+    "headings": [
+      "Earth and Sun",
+      "Size",
+      "Ellipse",
+      "Orbit",
+      "Second Law of Kepler",
+      "Orbital Plane",
+      "Axial Rotation",
+      "Axial Tilt",
+      "Year",
+      "Everything’s Moving",
+      "Further Watching and Reading",
+      "Final Words"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/earth_sun.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "webgl",
+      "canvas2d",
+      "pointer_events",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 2,
+      "drag": 3,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 1,
+      "toggle": 1,
+      "input": 0,
+      "chart": 18,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "You can drag the globe around to see it from different perspectives and use the sliders to change the date and time: It’s hard to talk about Earth and Sun without referencing a few dimensions and dates.",
+      "In the demonstration below you can adjust that ratio with a slider: This ratio is known as eccentricity .",
+      "At your current viewing scale the Earth is pretty much invisible, it has a diameter of pixels, so instead its location is shown by an arrow.",
+      "As Kepler has discovered, traversal of each of the arc of the pie-slice sections of the orbit takes the same amount of time: At the bottom part of the simulation you can see the flattened length of the arc the planet sweeps within the same amount of time.",
+      "You may drag over the demonstration up and down to change the viewing angle: In fact, all planets in the Solar System have very similar orbital planes which is a consequence of formation of the planets from a protoplanetary disk .",
+      "In the simulation below you can change the time of day by dragging the slider.",
+      "If you look closely at the simulation of the sidereal and solar day you’ll notice that we didn’t account for two important factors â eccentricity of the orbit and the axial tilt of the Earth.",
+      "In the simulation below you can observe the position of the Earth and its axis of rotation at different points of the year: The four colored line segments mark four important points on that path: during March equinox and September equinox in the top-down view the axis of rotation is perpendicular to the direction towards the Sun during June solstice and December solstice in the top-down view the axis of rotation is parallel to the direction towards the Sun Moreover, at different times of year either the Northern or the Southern Hemisphere is tilted towards the Sun which is clearly visible when we look at the orbital plane from a side with the point of September equinox pointing directly at us: The change in tilt relative to the Sun causes the familiar cycle of seasons.",
+      "You can drag around to spin the globe freely in space.",
+      "In the exaggerated simulation below you can see how the precession causes the point of March equinox to change."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "slider",
+        78
+      ],
+      [
+        "canvas",
+        35
+      ],
+      [
+        "axis",
+        35
+      ],
+      [
+        "click",
+        10
+      ],
+      [
+        "drag",
+        9
+      ],
+      [
+        "mousemove",
+        4
+      ],
+      [
+        "requestanimationframe",
+        4
+      ],
+      [
+        "touchstart",
+        3
+      ],
+      [
+        "reset",
+        2
+      ],
+      [
+        "pointer",
+        2
+      ],
+      [
+        "webgl",
+        1
+      ],
+      [
+        "svg",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "awesome-gears.md",
+    "title": "Gears",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/gears/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/gears/",
+    "page_title": "Gears â Bartosz Ciechanowski",
+    "headings": [
+      "Gears",
+      "Spinning",
+      "Disc",
+      "Transmission",
+      "Torque",
+      "Tangent & Normal",
+      "Strings Attached",
+      "Multiple Gears",
+      "Further Watching and Reading",
+      "Final Words"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/gears.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "canvas2d",
+      "pointer_events"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 5,
+      "drag": 0,
+      "click": 1,
+      "hover": 0,
+      "playback": 3,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 5,
+      "chart": 16,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 1
+    },
+    "interactive_sentences": [
+      "Movement is important in this article so most of the visualizations are animated â you can play and pause them by clicking tapping on the button in their bottom left corner.",
+      "By default the animations are enabled, but if you find them distracting, or you want to save power, you can globally pause all animations, just make sure to unpause them as needed.",
+      "In the demonstration below you can control the fan’s speed using a slider: The speed of a rotating fan is a different kind of speed than that of a car â it describes how quickly a fan rotates .",
+      "In the demonstration below you can control its angular velocity with a slider: The small triangular indicator is there to help visualize the current orientation of the disc.",
+      "Let’s investigate what’s going on by controlling the time back and forth with a slider.",
+      "As the disc rotates the points leave a trace of the path they followed: At the bottom part of the simulation you can see the flattened arcs of the paths traced by the six points.",
+      "In the demonstration below the driving yellow disc is powered by some engine, which I’ve indicated using a rotating arrow near the shaft.",
+      "In the simulation below you can control the ratio of radii of the two discs.",
+      "The only useful component of the contact force between the two gears will be acting in the direction of that normal â that’s the pushing force which I depicted using the black arrow.",
+      "However, the radii of both discs are scaled by the same factor of cos(Î±) , where Î± is the pressure angle controlled by the slider in the simulation above: T out = T in · r out ·cos(α) / r in ·cos(α) In effect, the cosine factors cancel out and the constant ratio of torque transfer is maintained.",
+      "In the simulation below you can witness what happens to the effective circle radii when the line of force does not go through the pitch point: As you can see, if the acting force doesn’t lie on the line through the pitch point one of the circles effectively grows while the other one effectively shrinks.",
+      "Let’s see what happens when we put a little perpendicular red marker on that string and start unwinding it from one disc and winding it onto another.",
+      "IÂ attached a piece of paper to the underside of the yellow disc so that we can see the trail left by the marker as the disc rotates: The straight part of the string represents the normal â that’s the direction in which the pushing force will act.",
+      "However, that’s exactly what the red marker does â at every point of the curve it is perpendicular to the string, and thus it’s perpendicular to the normal.",
+      "We can look at this same situation from a point of view of the single disc, by unwinding a string with a marker from its surface: The shape we’ve created is called an involute .",
+      "The magic marker at the end of the string passes through the pitch circle , which corresponds to the idealized friction disc, only to end at the addendum circle which defines the outline of the teeth tips.",
+      "In the simulation below the green line shows the pitch circle, the red line shows the base circle of the involute, and the slider controls the radius of the gear: Two matching involute gears with different number of teeth, and thus different radii, will have slightly different shapes of teeth."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "slider",
+        70
+      ],
+      [
+        "canvas",
+        22
+      ],
+      [
+        "axis",
+        21
+      ],
+      [
+        "three",
+        12
+      ],
+      [
+        "click",
+        11
+      ],
+      [
+        "play",
+        11
+      ],
+      [
+        "pause",
+        9
+      ],
+      [
+        "animate",
+        8
+      ],
+      [
+        "requestanimationframe",
+        7
+      ],
+      [
+        "drag",
+        4
+      ],
+      [
+        "mousemove",
+        4
+      ],
+      [
+        "touchstart",
+        3
+      ],
+      [
+        "reset",
+        2
+      ],
+      [
+        "button",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "awesome-gps.md",
+    "title": "GPS",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/gps/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/gps/",
+    "page_title": "GPS â Bartosz Ciechanowski",
+    "headings": [
+      "GPS",
+      "Simple Positioning",
+      "Time of Flight",
+      "Do you hear me?",
+      "Do I hear you?",
+      "Leveling Up",
+      "Higher, Better, Faster, Stronger",
+      "Orbits",
+      "GPS Orbits",
+      "Keplerian Elements",
+      "Time",
+      "Signal Propagation"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/gps.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "webgl",
+      "canvas2d",
+      "intersection_observer",
+      "pointer_events",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 23,
+      "drag": 7,
+      "click": 9,
+      "hover": 0,
+      "playback": 4,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 2,
+      "input": 13,
+      "chart": 13,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 2
+    },
+    "interactive_sentences": [
+      "Here’s a current constellation of active satellites, you can drag the view around to see it from different angles: However, the satellites are just a part of what makes GPS possible.",
+      "You can also drag the landscape itself to change the viewing angle.",
+      "In the simulation below you can control the progress of time with the slider.",
+      "In the demonstration below we’re sending two drones at the same time, the slider once again controls the time : As the drones arrive to their destinations we get the direct measure of distance to each landmark as shown by the length of their bars on the timeline.",
+      "Thankfully, with two clocks side by side we can try to correct for that bias using the second slider: Notice that the timeline at the bottom shows progress of both the system clock and the user clock â if the clocks are not synchronized they’re not tracking the same time.",
+      "In the demonstration below you can control the user’s vertical position with a slider.",
+      "Notice that the intersection point of the three spheres lets us pinpoint the position and altitude even as you drag the figurine around: Throughout these examples we’ve been using the simple system of measuring tapes, so let’s try to go back to the solution that used sound waves and pseudoranges.",
+      "So far we assumed that our local environment is perfectly flat, but when a radio wave encounters a hill it gets blocked, which you can experience in the following simulation.",
+      "In many cases the receiver will never get the signal unless we put the emitter high enough using the second slider: By putting the emitter at an altitude we can thankfully mitigate that problem on a local scale.",
+      "In the demonstration below you can drag the yellow object around.",
+      "As the object starts to move a yellow arrow reflects its current velocity: Note that the strength at which the object is pulled towards the planet varies with distance.",
+      "In the demonstration below you can once again drag the object around, but this time it will have some initial velocity that was perhaps given to it by a rocket.",
+      "Notice that the speed of the object , as shown by the length of the yellow arrow , varies over the course of its journey.",
+      "Before we continue, I need to note that some demonstrations in the following sections are animated â you can play and pause them by clicking tapping on the button in their bottom left corner.",
+      "By default all animations are enabled, but if you find them distracting, or if you want to save power, you can globally pause all the following demonstrations.",
+      "You may have noticed that the red slider controls the inclination of the orbit which is the angle between the orbital plane and the plane passing through the Earth’s equator known as equatorial plane .",
+      "In the demonstration below you can drag the red point around to change its position on the globe.",
+      "In the demonstration below you can drag the red point on Earth to observe the satellites it sees: We can also visualize the number of visible satellites from every point on Earth."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "canvas",
+        91
+      ],
+      [
+        "axis",
+        51
+      ],
+      [
+        "drag",
+        34
+      ],
+      [
+        "plot",
+        22
+      ],
+      [
+        "pause",
+        19
+      ],
+      [
+        "slider",
+        16
+      ],
+      [
+        "pointer",
+        16
+      ],
+      [
+        "animate",
+        15
+      ],
+      [
+        "click",
+        12
+      ],
+      [
+        "play",
+        12
+      ],
+      [
+        "reset",
+        11
+      ],
+      [
+        "requestanimationframe",
+        8
+      ],
+      [
+        "range",
+        8
+      ],
+      [
+        "d3",
+        8
+      ],
+      [
+        "mousemove",
+        5
+      ]
+    ]
+  },
+  {
+    "file": "awesome-hysteresis-slack.md",
+    "title": "Hysteresis & Slack",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://joshuahhh.com/projects/hysteresis/",
+    "status": 200,
+    "final_url": "https://joshuahhh.com/projects/hysteresis/",
+    "page_title": "hysteresis & slack",
+    "headings": [
+      "hysteresis & slack",
+      "Here are two machines you can control.",
+      "Set a trajectory for the input pin."
+    ],
+    "scripts": [
+      "https://joshuahhh.com/projects/hysteresis/build/bundle.js"
+    ],
+    "script_hints": [
+      "svelte"
+    ],
+    "code_hints": [
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 9,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 6,
+      "drag": 1,
+      "click": 2,
+      "hover": 1,
+      "playback": 1,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 24,
+      "chart": 5,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "In this one, the output pin of the slider is rigidly connected to the input pin .",
+      "In this one, the output pin of the slider is connected to the input pin , but it's not a rigid connection: there's slack .",
+      "The first plot is a simple curve.",
+      "But the second plot is made out of loops.",
+      "So let's give the computer some \"history\" to play with.",
+      "Click & drag to define the path of the input pin over time.",
+      "Hover to see the future trajectory of the output pin from the point you've selected.",
+      "One way to put it — the slider has a memory (the position of the output pin), which has its own existence, independent of the input.",
+      "So, if the external forces are strong enough, the slider's memory is overwhelmed.",
+      "It's like H is the input pin and M is the output pin in some weird slider system."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "d3",
+        2789
+      ],
+      [
+        "react",
+        2236
+      ],
+      [
+        "key",
+        1216
+      ],
+      [
+        "range",
+        342
+      ],
+      [
+        "svg",
+        251
+      ],
+      [
+        "drag",
+        204
+      ],
+      [
+        "transition",
+        118
+      ],
+      [
+        "play",
+        85
+      ],
+      [
+        "scroll",
+        84
+      ],
+      [
+        "click",
+        81
+      ],
+      [
+        "chart",
+        48
+      ],
+      [
+        "slider",
+        45
+      ],
+      [
+        "reset",
+        42
+      ],
+      [
+        "button",
+        32
+      ],
+      [
+        "axis",
+        32
+      ]
+    ]
+  },
+  {
+    "file": "awesome-immersive-linear-algebra.md",
+    "title": "Immersive Linear Algebra",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://immersivemath.com/ila/index.html",
+    "status": 509,
+    "final_url": "https://immersivemath.com/ila/index.html",
+    "page_title": "The page is temporarily unavailable",
+    "headings": [],
+    "scripts": [],
+    "script_hints": [],
+    "code_hints": [],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 0,
+      "drag": 0,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 0,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [],
+    "notes": [],
+    "script_token_hits": []
+  },
+  {
+    "file": "awesome-internal-combustion-engine.md",
+    "title": "Internal Combustion Engine",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/internal-combustion-engine/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/internal-combustion-engine/",
+    "page_title": "Internal Combustion Engine â Bartosz Ciechanowski",
+    "headings": [
+      "Internal Combustion Engine",
+      "Crank",
+      "Engine Block",
+      "Crankshaft",
+      "Pistons",
+      "Closing the Lid",
+      "Combustion",
+      "Further Watching",
+      "Final Words"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/ice.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "webgl",
+      "canvas2d",
+      "intersection_observer",
+      "pointer_events"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 3,
+      "drag": 2,
+      "click": 1,
+      "hover": 0,
+      "playback": 1,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 1,
+      "chart": 7,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 1
+    },
+    "interactive_sentences": [
+      "You can drag it around to see it from other angles: It’s hard to talk about a mechanical device without visualizing its motion, so many demonstrations in this blog post are animated.",
+      "By default all animations are enabled, but if you find them distracting, or if you want to save power, you can globally pause them.",
+      "You can control the rotation of the crankshaft with a slider: Notice that when the crank arm has done a 90Â° turn , i.e.",
+      "The plot in the upper part shows the offset of the bucket relative to its normal position as the function of cam rotation angle : The shape of the cam is critical for defining the way the engine operates.",
+      "Let’s look at the plot of the velocity of a piston as it moves up and down the cylinder when the crankshaft rotates with a constant angular velocity: You may be surprised that the plot isn’t symmetrical, but it’s just a consequence of the already discussed behavior of the crank mechanism taking more time to move through the lower half of the stroke compared to the upper half of the stroke.",
+      "Let’s consider a piston in a top dead center position â as the piston reaches that point its velocity is 0, so the crankshaft has to drag the piston down."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "slider",
+        73
+      ],
+      [
+        "canvas",
+        51
+      ],
+      [
+        "axis",
+        21
+      ],
+      [
+        "pointer",
+        18
+      ],
+      [
+        "animate",
+        17
+      ],
+      [
+        "click",
+        11
+      ],
+      [
+        "play",
+        11
+      ],
+      [
+        "pause",
+        11
+      ],
+      [
+        "requestanimationframe",
+        10
+      ],
+      [
+        "drag",
+        6
+      ],
+      [
+        "mousemove",
+        4
+      ],
+      [
+        "touchstart",
+        4
+      ],
+      [
+        "reset",
+        3
+      ],
+      [
+        "intersectionobserver",
+        2
+      ],
+      [
+        "key",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "awesome-lights-and-shadows.md",
+    "title": "Lights and Shadows",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/lights-and-shadows/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/lights-and-shadows/",
+    "page_title": "Lights and Shadows â Bartosz Ciechanowski",
+    "headings": [
+      "Lights and Shadows",
+      "Power",
+      "Position",
+      "Angles",
+      "Radians",
+      "Solid Angles",
+      "Surface Vision",
+      "Radiance",
+      "Reflections",
+      "Shadow",
+      "Color",
+      "Bounces"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/light.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "webgl",
+      "canvas2d",
+      "pointer_events"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 6,
+      "drag": 2,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 5,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 1
+    },
+    "interactive_sentences": [
+      "You can also drag around the scene to see it from different angles: By the end of this article the effects of light in this demonstration should become more clear, but before we get there we have to take a few steps back and start with a much simpler setup.",
+      "While this ball of light is not very exciting, you can at least control its brightness with the slider below: What this slider actually regulates is the power of the light source â the amount of energy emitted from it per second.",
+      "Let’s see how we perceive the brightness of some source depending on its power: Notice that relative change in the perceived brightness strongly depends on the position of the slider.",
+      "You can drag around the demo to see the scene from a different point of view: While on its own the surface doesn’t emit any light, it reflects the light emitted from the source.",
+      "Position If you looked closely at the previous simulation you may have noticed that the surface wasn’t uniformly lit.",
+      "In the simulation below a red dot terminates a ray that used to hit the tiny patch in the perpendicular case, but it no longer does so after tilting: As soon as the light source slants away from the perpendicular direction some of the rays that used to hit the patch no longer do.",
+      "The blue arrow shows the surface normal.",
+      "The yellow arrow points towards the light source: As the angle increases, a smaller portion of the original stream of light hits the surface.",
+      "In the example below the yellow arrow shows the direction towards a distant light source: With the cosine factor covered we can now analyze how the distance to the light source affects the distribution of rays.",
+      "That source is surrounded by a sphere â you can control its radius with a slider: Notice, that when the radius of the sphere increases, the density of the yellow intersection points decreases .",
+      "Radians The car simulation displayed the angle using the unit of degrees, but observe that the length of the yellow arc also gets smaller as the angle gets smaller.",
+      "However, the light source itself doesn’t seem to undergo the same effects â it remains consistently bright even as we look at it from an oblique angle or move away from it with a slider: A matte surface seems to collect the surrounding light from every direction.",
+      "Every point of a Lambertian emitter emits light in the following spherical pattern, the length of an arrow corresponds to relative number of photons per second emitted in the arrow’s direction: The lengths of the vectors are proportional to the cosine of the angle away from the normal which ends up forming a perfect sphere.",
+      "As the viewing angle tilts, the length of each arrow gets smaller, so each point of the surface contributes fewer photons towards the observer.",
+      "The hemispherical model of light aggregation seems to work well for a matte surface, but it certainly doesn’t explain the behavior of a plain mirror: Let’s try to visualize how a ray of incoming light, represented with a blue arrow , ends up being reflected by the mirror in the direction of a red arrow : Notice that you’ll only see the reflection of the light source in a place pointed to by an incoming ray if the outgoing ray points directly at you .",
+      "In the simulation below a scene is surrounded by a swarm of tiny light sources, you can see their projections onto the hemisphere of the central point: In limit, if we cover the entire surrounding sphere with tiny light sources it would look like something in the demonstration below.",
+      "The light covers everything now so we can’t really see the scene anymore, but by dragging the slider you can make the surrounding sphere of light so big that it will start to encompass even you, revealing what’s hidden inside: For the final part of this article we will remain inside that sphere of light, it will completely surround us and the scenes we will look at."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "slider",
+        131
+      ],
+      [
+        "canvas",
+        36
+      ],
+      [
+        "axis",
+        21
+      ],
+      [
+        "click",
+        14
+      ],
+      [
+        "drag",
+        6
+      ],
+      [
+        "requestanimationframe",
+        5
+      ],
+      [
+        "mousemove",
+        4
+      ],
+      [
+        "touchstart",
+        3
+      ],
+      [
+        "reset",
+        2
+      ],
+      [
+        "pointer",
+        2
+      ],
+      [
+        "play",
+        1
+      ],
+      [
+        "webgl",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "awesome-load-balancing.md",
+    "title": "Load Balancing",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://samwho.dev/load-balancing/",
+    "status": 200,
+    "final_url": "https://samwho.dev/load-balancing/",
+    "page_title": "Load Balancing",
+    "headings": [
+      "Load Balancing",
+      "# Visualising the problem",
+      "# When round robin doesn't cut it",
+      "# Improving on round robin",
+      "# Moving away from round robin",
+      "# Optimizing for latency",
+      "# One last algorithm",
+      "# Conclusion",
+      "# Playground"
+    ],
+    "scripts": [
+      "https://samwho.dev/js/load-balancers.js"
+    ],
+    "script_hints": [],
+    "code_hints": [],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 2,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 2,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 1,
+      "drag": 0,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 4,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "In the following simulation, requests aren't equally expensive.",
+      "If you watch the above simulation long enough, you might notice the requests subtly changing colour.",
+      "In the next simulation we also vary the power of each server , which is represented visually with a darker shade of grey.",
+      "In this simulation, we use each server's known power value as its weight, and we give more powerful servers more requests as we loop through them.",
+      "The result is very similar to the initial weighted round robin simulation, but there's no need to specify the weight of each server up front.",
+      "The following simulation uses randomised values, so feel free to refresh the page a few times to see it adapt to new variants.",
+      "Let's see this in action in a similarly complex simulation, the same parameters we gave the dynamic weighted round robin algorithm above.",
+      "Each simulation varied only by the load balancing algorithm used.",
+      "Higher percentiles will always be higher on the graph.",
+      "The following is a graph of cumulative requests dropped over time.",
+      "Below is a simulation using an algorithm called \"peak exponentially weighted moving average\" (or PEWMA).",
+      "I've set specific parameters for this simulation that are guaranteed to exhibit an expected behaviour.",
+      "To round this out, I leave you with a version of the simulation that lets you tweak most of the parameters in real time."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "slider",
+        91
+      ],
+      [
+        "simulation",
+        40
+      ],
+      [
+        "plot",
+        22
+      ],
+      [
+        "range",
+        21
+      ],
+      [
+        "axis",
+        14
+      ],
+      [
+        "scroll",
+        3
+      ],
+      [
+        "play",
+        1
+      ],
+      [
+        "pixi",
+        1
+      ]
+    ]
+  },
+  {
+    "file": "awesome-mechanical-watch.md",
+    "title": "Mechanical Watch",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/mechanical-watch/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/mechanical-watch/",
+    "page_title": "Mechanical Watch â Bartosz Ciechanowski",
+    "headings": [
+      "Mechanical Watch",
+      "Power",
+      "Gears",
+      "Escapement",
+      "Balance",
+      "Mainplate",
+      "Click",
+      "Motion Works",
+      "Date",
+      "Keyless Works",
+      "Automatic Winding",
+      "The Size of it All"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/watch.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "webgl",
+      "canvas2d",
+      "pointer_events"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 18,
+      "drag": 3,
+      "click": 14,
+      "hover": 0,
+      "playback": 2,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 3,
+      "input": 0,
+      "chart": 11,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "You can drag the device around to change your viewing angle, and you can use the slider to peek at what’s going on inside: What you see here is known as the movement â the inner part of a mechanical watch that’s usually enclosed in a metal case.",
+      "By default all animations in this article are enabled, but if you find them distracting, or if you want to save power, you can globally pause all the following demonstrations.",
+      "By dragging the slider you can try to wind it midair, but as soon as you let go, it will snap back to its original shape: As you can see, this spring is quite strong and it wants to expand very rapidly.",
+      "In the demonstration below, we’re holding the barrel tight, and you can turn the arbor by dragging the slider: Notice that as soon as you let go of the arbor by releasing the slider, the mainspring will turn the arbor right back.",
+      "You can see how this “watch” behaves after you wind the mainspring with the slider and let it go: We clearly have some work to do â the hand spins way too fast and it only does a few rotations before the mainspring inside the barrel runs out of the stored energy.",
+      "In the demonstration below, you can use the slider to look at the two gears from further away: As you can see, these proportions are ridiculous â to make the red gear fit in any reasonably sized watch, the yellow gear would have to be absolutely tiny and both gears would have to have very fragile, microscopic teeth.",
+      "You can control the speed of rotation of this gear train using the slider: The barrel acts as the first wheel , it drives the second wheel , which drives the third wheel , which finally drives the fourth wheel .",
+      "Let’s see why these properties are important by observing how these two components interact with each other: The escape wheel wants to rotate as indicated by the red arrow .",
+      "In the demonstration below, you can slow things down with the slider: Let’s look at this interaction up close, as it deserves a closer attention.",
+      "This seemingly complicated problem is solved with a very simple mechanism known as the click â let’s see how it works.",
+      "Click To continue developing our assembly, we firstly need to put a solid foundation in the form of the barrel bridge â it holds the barrel in place and provides structure for other parts.",
+      "Firstly, we put the little click in the opening on top of the barrel bridge : Within its limited range the click can rotate back and forth on its little axis: The second piece of the puzzle is a click spring .",
+      "When we squeeze it, it wants to pop back: We compress that click spring a little and we also put it into the barrel bridge : Notice that when we try to rotate the click , the click spring will push it back in place as soon as we let go: The final piece of the puzzle is the crown wheel , which also lands on the barrel bridge .",
+      "The gaps in the crown wheel allow the little post on the click to fall between the crown wheel’s teeth.",
+      "Notice how the teeth of the crown wheel end up pushing the click away, but it snaps back as soon as there is some space: When the click snaps back and hits the crown wheel , it makes a clicking sound, which explains its name.",
+      "In the simulation below, notice how the crown wheel’s teeth jam with the click , preventing the crown wheel’s rotation: This simple mechanism allows us to wind the mainspring by turning the crown wheel , which you can do in the demonstration below.",
+      "The click also prevents the mainspring from unwinding on its own â that’s why you can’t drag back the slider without restarting the entire simulation: The second hand on the other side of the watch shows how the seconds are tracked, but a functional watch should show minutes and hours as well.",
+      "The slider lets you control the speed of flowing time so that you don’t have to wait too patiently to see hands change their position: The hour hand itself needs to rotate 12 times slower than the minute hand, but we can easily achieve that using two additional gears."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "canvas",
+        136
+      ],
+      [
+        "click",
+        99
+      ],
+      [
+        "slider",
+        53
+      ],
+      [
+        "pause",
+        52
+      ],
+      [
+        "range",
+        33
+      ],
+      [
+        "drag",
+        25
+      ],
+      [
+        "axis",
+        21
+      ],
+      [
+        "pointer",
+        18
+      ],
+      [
+        "animate",
+        15
+      ],
+      [
+        "key",
+        14
+      ],
+      [
+        "reset",
+        11
+      ],
+      [
+        "play",
+        11
+      ],
+      [
+        "requestanimationframe",
+        8
+      ],
+      [
+        "mousemove",
+        4
+      ],
+      [
+        "touchstart",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "awesome-memory-allocation.md",
+    "title": "Memory Allocation",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://samwho.dev/memory-allocation/",
+    "status": 200,
+    "final_url": "https://samwho.dev/memory-allocation/",
+    "page_title": "Memory Allocation",
+    "headings": [
+      "Memory Allocation",
+      "# malloc and free",
+      "# What is memory?",
+      "# The simplest malloc",
+      "# The simplest general-purpose malloc",
+      "# Fragmentation",
+      "# A quick malloc puzzle",
+      "# Inline bookkeeping",
+      "# Playground",
+      "# Conclusion",
+      "# Acknowledgments"
+    ],
+    "scripts": [
+      "https://samwho.dev/js/gsap/gsap.min.js",
+      "https://samwho.dev/js/gsap/PixiPlugin.min.js",
+      "https://samwho.dev/js/memory-allocation.js"
+    ],
+    "script_hints": [
+      "gsap",
+      "pixi"
+    ],
+    "code_hints": [
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 2,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 3,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 6,
+      "drag": 6,
+      "click": 2,
+      "hover": 0,
+      "playback": 1,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 0,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "You'll notice there's now a slider.",
+      "Dragging the slider to the right advances time forward, and dragging it left rewinds.",
+      "You can also click anywhere on the grid and then use the arrow keys on your keyboard, or you can use the left and right buttons.",
+      "The ticks along the slider represent calls to malloc and free .",
+      "Move the slider below to see a comparison between decimal numbers and hexadecimal numbers.",
+      "Have a think about this before playing with the slider below.",
+      "This is where the seemingly wasteful bookkeeping comes into play.",
+      "# Playground If you're keen to take your new found knowledge and try your hand at writing your own allocators, you can click here to go to my allocator playground."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "gsap",
+        41
+      ],
+      [
+        "play",
+        36
+      ],
+      [
+        "pause",
+        33
+      ],
+      [
+        "svg",
+        31
+      ],
+      [
+        "pixi",
+        30
+      ],
+      [
+        "slider",
+        23
+      ],
+      [
+        "range",
+        20
+      ],
+      [
+        "pointer",
+        17
+      ],
+      [
+        "simulation",
+        14
+      ],
+      [
+        "key",
+        13
+      ],
+      [
+        "button",
+        12
+      ],
+      [
+        "scroll",
+        11
+      ],
+      [
+        "reset",
+        4
+      ],
+      [
+        "restart",
+        4
+      ],
+      [
+        "click",
+        4
+      ]
+    ]
+  },
+  {
+    "file": "awesome-naval-architecture.md",
+    "title": "Naval Architecture",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/naval-architecture/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/naval-architecture/",
+    "page_title": "Naval Architecture â Bartosz Ciechanowski",
+    "headings": [
+      "Naval Architecture",
+      "Pressure",
+      "Buoyancy",
+      "Hull",
+      "Stability",
+      "Cargo",
+      "Free Surface",
+      "Waves",
+      "Propulsion",
+      "Further Watching and Reading",
+      "Final Words"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/navarch.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "webgl",
+      "canvas2d",
+      "pointer_events"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 10,
+      "drag": 6,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 1,
+      "chart": 8,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "You can dunk it into water using the slider: From this point on I’ll remove the constraints of containers and we’ll instead move outdoors where we’ll submerge things into vast, peaceful ocean waters.",
+      "You can drag the block around to see all the pressure forces acting on it: The pressure P T on top of the brick acting on the top surface area A exerts the force F T equal to: F T = P T × A = ρ × g × h T × A Similarly, the resulting force F B acting from the bottom is: F B = P B × A = ρ × g × h B × A And the net force of buoyancy F in the upwards direction is the difference of the two: F = F B − F T = ρ × g × ( h B − h T ) × A Notice however, that the highlighted difference is just the height of the submerged part: F = ρ × g × h × A And the product of height h and the base area A is volume V of the submerged object, which gives us the equation that ties the force of buoyancy to the displaced volume V of fluid with density Ï : F = ρ × g × V Displaced volume is the volume of fluid that would normally occupy a space that is now filled by the object.",
+      "You can drag the simulation around to see it from different angles: Notice how quickly a group of blocks starts to resemble the smooth shape of the sphere.",
+      "You can drag it around to change the point of view: This hull is covered with a deck , but some smaller boats may have an open top.",
+      "This hull has a bulbous bow which is the “nose” in the front bottom part â for larger ships it improves the flow around the ship, reducing drag.",
+      "Other than drag considerations, it may seem that the shape of the hull can be more or less arbitrary.",
+      "In the demonstration below, the first slider controls the wind, which will tilt the ship one way or another.",
+      "The second slider changes the proportions of the hull: For relatively wider shapes the ship tilts a little due to wind , but it finds its stable position and will return back to vertical when the wind stops .",
+      "The curly arrow at the top shows the direction of the turn.",
+      "We can visualize the length of the righting arm for different heel angles of the hull using the following plot.",
+      "The slider controls the horizontal position of the heavy box : Once again, the ship will find its static equilibrium at some angle, known as angle of list , which this time is caused by the lateral imbalance.",
+      "The slider controls the amplitude of the waves: Notice that as the wave passes through it changes the size and position of the underwater volume of the hull, which in turn shifts the center of buoyancy , causing the ship to tilt.",
+      "The sum of all these forces is shown with the yellow arrow and the induced swirl is depicted with the red arrow : When the blades are oriented sideways they push a lot of water, but only in the swirly motion and the forces balance each other out.",
+      "In this very simplified analysis we seem to achieve the largest thrust roughly in the middle between the two extremes, but notice that we still have a relatively large drag induced by the blades."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "canvas",
+        81
+      ],
+      [
+        "plot",
+        48
+      ],
+      [
+        "axis",
+        30
+      ],
+      [
+        "slider",
+        27
+      ],
+      [
+        "pause",
+        21
+      ],
+      [
+        "reset",
+        14
+      ],
+      [
+        "click",
+        12
+      ],
+      [
+        "play",
+        11
+      ],
+      [
+        "requestanimationframe",
+        8
+      ],
+      [
+        "drag",
+        7
+      ],
+      [
+        "animate",
+        5
+      ],
+      [
+        "pointer",
+        5
+      ],
+      [
+        "mousemove",
+        4
+      ],
+      [
+        "touchstart",
+        4
+      ],
+      [
+        "d3",
+        4
+      ]
+    ]
+  },
+  {
+    "file": "awesome-reading-qr-codes-without-a-computer.md",
+    "title": "Reading QR codes without a computer!",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://qr.blinry.org/",
+    "status": 200,
+    "final_url": "https://qr.blinry.org/",
+    "page_title": "Reading QR codes without a computer!",
+    "headings": [],
+    "scripts": [
+      "https://qr.blinry.org/assets/index-m4DBYcND.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "canvas2d",
+      "svg_dom",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 0,
+      "drag": 0,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 0,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "svg",
+        40
+      ],
+      [
+        "svelte",
+        30
+      ],
+      [
+        "play",
+        17
+      ],
+      [
+        "range",
+        16
+      ],
+      [
+        "key",
+        15
+      ],
+      [
+        "button",
+        7
+      ],
+      [
+        "click",
+        6
+      ],
+      [
+        "canvas",
+        6
+      ],
+      [
+        "drag",
+        3
+      ],
+      [
+        "three",
+        3
+      ],
+      [
+        "chart",
+        3
+      ],
+      [
+        "keyboard",
+        2
+      ],
+      [
+        "react",
+        2
+      ],
+      [
+        "plot",
+        2
+      ],
+      [
+        "simulation",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "awesome-rigid-body-collisions.md",
+    "title": "Rigid Body Collisions",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://www.sassnow.ski/rigid-body-collisions/1",
+    "status": 200,
+    "final_url": "https://www.sassnow.ski/rigid-body-collisions/1",
+    "page_title": "What is a collision? — On Error Resume Next",
+    "headings": [
+      "2D Rigid Body Collision Resolution Part 1: Defining the problem",
+      "Before we start",
+      "Rigid bodies",
+      "Collision detection vs. collision resolution",
+      "What are we trying to do?",
+      "What is a collision?",
+      "Towards a definition",
+      "Surface normals",
+      "The dot product",
+      "Tying it all together",
+      "Conclusion"
+    ],
+    "scripts": [
+      "https://www.sassnow.ski/_nuxt/D4VqJVMa.js"
+    ],
+    "script_hints": [
+      "vue"
+    ],
+    "code_hints": [
+      "webgl"
+    ],
+    "dom_counts": {
+      "canvas": 1,
+      "svg": 32,
+      "video": 0,
+      "audio": 0,
+      "button": 6,
+      "input": 5,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 3,
+      "drag": 0,
+      "click": 1,
+      "hover": 0,
+      "playback": 3,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 1,
+      "input": 0,
+      "chart": 1,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "In this series of blog posts, I want to show you what actually goes on behind the scenes in a physics simulation like the one above.",
+      "Rigid bodies The specific kind of physics simulation we are going to cover is called rigid body physics .",
+      "We can represent an object's current velocity with an arrow where the length of the arrow represents the object's current speed and the direction the arrow is pointing its travel direction.",
+      "In the demonstration below, you can change the box's velocity by dragging the arrow around.",
+      "If you ever get lost in space, you can always reset the simulation with the button.",
+      "Whenever you see a little arrow over a variable like this s ⃗ \\vec{s} s , this means that the variable is a vector.",
+      "You can see this happening in the demonstration below by dragging the slider to progress time.",
+      "The goal of collision resolution is to change each object's velocity so that as the simulation progresses the objects will no longer penetrate each other.",
+      "You can verify the result by playing the simulation.",
+      "To explore this idea, let's play a little game.",
+      "To make things a little more challenging, the angle of inclination of the floor is going to change every time you reset the game.",
+      "You can click on them to reveal the answers.",
+      "You can control the angle between the vectors with the slider below."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "key",
+        94
+      ],
+      [
+        "nuxt",
+        45
+      ],
+      [
+        "scroll",
+        37
+      ],
+      [
+        "transition",
+        36
+      ],
+      [
+        "vue",
+        33
+      ],
+      [
+        "svg",
+        16
+      ],
+      [
+        "play",
+        9
+      ],
+      [
+        "d3",
+        7
+      ],
+      [
+        "react",
+        7
+      ],
+      [
+        "click",
+        5
+      ],
+      [
+        "reset",
+        4
+      ],
+      [
+        "pause",
+        3
+      ],
+      [
+        "requestanimationframe",
+        3
+      ],
+      [
+        "slider",
+        2
+      ],
+      [
+        "range",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "awesome-sound.md",
+    "title": "Sound",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/sound/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/sound/",
+    "page_title": "Sound â Bartosz Ciechanowski",
+    "headings": [
+      "Sound",
+      "Air",
+      "Making Sounds",
+      "Pure Tones",
+      "Masses and Springs",
+      "Pressure Waves",
+      "Further Reading",
+      "Final Words"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/sound.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "webgl",
+      "canvas2d",
+      "intersection_observer",
+      "pointer_events",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 1,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 21,
+      "drag": 9,
+      "click": 1,
+      "hover": 0,
+      "playback": 6,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 1,
+      "input": 0,
+      "chart": 12,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 1
+    },
+    "interactive_sentences": [
+      "Throughout this presentation you will be hearing different sounds, which you will often play yourself on little keyboards like the one below.",
+      "You can either click its keys with your mouse or use W E R keys on your computer keyboard, but before you do so make sure your system volume is at a reasonable level: You can press its keys with your fingers, but before you do so make sure your system volume is at a reasonable level.",
+      "You can drag the cube around to change the viewing angle and you can also control the speed of the flow of time with the slider: I need to note that this visualization simplifies things a little.",
+      "With all the commotion in the previous simulation it may have been hard to see that the air particles collide with each other.",
+      "To make these events easier to see you can control the speed of time with the slider: Naturally, those particles can also collide with other things in the environment.",
+      "InÂ the simulation below I put up walls around that parcel of air.",
+      "In the demonstration below, you can drag the slider to change the length of the box, the plot in the bottom tracks the number of collisions per area of the box in a unit of time: The number of collisions per area, and thus the pressure, increases as we squeeze particles closer together, and it decreases as we let them loose .",
+      "Remember that we’re observing a significantly slowed down simulation.",
+      "All the collisions between particles also have other consequences, but to look at them I need to adjust the scale at which we’ll be looking at â you can do this with a slider below: The small cube of air from the previous demonstration is now just part of a larger volume .",
+      "In the demonstration below, I enlarged that particle to make it visible, you can also control the flow of time with the slider: Due to collisions with other molecules, it may take a while for this particle to travel a significant distance and get out of this larger volume.",
+      "Although these boundaries are imaginary, they let us see what happens to different sections of air as you move the plate around with the slider: Notice that the individual parcels of air move only a little from their initial position, but the disturbance caused by the motion of the plate seems to propagate through them with some speed.",
+      "Notice that each of the three keys moves the plate by a different amount, with red marker showing the total offset: Despite its simplicity, this device lets us observe a few things.",
+      "Three pops of different loudness is not much to create music with as this only lets us play some simple beats.",
+      "In the demonstration below, you can drag the first slider to change how many times per second the plate should jump forwards and backwards.",
+      "You can also control how far the plate moves with each jump using the second slider: To describe the frequency of vibration, I’m using the unit of hertz , often abbreviated as Hz â it describes how many full cycles of motion happen within a single second.",
+      "I’m also drawing three plots corresponding to each key , and an additional plot showing the cumulative effect of the individual motions.",
+      "The higher the frequency the higher the perceived pitch: With these more complicated triangular shapes in place it may be a bit harder to understand how all these waveforms add up to form the final plot .",
+      "The slider tracks the process of the addition of four different triangular shapes of different amplitude : Notice that each waveform expresses some shift from the current position."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "key",
+        182
+      ],
+      [
+        "canvas",
+        150
+      ],
+      [
+        "drag",
+        55
+      ],
+      [
+        "keyboard",
+        55
+      ],
+      [
+        "play",
+        47
+      ],
+      [
+        "plot",
+        46
+      ],
+      [
+        "pause",
+        34
+      ],
+      [
+        "slider",
+        31
+      ],
+      [
+        "button",
+        30
+      ],
+      [
+        "axis",
+        21
+      ],
+      [
+        "range",
+        21
+      ],
+      [
+        "animate",
+        15
+      ],
+      [
+        "click",
+        13
+      ],
+      [
+        "reset",
+        11
+      ],
+      [
+        "mousemove",
+        7
+      ]
+    ]
+  },
+  {
+    "file": "awesome-tesseract.md",
+    "title": "Tesseract",
+    "source_name": "awesome-explanations",
+    "source_url": "https://github.com/Kohnnn/awesome-explanations",
+    "site_url": "https://ciechanow.ski/tesseract/",
+    "status": 200,
+    "final_url": "https://ciechanow.ski/tesseract/",
+    "page_title": "Tesseract â Bartosz Ciechanowski",
+    "headings": [
+      "Tesseract",
+      "Building Cubes",
+      "Ambiguous Representation",
+      "Fourth Dimension",
+      "Stepping into the Shadows",
+      "Plane of Rotation",
+      "In-N-Out",
+      "Leaving Plato’s Cave",
+      "Further Watching and Reading",
+      "Final Words"
+    ],
+    "scripts": [
+      "https://ciechanow.ski/js/base.js",
+      "https://ciechanow.ski/js/tesseract.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "canvas2d",
+      "pointer_events",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 6,
+      "drag": 7,
+      "click": 0,
+      "hover": 0,
+      "playback": 1,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 19,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "You can drag the object around to view it from a different angle.",
+      "The slider modifies the object itself: What you’ve just interacted with was a rotated tesseract going through our three dimensional world, but before we understand why it looks the way it looks we have to start at the very beginning.",
+      "In the demonstration below you can take a single point and “stretch” it into the next dimension by dragging the slider: We’ve just created a line segment.",
+      "You can drag it around to see it from other directions: In a three dimensional space all three x y z axes are perpendicular to each other.",
+      "I put a single black point in the 3D space, you can control its position with a slider: Despite the movement of the point in a 3D space its position in a 2D drawing doesn’t change.",
+      "In the simulation they’re 120Â° apart, but we know that those angles are equal to 90Â°.",
+      "You may drag the diagram around to change the viewing angle, I’ve also put a single point in that space: Similarly to the previous example the position of the black point is ambiguous.",
+      "By dragging the slider you can stretch a cube to create a tesseract: I personally find it quite difficult to see what’s going on with this form of presentation.",
+      "In the simulation below you can rotate the cube on the left side to see how its shadow changes.",
+      "You can drag the shadow around to see it from different angles.",
+      "The slider controls the rotation of the tesseract in the xw plane.",
+      "In the simulation below you can drag the slider to change the cube’s position on the z axis.",
+      "You may also drag the cube on the left side to change its orientation in the space: Notice that when the cube is perfectly aligned with the axes it can pop in and out of existence on the 2D plane quite abruptly.",
+      "For the grand finale of this article lets drag a tesseract through a 4D space and see how it intersects with a 3D world.",
+      "His 4D Toys is a fully interactive app that allows you to play with four dimensional objects including physical interactions between them!"
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "axis",
+        75
+      ],
+      [
+        "slider",
+        61
+      ],
+      [
+        "key",
+        43
+      ],
+      [
+        "canvas",
+        26
+      ],
+      [
+        "d3",
+        22
+      ],
+      [
+        "drag",
+        19
+      ],
+      [
+        "click",
+        10
+      ],
+      [
+        "mousemove",
+        4
+      ],
+      [
+        "requestanimationframe",
+        4
+      ],
+      [
+        "touchstart",
+        3
+      ],
+      [
+        "reset",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "mlu-decision-trees.md",
+    "title": "Decision Trees",
+    "source_name": "aws-mlu-explain",
+    "source_url": "https://github.com/Kohnnn/aws-mlu-explain",
+    "site_url": "https://mlu-explain.github.io/decision-tree/",
+    "status": 200,
+    "final_url": "https://mlu-explain.github.io/decision-tree/",
+    "page_title": "Decision Trees",
+    "headings": [
+      "MLU-expl AI n",
+      "Decision Trees",
+      "Let's Build a Decision Tree",
+      "Start Splitting",
+      "Split Some More",
+      "And Some More",
+      "And Yet Some More",
+      "Don't Go Too Deep!",
+      "Where To Partition?",
+      "Entropy Properties",
+      "Information Gain",
+      "ID3 Algorithm Steps"
+    ],
+    "scripts": [
+      "https://mlu-explain.github.io/decision-tree/js.0203594f.js",
+      "https://mlu-explain.github.io/decision-tree/annotatedTree.53ab4bb5.js",
+      "https://mlu-explain.github.io/decision-tree/katexCalls.5eeadbac.js"
+    ],
+    "script_hints": [
+      "katex"
+    ],
+    "code_hints": [
+      "svg_dom",
+      "pointer_events",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 1,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 2,
+      "drag": 0,
+      "click": 1,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 1,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 7,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 1
+    },
+    "interactive_sentences": [
+      "By Jared Wilber & Lucía Santamaría Let's Build a Decision Tree Let's pretend we're farmers with a new plot of land.",
+      "Split Some More We continue along, hoping to split our plot of land in the most favorable manner.",
+      "Click on the Add and Remove buttons to modify the composition of the bubble.",
+      "The line chart displays the different split values for the Diameter feature.",
+      "Move the decision boundary yourself to see how the data points in the top chart are assigned to the left or right children nodes accordingly.",
+      "The ID3 algorithm will select the split point with the largest information gain, shown as the peak of the black line in the bottom chart of 0.574 at Diameter = 0.45 .",
+      "Move the decision boundary yourself to see how the data points in the top chart are assigned to the left or right children nodes accordingly.",
+      "The ID3 algorithm will select the split point with the largest information gain, shown as the peak of the black line in the bottom chart of 0.574 at Diameter = 0.45 ."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "d3",
+        262
+      ],
+      [
+        "key",
+        197
+      ],
+      [
+        "drag",
+        134
+      ],
+      [
+        "svg",
+        126
+      ],
+      [
+        "range",
+        117
+      ],
+      [
+        "axis",
+        78
+      ],
+      [
+        "transition",
+        72
+      ],
+      [
+        "chart",
+        65
+      ],
+      [
+        "play",
+        57
+      ],
+      [
+        "pointer",
+        30
+      ],
+      [
+        "tooltip",
+        22
+      ],
+      [
+        "katex",
+        20
+      ],
+      [
+        "restart",
+        18
+      ],
+      [
+        "click",
+        17
+      ],
+      [
+        "button",
+        15
+      ]
+    ]
+  },
+  {
+    "file": "mlu-double-descent-2.md",
+    "title": "Double Descent 2",
+    "source_name": "aws-mlu-explain",
+    "source_url": "https://github.com/Kohnnn/aws-mlu-explain",
+    "site_url": "https://mlu-explain.github.io/double-descent2/",
+    "status": 200,
+    "final_url": "https://mlu-explain.github.io/double-descent2/",
+    "page_title": "Double Descent 2",
+    "headings": [
+      "MLU-expl AI n",
+      "Double Descent",
+      "Part 2: A Mathematical Explanation",
+      "Brent Werness & Jared Wilber , December 2021",
+      "A Sketch of the Mathematics",
+      "Our Piecewise Linear Model",
+      "Below The Interpolation Threshold",
+      "At The Interpolation Threshold",
+      "To Infinity! (But Not Beyond)",
+      "Summary",
+      "Resources + Open Source:"
+    ],
+    "scripts": [
+      "https://mlu-explain.github.io/double-descent2/js.47ac2d4d.js",
+      "https://mlu-explain.github.io/double-descent2/katexCalls.a524eba6.js"
+    ],
+    "script_hints": [
+      "katex"
+    ],
+    "code_hints": [
+      "svg_dom",
+      "katex_render",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 1,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 3,
+      "drag": 0,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 1,
+      "toggle": 0,
+      "input": 1,
+      "chart": 1,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "animate",
+        1003
+      ],
+      [
+        "range",
+        123
+      ],
+      [
+        "d3",
+        114
+      ],
+      [
+        "axis",
+        59
+      ],
+      [
+        "play",
+        55
+      ],
+      [
+        "transition",
+        52
+      ],
+      [
+        "svg",
+        47
+      ],
+      [
+        "plot",
+        21
+      ],
+      [
+        "katex",
+        21
+      ],
+      [
+        "key",
+        20
+      ],
+      [
+        "chart",
+        14
+      ],
+      [
+        "restart",
+        13
+      ],
+      [
+        "pointer",
+        8
+      ],
+      [
+        "reset",
+        4
+      ],
+      [
+        "requestanimationframe",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "mlu-double-descent.md",
+    "title": "Double Descent",
+    "source_name": "aws-mlu-explain",
+    "source_url": "https://github.com/Kohnnn/aws-mlu-explain",
+    "site_url": "https://mlu-explain.github.io/double-descent/",
+    "status": 200,
+    "final_url": "https://mlu-explain.github.io/double-descent/",
+    "page_title": "Double Descent",
+    "headings": [
+      "MLU-expl AI n",
+      "Double Descent",
+      "Part 1: A Visual Introduction",
+      "Jared Wilber & Brent Werness, December 2021",
+      "What's Going On?",
+      "Minding The Gap",
+      "Final Takeaways",
+      "References & Open Source"
+    ],
+    "scripts": [
+      "https://mlu-explain.github.io/double-descent/scrollCenter.9b85e06e.js",
+      "https://mlu-explain.github.io/double-descent/scrollSide.ff79d116.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "intersection_observer"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 1,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 1,
+      "drag": 0,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 1,
+      "input": 0,
+      "chart": 9,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "To begin, we plot a simple model.",
+      "Next, we plot a model that's not too simple, nor too complex.",
+      "This is reflected in the low error ( ≤ 0.25) in the bottom chart.",
+      "Now, let's plot a complex model, one where our number of features is equal to the number of dimensions.",
+      "At this stage we're overfitting, which leads to the high test error shown in the plot.",
+      "Toggle the slider to modify the number of non-linear features used to build the models."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "d3",
+        234
+      ],
+      [
+        "transition",
+        168
+      ],
+      [
+        "range",
+        165
+      ],
+      [
+        "axis",
+        79
+      ],
+      [
+        "key",
+        63
+      ],
+      [
+        "svg",
+        51
+      ],
+      [
+        "scroll",
+        46
+      ],
+      [
+        "tooltip",
+        28
+      ],
+      [
+        "restart",
+        26
+      ],
+      [
+        "intersectionobserver",
+        24
+      ],
+      [
+        "plot",
+        18
+      ],
+      [
+        "pointer",
+        18
+      ],
+      [
+        "play",
+        16
+      ],
+      [
+        "chart",
+        12
+      ],
+      [
+        "requestanimationframe",
+        4
+      ]
+    ]
+  },
+  {
+    "file": "mlu-linear-regression.md",
+    "title": "Linear Regression",
+    "source_name": "aws-mlu-explain",
+    "source_url": "https://github.com/Kohnnn/aws-mlu-explain",
+    "site_url": "https://mlu-explain.github.io/linear-regression/",
+    "status": 200,
+    "final_url": "https://mlu-explain.github.io/linear-regression/",
+    "page_title": "Linear Regression",
+    "headings": [],
+    "scripts": [
+      "https://mlu-explain.github.io/linear-regression/build/bundle.js"
+    ],
+    "script_hints": [
+      "svelte"
+    ],
+    "code_hints": [
+      "svg_dom",
+      "katex_render"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 0,
+      "drag": 0,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 0,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "svg",
+        557
+      ],
+      [
+        "svelte",
+        410
+      ],
+      [
+        "key",
+        223
+      ],
+      [
+        "katex",
+        209
+      ],
+      [
+        "plot",
+        135
+      ],
+      [
+        "play",
+        95
+      ],
+      [
+        "axis",
+        91
+      ],
+      [
+        "range",
+        86
+      ],
+      [
+        "scroll",
+        84
+      ],
+      [
+        "button",
+        64
+      ],
+      [
+        "transition",
+        60
+      ],
+      [
+        "click",
+        39
+      ],
+      [
+        "tooltip",
+        34
+      ],
+      [
+        "chart",
+        29
+      ],
+      [
+        "reset",
+        20
+      ]
+    ]
+  },
+  {
+    "file": "mlu-logistic-regression.md",
+    "title": "Logistic Regression",
+    "source_name": "aws-mlu-explain",
+    "source_url": "https://github.com/Kohnnn/aws-mlu-explain",
+    "site_url": "https://mlu-explain.github.io/logistic-regression/",
+    "status": 200,
+    "final_url": "https://mlu-explain.github.io/logistic-regression/",
+    "page_title": "Logistic Regression",
+    "headings": [],
+    "scripts": [
+      "https://mlu-explain.github.io/logistic-regression/build/bundle.js"
+    ],
+    "script_hints": [
+      "svelte"
+    ],
+    "code_hints": [
+      "svg_dom",
+      "katex_render"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 0,
+      "drag": 0,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 0,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "svelte",
+        132
+      ],
+      [
+        "play",
+        57
+      ],
+      [
+        "range",
+        41
+      ],
+      [
+        "transition",
+        39
+      ],
+      [
+        "svg",
+        38
+      ],
+      [
+        "axis",
+        34
+      ],
+      [
+        "katex",
+        17
+      ],
+      [
+        "slider",
+        16
+      ],
+      [
+        "chart",
+        13
+      ],
+      [
+        "click",
+        6
+      ],
+      [
+        "restart",
+        6
+      ],
+      [
+        "button",
+        6
+      ],
+      [
+        "reset",
+        4
+      ],
+      [
+        "key",
+        4
+      ],
+      [
+        "d3",
+        4
+      ]
+    ]
+  },
+  {
+    "file": "mlu-precision-recall.md",
+    "title": "Precision & Recall",
+    "source_name": "aws-mlu-explain",
+    "source_url": "https://github.com/Kohnnn/aws-mlu-explain",
+    "site_url": "https://mlu-explain.github.io/precision-recall/",
+    "status": 200,
+    "final_url": "https://mlu-explain.github.io/precision-recall/",
+    "page_title": "Precision & Recall",
+    "headings": [],
+    "scripts": [
+      "https://mlu-explain.github.io/precision-recall/build/bundle.js"
+    ],
+    "script_hints": [
+      "svelte"
+    ],
+    "code_hints": [
+      "svg_dom",
+      "intersection_observer",
+      "katex_render"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 0,
+      "drag": 0,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 0,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "svelte",
+        112
+      ],
+      [
+        "range",
+        91
+      ],
+      [
+        "play",
+        61
+      ],
+      [
+        "svg",
+        42
+      ],
+      [
+        "drag",
+        27
+      ],
+      [
+        "axis",
+        26
+      ],
+      [
+        "pointer",
+        20
+      ],
+      [
+        "katex",
+        17
+      ],
+      [
+        "key",
+        10
+      ],
+      [
+        "chart",
+        6
+      ],
+      [
+        "restart",
+        5
+      ],
+      [
+        "reset",
+        4
+      ],
+      [
+        "d3",
+        4
+      ],
+      [
+        "three",
+        4
+      ],
+      [
+        "click",
+        3
+      ]
+    ]
+  },
+  {
+    "file": "mlu-random-forest.md",
+    "title": "Random Forest",
+    "source_name": "aws-mlu-explain",
+    "source_url": "https://github.com/Kohnnn/aws-mlu-explain",
+    "site_url": "https://mlu-explain.github.io/random-forest/",
+    "status": 200,
+    "final_url": "https://mlu-explain.github.io/random-forest/",
+    "page_title": "Random Forest",
+    "headings": [
+      "MLU-expl AI n",
+      "The Random Forest Algorithm",
+      "But First: A Theorem From 1785",
+      "Ensemble Learning",
+      "Random Forest",
+      "Bagging Method",
+      "Feature Selection",
+      "Here are trees built from each sample.",
+      "Each tree produces a prediction.",
+      "Majority vote",
+      "It's your turn",
+      "Variance in Composition"
+    ],
+    "scripts": [
+      "https://mlu-explain.github.io/random-forest/js.a8267221.js",
+      "https://mlu-explain.github.io/random-forest/indexRF.7579dc6d.js",
+      "https://mlu-explain.github.io/random-forest/indexBarcode.c0641541.js"
+    ],
+    "script_hints": [],
+    "code_hints": [
+      "svg_dom",
+      "pointer_events",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 3,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 2,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 2,
+      "drag": 0,
+      "click": 1,
+      "hover": 0,
+      "playback": 1,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 1,
+      "chart": 1,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "Play with the scrollers yourself!",
+      "It's your turn Click the remaining data points to see how the random forest makes a prediction."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "d3",
+        1070
+      ],
+      [
+        "key",
+        370
+      ],
+      [
+        "range",
+        312
+      ],
+      [
+        "transition",
+        229
+      ],
+      [
+        "drag",
+        202
+      ],
+      [
+        "chart",
+        151
+      ],
+      [
+        "svg",
+        115
+      ],
+      [
+        "pointer",
+        81
+      ],
+      [
+        "axis",
+        68
+      ],
+      [
+        "restart",
+        61
+      ],
+      [
+        "click",
+        49
+      ],
+      [
+        "play",
+        27
+      ],
+      [
+        "mousemove",
+        21
+      ],
+      [
+        "touchstart",
+        20
+      ],
+      [
+        "simulation",
+        15
+      ]
+    ]
+  },
+  {
+    "file": "mlu-roc-auc.md",
+    "title": "ROC & AUC",
+    "source_name": "aws-mlu-explain",
+    "source_url": "https://github.com/Kohnnn/aws-mlu-explain",
+    "site_url": "https://mlu-explain.github.io/roc-auc/",
+    "status": 200,
+    "final_url": "https://mlu-explain.github.io/roc-auc/",
+    "page_title": "ROC & AUC",
+    "headings": [],
+    "scripts": [
+      "https://mlu-explain.github.io/roc-auc/build/bundle.js"
+    ],
+    "script_hints": [
+      "svelte"
+    ],
+    "code_hints": [
+      "svg_dom",
+      "intersection_observer",
+      "pointer_events",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 0,
+      "video": 0,
+      "audio": 0,
+      "button": 0,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 0,
+      "drag": 0,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 0,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "svelte",
+        95
+      ],
+      [
+        "range",
+        68
+      ],
+      [
+        "svg",
+        43
+      ],
+      [
+        "axis",
+        28
+      ],
+      [
+        "drag",
+        25
+      ],
+      [
+        "transition",
+        16
+      ],
+      [
+        "pointer",
+        14
+      ],
+      [
+        "restart",
+        9
+      ],
+      [
+        "chart",
+        7
+      ],
+      [
+        "animate",
+        7
+      ],
+      [
+        "key",
+        6
+      ],
+      [
+        "play",
+        5
+      ],
+      [
+        "plot",
+        4
+      ],
+      [
+        "click",
+        3
+      ],
+      [
+        "d3",
+        2
+      ]
+    ]
+  },
+  {
+    "file": "mlu-the-bias-variance-tradeoff.md",
+    "title": "The Bias Variance Tradeoff",
+    "source_name": "aws-mlu-explain",
+    "source_url": "https://github.com/Kohnnn/aws-mlu-explain",
+    "site_url": "https://mlu-explain.github.io/bias-variance/",
+    "status": 200,
+    "final_url": "https://mlu-explain.github.io/bias-variance/",
+    "page_title": "Bias Variance Tradeoff",
+    "headings": [
+      "MLU-expl AI n",
+      "The Bias Variance Tradeoff",
+      "Jared Wilber & Brent Werness, January 2021",
+      "LOESS Regression",
+      "K-Nearest Neighbors",
+      "What About Double Descent?",
+      "It's Finally Over",
+      "References + Open Source"
+    ],
+    "scripts": [
+      "https://mlu-explain.github.io/bias-variance/js.63b32ab2.js",
+      "https://mlu-explain.github.io/bias-variance/katexCalls.eb206bfb.js"
+    ],
+    "script_hints": [
+      "katex"
+    ],
+    "code_hints": [
+      "svg_dom",
+      "intersection_observer",
+      "katex_render",
+      "d3_usage"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 1,
+      "video": 0,
+      "audio": 0,
+      "button": 2,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 1,
+      "drag": 0,
+      "click": 0,
+      "hover": 1,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 15,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "These different model realizations are shown in the top chart, while the error decomposition (for each point of data) is shown in the bottom chart.",
+      "Specifically, variance measures how much, on average, predictions vary for a given data point : As you can see in the bottom plot, predictions from overfit (high-complexity) models show a lot more error from variance than from bias.",
+      "For each level of complexity, we’ll aggregate the error decomposition across all data-points, and plot the aggregate errors at their level of complexity.",
+      "The plot on the left shows the training data.",
+      "The plot on the right shows decision regions based on the current value of K.",
+      "Hover over a point to see its classification to the right, and the K-nearest neighbors used for consideration to the left."
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "d3",
+        169
+      ],
+      [
+        "transition",
+        142
+      ],
+      [
+        "svg",
+        138
+      ],
+      [
+        "axis",
+        134
+      ],
+      [
+        "range",
+        126
+      ],
+      [
+        "key",
+        78
+      ],
+      [
+        "play",
+        66
+      ],
+      [
+        "plot",
+        40
+      ],
+      [
+        "scroll",
+        26
+      ],
+      [
+        "katex",
+        26
+      ],
+      [
+        "chart",
+        20
+      ],
+      [
+        "slider",
+        19
+      ],
+      [
+        "restart",
+        13
+      ],
+      [
+        "pointer",
+        13
+      ],
+      [
+        "intersectionobserver",
+        12
+      ]
+    ]
+  },
+  {
+    "file": "mlu-train-test-and-validation-sets.md",
+    "title": "Train, Test, and Validation Sets",
+    "source_name": "aws-mlu-explain",
+    "source_url": "https://github.com/Kohnnn/aws-mlu-explain",
+    "site_url": "https://mlu-explain.github.io/train-test-validation/",
+    "status": 200,
+    "final_url": "https://mlu-explain.github.io/train-test-validation/",
+    "page_title": "Train,Test, and Validation Sets",
+    "headings": [
+      "MLU-EXPL AI N",
+      "MLU-expl AI n",
+      "Train , Test , and Validation Sets",
+      "The Importance of Data Splitting",
+      "Train, Test, and Validation Splits",
+      "The Training Set",
+      "Building Our Model",
+      "The Validation Set",
+      "The Testing Set",
+      "Summary"
+    ],
+    "scripts": [
+      "https://mlu-explain.github.io/train-test-validation/js.6c47f979.js",
+      "https://mlu-explain.github.io/train-test-validation/roughAnnotations.51d9685b.js"
+    ],
+    "script_hints": [
+      "roughjs"
+    ],
+    "code_hints": [
+      "svg_dom",
+      "pointer_events"
+    ],
+    "dom_counts": {
+      "canvas": 0,
+      "svg": 1,
+      "video": 0,
+      "audio": 0,
+      "button": 4,
+      "input": 0,
+      "details": 0
+    },
+    "keyword_counts": {
+      "slider": 0,
+      "drag": 2,
+      "click": 0,
+      "hover": 0,
+      "playback": 0,
+      "scroll": 0,
+      "tooltip": 0,
+      "toggle": 0,
+      "input": 0,
+      "chart": 0,
+      "canvas": 0,
+      "svg": 0,
+      "animation": 0
+    },
+    "interactive_sentences": [
+      "Drag each animal in the training set to a new position to see how the boundary updates!",
+      "Drag the pets across the line to see how the model performance updates!"
+    ],
+    "notes": [],
+    "script_token_hits": [
+      [
+        "d3",
+        139
+      ],
+      [
+        "range",
+        87
+      ],
+      [
+        "transition",
+        79
+      ],
+      [
+        "key",
+        62
+      ],
+      [
+        "svg",
+        51
+      ],
+      [
+        "drag",
+        39
+      ],
+      [
+        "animate",
+        25
+      ],
+      [
+        "restart",
+        17
+      ],
+      [
+        "button",
+        16
+      ],
+      [
+        "simulation",
+        14
+      ],
+      [
+        "pointer",
+        14
+      ],
+      [
+        "chart",
+        9
+      ],
+      [
+        "click",
+        4
+      ],
+      [
+        "play",
+        4
+      ],
+      [
+        "axis",
+        4
+      ]
+    ]
+  }
+]
