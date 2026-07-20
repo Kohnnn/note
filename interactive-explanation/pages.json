@@ -236,5 +236,20 @@
     "summary": "Interactive mathematical walkthrough of interpolation thresholds, spline limits, local KaTeX derivations, and charted double-descent examples.",
     "referenceUrl": "https://mlu-explain.github.io/double-descent2/",
     "docsUrl": "./docs/double-descent2/"
+  },
+  {
+    "slug": "interactive-mechanical-watch",
+    "title": "Interactive Mechanical Watch",
+    "summary": "Dark-editorial teardown of an ETA 2824-2 movement as a timed energy system, with a live WebGL 3D core and a From Pixels to Resin prototyping case study on exploded resin-cast watches.",
+    "topicTags": [
+      "horology",
+      "prototyping",
+      "engineering"
+    ],
+    "addedDate": "2026-06-27",
+    "intent": "simulation",
+    "docsUrl": "./docs/interactive-mechanical-watch/",
+    "referenceMode": "neutral",
+    "familyKey": "engineering-longform"
   }
 ]

@@ -1,0 +1,93 @@
+[
+  {
+    "moduleId": "engineering-sandbox-longform-shell",
+    "originalBehavior": "The route should be a longform Engineering Sandbox article with a shared hero, generated story rail, mobile chapter navigation, and neutral local provenance handling.",
+    "localStatus": "The route uses the shared Engineering Sandbox shell with engineering-longform framing, route-specific compact chapter labels, an immediately reachable after-hero mobile chapter bar, focused chapter destinations, local teaching content, and neutral provenance.",
+    "sourceFiles": [
+      "../../interactive-mechanical-watch/index.html",
+      "../../shared/engineering-sandbox.css",
+      "../../shared/engineering-sandbox.js",
+      "../../shared/public-footer.js"
+    ],
+    "notes": [
+      "The shell provides the longform wrapper, generated chapter navigation, compact route-specific labels, and mobile chapter sheet.",
+      "The route places its static mobile chapter bar after the hero rather than after the long article.",
+      "Active mobile chapters are revealed inside the horizontal nav without scrolling the article viewport, and sheet selections focus their chapter destinations.",
+      "Public provenance is neutral because the route is a local recomposition rather than a surfaced upstream mirror."
+    ],
+    "evidence": [
+      "The route hero, generated chapter rail, mobile chapter navigation, and compact chapter labels are mounted by the shared shell.",
+      "Targeted smoke verifies chapter order, accessible compact labels, after-hero mobile placement, chapter activation, destination focus, and no viewport jumps.",
+      "The public footer renders neutral route provenance via data-reference-mode=\"neutral\" rather than an upstream original-page link."
+    ]
+  },
+  {
+    "moduleId": "shared-webgl-movement-engine",
+    "originalBehavior": "The interactive movement should render through the original WebGL engine with all demos, sliders, and binary geometry intact.",
+    "localStatus": "The route loads the canonical shared WebGL engine, base runtime, and binary vertex/index buffers; demos remain bound by their original element ids, while a route-local adapter adds keyboard, ARIA, touch, and reduced-motion behavior without changing the shared simulation code.",
+    "sourceFiles": [
+      "../../shared/mechanical-watch/js/watch.js",
+      "../../shared/mechanical-watch/js/base.js",
+      "../../interactive-mechanical-watch/js/legacy-watch-accessibility.js",
+      "../../shared/mechanical-watch/models/watch_vertices.dat",
+      "../../shared/mechanical-watch/models/watch_indices.dat"
+    ],
+    "notes": [
+      "The engine binds demos by element id, so every drawer_container, slider, segmented-control, and playback id is preserved verbatim.",
+      "The adapter delegates keyboard activation to existing engine handlers instead of reimplementing simulation behavior.",
+      "Y-drag-only canvases advertise only Up and Down, while multi-slider demos add ordinal positions to their accessible names.",
+      "Reduced-motion startup pauses global animation and drawers while explicit playback remains available.",
+      "The geometry buffers cannot be regenerated locally and remain byte-identical in the shared asset tree."
+    ],
+    "evidence": [
+      "Each movement demo mounts through its original drawer_container id (for example #hero, #mainspring_barrel, #gear_train5).",
+      "The route loads ../shared/mechanical-watch/js/base.js and ../shared/mechanical-watch/js/watch.js before its accessibility adapter and shared shell scripts.",
+      "Targeted smoke verifies effective keyboard rotation, unique slider names, slider and segmented-control semantics, playback activation, reduced-motion startup, and the original slider handler through native CDP touch input."
+    ]
+  },
+  {
+    "moduleId": "dark-editorial-css-layer",
+    "originalBehavior": "The redesign should present a dark editorial reading surface without breaking the WebGL demos, which assume a light backdrop.",
+    "localStatus": "A route-local editorial-shell.css darkens the prose surface and lightens article text while wrapping each WebGL drawer_container in a light framed inset so loading text and explainers stay legible.",
+    "sourceFiles": [
+      "../../interactive-mechanical-watch/css/editorial-shell.css",
+      "../../shared/mechanical-watch/css/base.css",
+      "../../shared/mechanical-watch/css/watch.css"
+    ],
+    "notes": [
+      "All overrides are scoped under body[data-story-route=\"interactive-mechanical-watch\"] so other routes are unaffected.",
+      "The override layer loads last and styles the real shell nav and part-color legend classes rather than inventing new ones."
+    ],
+    "evidence": [
+      "The article surface renders dark with light body text while each drawer_container sits on a light framed card.",
+      "Responsive checks at 375px, 768px, and 1280px show no horizontal overflow on the public route."
+    ]
+  },
+  {
+    "moduleId": "interactive-exploded-resin-section",
+    "originalBehavior": "The route should extend the teardown with an additive prototyping case study and make the exploded component stack interactive rather than relying on a static hero image.",
+    "localStatus": "A new \"From Pixels to Resin\" chapter precedes the closing resources and opens with a selectable Three.js exploded view built from local movement geometry. Users can scrub depth without rebuilding the component list, orbit and zoom, choose components, read subsystem roles, and follow contextual lesson links; an accessible SVG fallback remains available if WebGL initialization fails.",
+    "sourceFiles": [
+      "../../interactive-mechanical-watch/index.html",
+      "../../interactive-mechanical-watch/js/exploded-view.js",
+      "../../interactive-mechanical-watch/js/exploded-view-three.js",
+      "../../interactive-mechanical-watch/vendor/three/",
+      "../../shared/mechanical-watch/models/watch_vertices.dat",
+      "../../shared/mechanical-watch/models/watch_indices.dat",
+      "../../interactive-mechanical-watch/css/editorial-shell.css",
+      "../../interactive-mechanical-watch/images/generated/"
+    ],
+    "notes": [
+      "The section is anchored with a top-level h1 id, appears before Further Watching and Reading, and joins the generated chapter rail.",
+      "The exploded view is route-local and does not mutate the shared WebGL movement engine.",
+      "Depth changes update geometry and state without replacing the component-list DOM or losing its scroll position.",
+      "Each selectable component has a DOM button, Three.js mesh or SVG fallback target, detail panel entry, and related-lesson metadata."
+    ],
+    "evidence": [
+      "The #from-pixels-to-resin chapter contains a data-exploded-watch mount instead of a static hero figure.",
+      "The Three.js adapter maps 27 semantic components across power, train, escapement, balance, keyless works, automatic winding, display, structure, and friction subsystems.",
+      "Contextual detail links route components such as the barrel, mainplate, and rotor to their relevant lessons.",
+      "Targeted smoke verifies incremental depth updates, keyboard and pointer selection, native touch orbit, lesson links, SVG fallback, and capped 320px component-list density."
+    ]
+  }
+]

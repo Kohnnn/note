@@ -1,0 +1,255 @@
+[
+  {
+    "slug": "trust",
+    "title": "The Evolution of Trust",
+    "summary": "Game-theory slideshow about cooperation, betrayal, noise, and repair under repeated interaction.",
+    "referenceUrl": "https://ncase.me/trust/",
+    "docsUrl": "./docs/trust/"
+  },
+  {
+    "slug": "polygons",
+    "title": "Parable of the Polygons",
+    "summary": "Playable essay on segregation, tipping points, and small anti-bias changes that reshape the whole board.",
+    "referenceUrl": "https://ncase.me/polygons/",
+    "docsUrl": "./docs/polygons/"
+  },
+  {
+    "slug": "ballot",
+    "title": "To Build a Better Ballot",
+    "summary": "Voting-systems explainer with draggable electorates, counting flows, spoiler scenarios, and a sandbox.",
+    "referenceUrl": "https://ncase.me/ballot/",
+    "docsUrl": "./docs/ballot/"
+  },
+  {
+    "slug": "crowds",
+    "title": "The Wisdom and/or Madness of Crowds",
+    "summary": "Network-science slideshow with drawing tools, contagion puzzles, chapter presets, and sandbox experiments.",
+    "referenceUrl": "https://ncase.me/crowds/",
+    "docsUrl": "./docs/crowds/"
+  },
+  {
+    "slug": "loopy",
+    "title": "LOOPY",
+    "summary": "Systems-thinking tool with node drawing, signed feedback arrows, example models, and local share or export flows.",
+    "referenceUrl": "https://ncase.me/loopy/",
+    "docsUrl": "./docs/loopy/"
+  },
+  {
+    "slug": "neurons",
+    "title": "Neurotic Neurons",
+    "summary": "Interactive animation about neuron firing, Hebbian and anti-Hebbian learning, anxiety loops, and rewiring scenes.",
+    "referenceUrl": "https://ncase.me/neurons/",
+    "docsUrl": "./docs/neurons/"
+  },
+  {
+    "slug": "remember",
+    "title": "How To Remember Anything Forever-ish",
+    "summary": "Interactive comic about memory, forgetting curves, active recall, spaced repetition, and Leitner-box practice.",
+    "referenceUrl": "https://ncase.me/remember/",
+    "docsUrl": "./docs/remember/"
+  },
+  {
+    "slug": "anxiety",
+    "title": "Adventures With Anxiety!",
+    "summary": "Narrative game about anxiety loops, branching choices, pacing controls, replay flow, and resource handoff.",
+    "referenceUrl": "https://ncase.me/anxiety/",
+    "docsUrl": "./docs/anxiety/"
+  },
+  {
+    "slug": "wbwwb",
+    "title": "We Become What We Behold",
+    "summary": "Short camera-driven game about headlines, outrage loops, crowd escalation, and replaying the spiral.",
+    "referenceUrl": "https://ncase.itch.io/wbwwb",
+    "docsUrl": "./docs/wbwwb/"
+  },
+  {
+    "slug": "coming-out-simulator-2014",
+    "title": "Coming Out Simulator 2014",
+    "summary": "Branching dialogue game about a family conversation, consequence mapping, alternate paths, and replaying difficult scenes.",
+    "referenceUrl": "https://ncase.itch.io/coming-out-simulator-2014",
+    "docsUrl": "./docs/coming-out-simulator-2014/"
+  },
+  {
+    "slug": "covid-19",
+    "title": "What Happens Next? COVID-19 Futures",
+    "summary": "Playable epidemiology article with SEIR sims, R-value calculators, intervention schedules, ICU overlays, and a long-term sandbox.",
+    "referenceUrl": "https://ncase.me/covid-19/",
+    "docsUrl": "./docs/covid-19/"
+  },
+  {
+    "slug": "simulating",
+    "title": "Simulating",
+    "summary": "Launcher replica for the relaunched Emoji Simulator plus the nested legacy original article and model editor surfaces.",
+    "referenceUrl": "https://ncase.me/simulating/",
+    "docsUrl": "./docs/simulating/"
+  },
+  {
+    "slug": "sim",
+    "title": "Emoji Simulator",
+    "summary": "Relaunched emoji-based cellular-automata editor with model presets, local save links, export flow, and editable rules.",
+    "referenceUrl": "https://ncase.me/sim/",
+    "docsUrl": "./docs/sim/"
+  },
+  {
+    "slug": "decision-tree",
+    "title": "Decision Trees",
+    "summary": "Scrollytelling explainer about split boundaries, entropy, information gain, and tree-depth tradeoffs.",
+    "referenceUrl": "https://mlu-explain.github.io/decision-tree/",
+    "docsUrl": "./docs/decision-tree/"
+  },
+  {
+    "slug": "random-forest",
+    "title": "Random Forest",
+    "summary": "Interactive article about bagging, feature randomness, majority-vote prediction, and ensemble variance.",
+    "referenceUrl": "https://mlu-explain.github.io/random-forest/",
+    "docsUrl": "./docs/random-forest/"
+  },
+  {
+    "slug": "conditional-probability",
+    "title": "Conditional Probability",
+    "summary": "Visual probability explainer with overlap geometry, conditioning lenses, and synchronized probability readouts.",
+    "referenceUrl": "https://setosa.io/ev/conditional-probability/",
+    "docsUrl": "./docs/conditional-probability/"
+  },
+  {
+    "slug": "markov-chains",
+    "title": "Markov Chains",
+    "summary": "Interactive article about transition matrices, state evolution, stochastic sequences, and a local playground.",
+    "referenceUrl": "https://setosa.io/ev/markov-chains/",
+    "docsUrl": "./docs/markov-chains/"
+  },
+  {
+    "slug": "principal-component-analysis",
+    "title": "Principal Component Analysis",
+    "summary": "Interactive PCA explainer with draggable samples, a 3D projection view, and fixed UK-food dataset projections.",
+    "referenceUrl": "https://setosa.io/ev/principal-component-analysis/",
+    "docsUrl": "./docs/principal-component-analysis/"
+  },
+  {
+    "slug": "exponentiation",
+    "title": "Exponentiation",
+    "summary": "Interactive explainer about repeated addition, repeated multiplication, and a virus-spread toy model.",
+    "referenceUrl": "https://setosa.io/ev/exponentiation/",
+    "docsUrl": "./docs/exponentiation/"
+  },
+  {
+    "slug": "pi",
+    "title": "Pi (π)",
+    "summary": "Interactive pi explainer with draggable circle geometry, circumference unwrapping, and synchronized ratio readouts.",
+    "referenceUrl": "https://setosa.io/ev/pi/",
+    "docsUrl": "./docs/pi/"
+  },
+  {
+    "slug": "sine-and-cosine",
+    "title": "Sine and Cosine",
+    "summary": "Interactive trigonometry explainer with similar triangles, autoplay transforms, and linked polar-cartesian views.",
+    "referenceUrl": "https://setosa.io/ev/sine-and-cosine/",
+    "docsUrl": "./docs/sine-and-cosine/"
+  },
+  {
+    "slug": "eigenvectors-and-eigenvalues",
+    "title": "Eigenvectors and Eigenvalues",
+    "summary": "Interactive linear algebra explainer with draggable matrix columns, Fibonacci growth, steady-state migration, and complex spirals.",
+    "referenceUrl": "https://setosa.io/ev/eigenvectors-and-eigenvalues/",
+    "docsUrl": "./docs/eigenvectors-and-eigenvalues/"
+  },
+  {
+    "slug": "image-kernels",
+    "title": "Image Kernels",
+    "summary": "Interactive image-kernel explainer with preset filters, hoverable pixel arithmetic, a custom kernel playground, uploads, and live video.",
+    "referenceUrl": "https://setosa.io/ev/image-kernels/",
+    "docsUrl": "./docs/image-kernels/"
+  },
+  {
+    "slug": "ordinary-least-squares-regression",
+    "title": "Ordinary Least Squares Regression",
+    "summary": "Interactive explainer about fitted lines, squared error, draggable points, and coefficient readouts in ordinary least squares.",
+    "referenceUrl": "https://setosa.io/ev/ordinary-least-squares-regression/",
+    "docsUrl": "./docs/ordinary-least-squares-regression/"
+  },
+  {
+    "slug": "blockchain",
+    "title": "Blockchain",
+    "summary": "Interactive blockchain demo with editable block fields, nonce mining, downstream invalidation, and multi-chain comparison views.",
+    "referenceUrl": "https://andersbrownworth.com/Blockchain/blockchain.html",
+    "docsUrl": "./docs/blockchain/"
+  },
+  {
+    "slug": "public-private-keys",
+    "title": "Public / Private Keys",
+    "summary": "Interactive signing demo with keypair generation, message signatures, transaction flows, and blockchain records backed by public-key cryptography.",
+    "referenceUrl": "https://andersbrownworth.com/blockchain/public-private-keys/keys",
+    "docsUrl": "./docs/public-private-keys/"
+  },
+  {
+    "slug": "linear-regression",
+    "title": "Linear Regression",
+    "summary": "Interactive article about fitted lines, residuals, MSE, coefficient updates, and scroll-linked regression scenes.",
+    "referenceUrl": "https://mlu-explain.github.io/linear-regression/",
+    "docsUrl": "./docs/linear-regression/"
+  },
+  {
+    "slug": "logistic-regression",
+    "title": "Logistic Regression",
+    "summary": "Interactive article about binary classification, sigmoid probabilities, thresholding, and linked logistic-regression scenes.",
+    "referenceUrl": "https://mlu-explain.github.io/logistic-regression/",
+    "docsUrl": "./docs/logistic-regression/"
+  },
+  {
+    "slug": "precision-recall",
+    "title": "Precision & Recall",
+    "summary": "Interactive article about confusion matrices, precision and recall tradeoffs, thresholding, and F1 score.",
+    "referenceUrl": "https://mlu-explain.github.io/precision-recall/",
+    "docsUrl": "./docs/precision-recall/"
+  },
+  {
+    "slug": "roc-auc",
+    "title": "ROC & AUC",
+    "summary": "Interactive article about ROC curves, threshold sweeps, AUC interpretation, and classifier comparison scenes.",
+    "referenceUrl": "https://mlu-explain.github.io/roc-auc/",
+    "docsUrl": "./docs/roc-auc/"
+  },
+  {
+    "slug": "bias-variance",
+    "title": "Bias-Variance Tradeoff",
+    "summary": "Interactive article about underfitting, overfitting, error decomposition, model complexity, LOESS smoothing, and K-nearest neighbors.",
+    "referenceUrl": "https://mlu-explain.github.io/bias-variance/",
+    "docsUrl": "./docs/bias-variance/"
+  },
+  {
+    "slug": "train-test-validation",
+    "title": "Train, Test, and Validation Sets",
+    "summary": "Interactive article about data splitting, draggable training examples, logistic-regression boundaries, and validation versus test evaluation.",
+    "referenceUrl": "https://mlu-explain.github.io/train-test-validation/",
+    "docsUrl": "./docs/train-test-validation/"
+  },
+  {
+    "slug": "double-descent",
+    "title": "Double Descent",
+    "summary": "Interactive article about classical and interpolation regimes, complexity-driven error curves, model smoothness, and the interpolation gap.",
+    "referenceUrl": "https://mlu-explain.github.io/double-descent/",
+    "docsUrl": "./docs/double-descent/"
+  },
+  {
+    "slug": "double-descent2",
+    "title": "Double Descent, Part 2",
+    "summary": "Interactive mathematical walkthrough of interpolation thresholds, spline limits, local KaTeX derivations, and charted double-descent examples.",
+    "referenceUrl": "https://mlu-explain.github.io/double-descent2/",
+    "docsUrl": "./docs/double-descent2/"
+  },
+  {
+    "slug": "interactive-mechanical-watch",
+    "title": "Interactive Mechanical Watch",
+    "summary": "Dark-editorial teardown of an ETA 2824-2 movement as a timed energy system, with a live WebGL 3D core and a From Pixels to Resin prototyping case study on exploded resin-cast watches.",
+    "topicTags": [
+      "horology",
+      "prototyping",
+      "engineering"
+    ],
+    "addedDate": "2026-06-27",
+    "intent": "simulation",
+    "docsUrl": "./docs/interactive-mechanical-watch/",
+    "referenceMode": "neutral",
+    "familyKey": "engineering-longform"
+  }
+]
