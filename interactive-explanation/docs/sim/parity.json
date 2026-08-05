@@ -79,16 +79,36 @@
     "localStatus": "The local shell normalizes canonical and Open Graph URLs to the current page, preserves relative asset loading under the nested subpath, and adds the shared footer as the only original-page reference surface.",
     "sourceFiles": [
       "index.html",
+      "scripts/libraries/emojiFallback.js",
       "../shared/public-footer.css",
       "../shared/public-footer.js"
     ],
     "notes": [
       "The route still loads its assets relatively from the shipped folder instead of relying on root-path hosting.",
+      "The emoji fallback reuses the shipped font from the sibling <code>simulating</code> route instead of requesting a missing route-local copy.",
       "The shared footer is injected at document level only and does not alter the grid or editor runtime."
     ],
     "evidence": [
       "The route now loads under <code>/interactive-explanation/sim/</code> with local canonical metadata.",
+      "Unit coverage resolves the fallback font URL on case-sensitive deployment filesystems.",
       "Audit coverage passes with the shipped <code>sim</code> route included in the public-surface sweep."
+    ]
+  },
+  {
+    "moduleId": "phase-10-runtime-loading-and-failure-contract",
+    "originalBehavior": "The editor loads a preset or compressed URL model before mounting the grid and controls.",
+    "localStatus": "The editor workspace is the route's single meaningful main landmark; it clears loading state after a successful mount and shows a concise failure message for malformed parameters, invalid compressed data, or failed model requests.",
+    "sourceFiles": [
+      "index.html",
+      "scripts/engine/Load.js"
+    ],
+    "notes": [
+      "Valid preset, compressed-link, and export behavior remains upstream-driven.",
+      "Failure handling is limited to the existing model-loading boundary."
+    ],
+    "evidence": [
+      "Focused browser coverage verifies successful loading and malformed-link failure semantics.",
+      "Phase 10 source and browser contracts enforce exactly one meaningful main landmark."
     ]
   }
 ]

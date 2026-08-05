@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ableton Learning Synths: Modulating amplitude with envelopes Replica Docs</title>
+  <meta name="description" content="Provenance, parity notes, and implementation references for the local ableton-learning-synths-modulating-amplitude-with-envelopes route.">
+  <meta name="robots" content="noindex,follow">
+  <meta property="og:title" content="Ableton Learning Synths: Modulating amplitude with envelopes Replica Docs">
+  <meta property="og:description" content="Provenance, parity notes, and implementation references for the local ableton-learning-synths-modulating-amplitude-with-envelopes route.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kohnnn.github.io/interactive-explanation/docs/ableton-learning-synths-modulating-amplitude-with-envelopes/">
+  <link rel="canonical" href="https://kohnnn.github.io/interactive-explanation/docs/ableton-learning-synths-modulating-amplitude-with-envelopes/">
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <script src="../../shared/theme-init.js"></script>
+  <link rel="stylesheet" href="../../shared/site.css">
+</head>
+<body data-page-type="docs" data-parity-url="./parity.json">
+  <main class="site-page docs-page">
+    <a class="back-link" href="../../">Back to Atlas</a>
+
+    <header class="hero hero-compact">
+      <p class="eyebrow">Replica documentation</p>
+      <h1>Ableton Learning Synths: Modulating amplitude with envelopes</h1>
+      <p class="lead">
+        Local route <code>/interactive-explanation/ableton-learning-synths-modulating-amplitude-with-envelopes/</code>
+        vendors Ableton's amplitude-envelope lesson, keeps the archived ADSR runtime in shared scripts with route-local lesson assets, and preserves the published press-and-hold and envelope-shape scenes with local assets.
+      </p>
+      <div class="action-row">
+        <a class="action-link" href="../../ableton-learning-synths-modulating-amplitude-with-envelopes/">Open replica</a>
+        <a class="action-link secondary" href="https://learningsynths.ableton.com/en/envelopes/modulating-amplitude-with-envelopes" target="_blank" rel="noreferrer">Open original</a>
+      </div>
+      <p class="meta-line">
+        Upstream snapshot: <code>lesson runtime and media inventory verified 2026-03-22</code><br>
+        Source family: <code>learningsynths.ableton.com amplitude-envelope lesson</code>
+      </p>
+    </header>
+
+    <section class="note-grid">
+      <article class="note-section">
+        <h2>Source snapshot</h2>
+        <p>
+          Vendored from Ableton's amplitude-envelope lesson at
+          <code>learningsynths.ableton.com/en/envelopes/modulating-amplitude-with-envelopes</code>. The
+          local route keeps the published lesson shell and ADSR runtime from shared scripts so the
+          press-and-hold envelope scene boots from local assets.
+        </p>
+        <ul class="plain-list">
+          <li>The archive preserves the published envelope scenes instead of rebuilding them in a custom synth teaching page.</li>
+          <li>The ADSR shape scene is treated as parity-critical because it is the clearest demonstration in the lesson.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Asset handoff</h2>
+        <ul class="plain-list">
+          <li><code>shared/ableton-learning-synths-musiclab.js</code> plus <code>shared/ableton-learning-synths-archive.js</code> drive the lesson shell and ADSR runtime.</li>
+          <li>Route-local inventory matches the rest of the shipped Learning Synths batch: shared fonts, text payloads, RNBO patch data, and lesson WAVs.</li>
+          <li>Assets such as <code>content/lessons/en/synthesis/sustain-clarinet.wav</code> and <code>rnbo/patches/learning-synth.json</code> stay on relative paths for subpath hosting.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Known deviations</h2>
+        <ul class="plain-list">
+          <li>A shared footer carries the single original-page reference link; the upstream lesson shell is stripped from the public body.</li>
+          <li>Ableton feedback, privacy, language-switch, analytics, and cookie surfaces are removed from the public route.</li>
+          <li>Local chapter links are rewritten after mount so the shipped synth family stays internally navigable.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Validation guidance</h2>
+        <ul class="plain-list">
+          <li><code>node tools/check-public-surface.mjs .</code> keeps the public route footer-only.</li>
+          <li><code>node tools/smoke-bundle.mjs . --group music</code> (or <code>--route ableton-learning-synths-modulating-amplitude-with-envelopes</code>) verifies local script loading, the ADSR envelope redraw, and the held-note path after parameter changes.</li>
+          <li>Smoke asserts the expected local asset counts and keeps the no-remote-playable-media guard clean after lesson boot and interaction.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="note-section">
+      <div class="section-heading">
+        <h2>Parity checklist</h2>
+        <span data-module-count class="meta-pill">Loading...</span>
+      </div>
+      <div class="parity-list" data-parity-list>
+        <div class="empty-state">Loading parity contract...</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../../shared/site.js"></script>
+</body>
+</html>

@@ -5,12 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ballot Replica Docs</title>
   <meta name="description" content="Provenance, parity notes, and implementation references for the local ballot replica.">
+  <meta name="robots" content="noindex,follow">
+  <meta property="og:title" content="Ballot Replica Docs">
+  <meta property="og:description" content="Provenance, parity notes, and implementation references for the local ballot replica.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kohnnn.github.io/interactive-explanation/docs/ballot/">
+  <link rel="canonical" href="https://kohnnn.github.io/interactive-explanation/docs/ballot/">
   <link rel="icon" type="image/png" href="../../favicon.png">
+  <script src="../../shared/theme-init.js"></script>
   <link rel="stylesheet" href="../../shared/site.css">
 </head>
 <body data-page-type="docs" data-parity-url="./parity.json">
   <main class="site-page docs-page">
-    <a class="back-link" href="../../">Back to replicas</a>
+    <a class="back-link" href="../../">Back to Atlas</a>
 
     <header class="hero hero-compact">
       <p class="eyebrow">Replica documentation</p>
@@ -64,6 +71,14 @@
           <li>Top-level self-promo, repo, and supporter blocks were removed from the public page body.</li>
           <li>Static share anchors and sandbox save links now resolve to the local replica routes instead of embedding the original host.</li>
           <li>Top-of-page translation and original-site link blocks were removed so the public route stays footer-only.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Keyboard interaction</h2>
+        <ul class="plain-list">
+          <li>Each required draggable ballot model now provides an object select, four native movement buttons, Arrow-key movement on the select, and a live text summary of object position and election result.</li>
+          <li>Canvas pointer dragging remains unchanged, while canvases are removed from the tab order and reset, save, and voting-system controls are native buttons.</li>
         </ul>
       </article>
 

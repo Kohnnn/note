@@ -1,72 +1,100 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <meta property="og:url" content="https://kohnnn.github.io/interactive-explanation/">
+  <link rel="canonical" href="https://kohnnn.github.io/interactive-explanation/">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Interactive Explanation Replicas</title>
-  <meta name="description" content="Static replica routes for interactive explanations, with separate parity documentation for each build.">
+  <title>Interactive Explanation Atlas</title>
+  <meta name="description" content="Interactive ways to understand, practice, experiment, and build.">
+  <script src="./shared/theme-init.js"></script>
   <link rel="icon" type="image/png" href="./favicon.png">
   <link rel="stylesheet" href="./shared/site.css">
   <link rel="stylesheet" href="./shared/public-footer.css">
 </head>
 <body data-page-type="home">
   <main class="site-page">
-    <section class="hero">
-      <p class="eyebrow">Interactive Explanation</p>
-      <h1>Replica routes for interactive explanations</h1>
-      <p class="lead">
-        This folder is a self-contained static site for subpath hosting. The public pages stay
-        focused on the interactives themselves, while parity notes and technical provenance live
-        separately under <code>/docs/</code>.
-      </p>
-      <p class="meta-line">
-        Only the routes listed on this page are live replicas. Notes under <code>/compilations/</code>
-        stay as planning or research material until they are vendored, documented, and added to
-        <code>pages.json</code>.
-      </p>
-      <div class="action-row">
-        <a class="action-link" href="./trust/">Open trust</a>
-        <a class="action-link secondary" href="./polygons/">Open polygons</a>
-        <a class="action-link ghost" href="./ballot/">Open ballot</a>
-        <a class="action-link secondary" href="./crowds/">Open crowds</a>
-        <a class="action-link ghost" href="./loopy/">Open loopy</a>
-        <a class="action-link secondary" href="./neurons/">Open neurons</a>
-        <a class="action-link ghost" href="./remember/">Open remember</a>
-        <a class="action-link secondary" href="./anxiety/">Open anxiety</a>
-        <a class="action-link ghost" href="./wbwwb/">Open wbwwb</a>
-        <a class="action-link secondary" href="./coming-out-simulator-2014/">Open coming out simulator 2014</a>
-        <a class="action-link ghost" href="./covid-19/">Open covid-19</a>
-        <a class="action-link secondary" href="./simulating/">Open simulating</a>
-        <a class="action-link ghost" href="./sim/">Open sim</a>
-        <a class="action-link secondary" href="./decision-tree/">Open decision tree</a>
-        <a class="action-link ghost" href="./random-forest/">Open random forest</a>
-        <a class="action-link secondary" href="./conditional-probability/">Open conditional probability</a>
-        <a class="action-link ghost" href="./markov-chains/">Open markov chains</a>
-        <a class="action-link secondary" href="./principal-component-analysis/">Open principal component analysis</a>
-        <a class="action-link ghost" href="./exponentiation/">Open exponentiation</a>
-        <a class="action-link secondary" href="./pi/">Open pi</a>
-        <a class="action-link ghost" href="./sine-and-cosine/">Open sine and cosine</a>
-        <a class="action-link secondary" href="./eigenvectors-and-eigenvalues/">Open eigenvectors and eigenvalues</a>
-        <a class="action-link ghost" href="./image-kernels/">Open image kernels</a>
-        <a class="action-link secondary" href="./ordinary-least-squares-regression/">Open ordinary least squares regression</a>
-        <a class="action-link ghost" href="./blockchain/">Open blockchain</a>
-        <a class="action-link secondary" href="./public-private-keys/">Open public private keys</a>
-        <a class="action-link secondary" href="./linear-regression/">Open linear regression</a>
-        <a class="action-link ghost" href="./logistic-regression/">Open logistic regression</a>
-        <a class="action-link secondary" href="./precision-recall/">Open precision and recall</a>
-        <a class="action-link ghost" href="./roc-auc/">Open ROC and AUC</a>
-        <a class="action-link secondary" href="./bias-variance/">Open bias-variance</a>
-        <a class="action-link ghost" href="./train-test-validation/">Open train-test-validation</a>
-        <a class="action-link secondary" href="./double-descent/">Open double descent</a>
-        <a class="action-link ghost" href="./double-descent2/">Open double descent 2</a>
+    <section class="hero hero--atlas">
+      <p class="eyebrow">Interactive Explanation Atlas</p>
+      <h1>Understand, practice, experiment, and build.</h1>
+      <p class="lead">Find an interactive route for the question, skill, or idea in front of you.</p>
+      <div class="action-row action-row--compact">
+        <a class="action-link" href="#route-inventory">Browse all routes</a>
+        <button class="action-link secondary action-link--button" type="button" data-home-theme-toggle aria-pressed="false">Theme: Light</button>
       </div>
     </section>
 
-    <section class="page-grid" data-page-list>
-      <div class="empty-state">Loading page manifest...</div>
+    <section class="inventory-section" id="route-inventory">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Route inventory</p>
+          <h2>Choose a way in</h2>
+        </div>
+        <p class="meta-line" data-page-results aria-live="polite">Loading routes...</p>
+      </div>
+
+      <div class="inventory-toolbar" data-atlas-controls>
+        <label class="search-field">
+          <span class="search-field__label">Search</span>
+          <input type="search" placeholder="Title, topic, source, or route" autocomplete="off" data-filter-query>
+        </label>
+
+        <div class="control-row">
+          <div class="filter-group">
+            <span class="filter-group__label" id="intent-filter-label">I want to</span>
+            <div class="filter-pills" data-intent-filters role="group" aria-labelledby="intent-filter-label">
+              <button class="filter-pill is-active" type="button" data-atlas-intent="all" aria-pressed="true">All</button>
+              <button class="filter-pill" type="button" data-atlas-intent="explainer" aria-pressed="false">Understand</button>
+              <button class="filter-pill" type="button" data-atlas-intent="simulation" aria-pressed="false">Experiment</button>
+              <button class="filter-pill" type="button" data-atlas-intent="practice" aria-pressed="false">Practice</button>
+              <button class="filter-pill" type="button" data-atlas-intent="create" aria-pressed="false">Build</button>
+              <button class="filter-pill" type="button" data-atlas-intent="guided-path" aria-pressed="false">Follow a path</button>
+            </div>
+          </div>
+          <div class="filter-selects">
+            <label class="select-field">
+              <span class="filter-group__label">Topic</span>
+              <select data-topic-select>
+                <option value="all">All topics</option>
+              </select>
+            </label>
+            <label class="select-field">
+              <span class="filter-group__label">Sort</span>
+              <select data-sort-select>
+                <option value="featured">Featured</option>
+                <option value="new">Newest</option>
+                <option value="title">Title A–Z</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <details class="advanced-filters">
+          <summary>Advanced: source family</summary>
+          <div class="filter-pills" data-family-filters></div>
+        </details>
+
+        <button class="action-link secondary action-link--button" type="button" data-clear-filters hidden disabled>Clear filters</button>
+      </div>
+
+      <section class="guided-paths" aria-labelledby="guided-paths-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Guided paths</p>
+            <h2 id="guided-paths-title">Start with a sequence</h2>
+          </div>
+          <p class="meta-line">Three curated ways through related routes.</p>
+        </div>
+        <div class="page-grid page-grid--guided" data-guided-path-list></div>
+      </section>
+
+      <section class="page-grid page-grid--inventory" data-page-list aria-label="Complete route inventory">
+        <div class="empty-state">Loading route inventory...</div>
+      </section>
     </section>
   </main>
 
+  <script src="./shared/route-families.js"></script>
   <script src="./shared/site.js"></script>
   <script src="./shared/public-footer.js"></script>
 </body>

@@ -66,9 +66,10 @@
   {
     "moduleId": "interactive-exploded-resin-section",
     "originalBehavior": "The route should extend the teardown with an additive prototyping case study and make the exploded component stack interactive rather than relying on a static hero image.",
-    "localStatus": "A new \"From Pixels to Resin\" chapter precedes the closing resources and opens with a selectable Three.js exploded view built from local movement geometry. Users can scrub depth without rebuilding the component list, orbit and zoom, choose components, read subsystem roles, and follow contextual lesson links; an accessible SVG fallback remains available if WebGL initialization fails.",
+    "localStatus": "A new \"From Pixels to Resin\" chapter precedes the closing resources and opens with a 71-part technical-museum Three.js exploded view. Canonical movement meshes combine with generated teeth, pinions, staffs, screws, markers, springs, case, crystal, and caseback; 16 pivot-sensitive meshes retain archived local offsets, flips, and ZYX rotation composition. The movement runs continuously at selectable speeds while depth, orbit, selection, lesson links, DOM controls, and the SVG fallback remain available.",
     "sourceFiles": [
       "../../interactive-mechanical-watch/index.html",
+      "../../interactive-mechanical-watch/js/watch-parts.js",
       "../../interactive-mechanical-watch/js/exploded-view.js",
       "../../interactive-mechanical-watch/js/exploded-view-three.js",
       "../../interactive-mechanical-watch/vendor/three/",
@@ -80,14 +81,19 @@
     "notes": [
       "The section is anchored with a top-level h1 id, appears before Further Watching and Reading, and joins the generated chapter rail.",
       "The exploded view is route-local and does not mutate the shared WebGL movement engine.",
+      "A single watch-parts.js inventory keeps all 71 DOM, SVG, and Three.js component identities synchronized.",
       "Depth changes update geometry and state without replacing the component-list DOM or losing its scroll position.",
-      "Each selectable component has a DOM button, Three.js mesh or SVG fallback target, detail panel entry, and related-lesson metadata."
+      "Continuous animation ports only the source-derived mechanism relationships and pauses offscreen or at reduced-motion startup.",
+      "Each selectable component has a DOM button, Three.js mesh or SVG fallback target, detail panel entry, and related-lesson metadata.",
+      "The exploded-view opening supplies an ordered three-step first-run guide (depth, component selection, running-layer observation) so the section states an explicit first action.",
+      "The exploded-view detail region is aria-atomic because renderDetail replaces the whole subtree at once."
     ],
     "evidence": [
       "The #from-pixels-to-resin chapter contains a data-exploded-watch mount instead of a static hero figure.",
-      "The Three.js adapter maps 27 semantic components across power, train, escapement, balance, keyless works, automatic winding, display, structure, and friction subsystems.",
+      "The Three.js adapter maps 71 selectable components across casing, display, calendar, power, winding, keyless works, gear train, motion works, escapement, regulator, shock protection, friction, structure, hardware, and automatic winding.",
       "Contextual detail links route components such as the barrel, mainplate, and rotor to their relevant lessons.",
-      "Targeted smoke verifies incremental depth updates, keyboard and pointer selection, native touch orbit, lesson links, SVG fallback, and capped 320px component-list density."
+      "Targeted smoke verifies continuous playback, 1x/8x/60x speed changes, incremental depth updates, keyboard and pointer selection, native touch orbit, lesson links, SVG fallback, and capped 320px component-list density.",
+      "Targeted smoke asserts ol.exploded-watch__firstrun exposes three steps with the expected label and that [data-exploded-detail] carries aria-atomic=true."
     ]
   }
 ]

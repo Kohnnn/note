@@ -1,37 +1,70 @@
 import fs from "node:fs";
 import path from "node:path";
-import http from "node:http";
+import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
+import "../shared/route-families.js";
+import { createSmokeServer } from "./smoke/server.mjs";
 
-const rootDir = path.resolve(process.argv[2] || path.join(process.cwd(), "interactive-explanation"));
+const RouteFamilies = globalThis.RouteFamilies;
+
+const defaultRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+const cliArgs = process.argv.slice(2);
+
+function hasFlag(flag) {
+  return cliArgs.includes(flag);
+}
+
+function getArgValues(flag) {
+  const values = [];
+
+  cliArgs.forEach((arg, index) => {
+    if (arg.startsWith(`${flag}=`)) {
+      values.push(arg.slice(flag.length + 1));
+      return;
+    }
+
+    if (arg === flag) {
+      const next = cliArgs[index + 1];
+      if (next && !next.startsWith("--")) {
+        values.push(next);
+      }
+    }
+  });
+
+  return values
+    .flatMap((value) => value.split(","))
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+const explicitRootArg = cliArgs.find((arg, index) => {
+  if (arg.startsWith("--")) {
+    return false;
+  }
+
+  const previous = cliArgs[index - 1];
+  return !previous || !previous.startsWith("--");
+});
+
+const rootDir = path.resolve(explicitRootArg || defaultRoot);
 const port = Number(process.env.SMOKE_PORT || 4173);
 const host = "127.0.0.1";
 const mountPath = "/interactive-explanation/";
 const baseUrl = `http://${host}:${port}${mountPath}`;
+const baseOrigin = new URL(baseUrl).origin;
+const verbose = hasFlag("--verbose") || process.env.SMOKE_VERBOSE === "1";
+const rawConsoleLog = console.log.bind(console);
 
-const contentTypes = {
-  ".css": "text/css; charset=utf-8",
-  ".eot": "application/vnd.ms-fontobject",
-  ".html": "text/html; charset=utf-8",
-  ".ico": "image/x-icon",
-  ".jpeg": "image/jpeg",
-  ".jpg": "image/jpeg",
-  ".js": "application/javascript; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
-  ".m4a": "audio/mp4",
-  ".md": "text/markdown; charset=utf-8",
-  ".mp3": "audio/mpeg",
-  ".otf": "font/otf",
-  ".opus": "audio/ogg",
-  ".png": "image/png",
-  ".svg": "image/svg+xml",
-  ".ttf": "font/ttf",
-  ".txt": "text/plain; charset=utf-8",
-  ".wav": "audio/wav",
-  ".webm": "video/webm",
-  ".woff": "font/woff",
-  ".woff2": "font/woff2",
+console.log = (...args) => {
+  if (verbose) {
+    rawConsoleLog(...args);
+  }
 };
+
+function phaseLog(message) {
+  rawConsoleLog(message);
+}
 
 const rememberDownloadCardNames = [
   "intro_a",
@@ -50,57 +83,85 @@ const rememberDownloadCardNames = [
   "you_when",
 ];
 
+const abletonLessonBatchSlugs = [
+  "ableton-learning-music-play-with-beats",
+  "ableton-learning-music-play-with-notes-and-scales",
+  "ableton-learning-music-play-with-chords",
+  "ableton-learning-music-play-with-basslines",
+  "ableton-learning-music-play-with-melodies",
+  "ableton-learning-music-play-with-song-structures",
+];
+
+const abletonSynthLessonSlugs = [
+  "ableton-learning-synths-get-started",
+  "ableton-learning-synths-how-synths-make-sound",
+  "ableton-learning-synths-filter-resonance",
+  "ableton-learning-synths-modulating-amplitude-with-envelopes",
+  "ableton-learning-synths-matching-envelopes",
+  "ableton-learning-synths-recipes",
+];
+
+const routeManifestPath = path.join(rootDir, "routes.manifest.json");
+const routeManifest = fs.existsSync(routeManifestPath)
+  ? JSON.parse(fs.readFileSync(routeManifestPath, "utf8"))
+  : [];
+const routeGroupsBySlug = new Map(routeManifest.map((route) => [route.slug, inferRouteGroups(route)]));
+const selectedGroups = new Set(getArgValues("--group"));
+const selectedRoutes = new Set(getArgValues("--route"));
+const manifestSlugs = new Set(routeManifest.map((route) => route.slug));
+
+function inferRouteFamily(route) {
+  return RouteFamilies.classifySmokeFamily(route);
+}
+
+function inferRouteGroups(route) {
+  return RouteFamilies.classifySmokeGroups(route);
+}
+
+function shouldRunSlug(slug) {
+  if (!slug) {
+    return true;
+  }
+
+  if (selectedRoutes.size > 0 && !selectedRoutes.has(slug)) {
+    return false;
+  }
+
+  if (selectedGroups.size === 0) {
+    return true;
+  }
+
+  const groups = routeGroupsBySlug.get(slug) || new Set(["custom"]);
+  return selectedGroups.has("all") ||
+    selectedGroups.has(slug) ||
+    Array.from(groups).some((group) => selectedGroups.has(group));
+}
+
 function exists(relativePath) {
-  return fs.existsSync(path.join(rootDir, relativePath));
+  const fullPath = path.join(rootDir, relativePath);
+  if (!fs.existsSync(fullPath)) {
+    return false;
+  }
+
+  const slug = relativePath.split(/[\\/]/)[0];
+  return shouldRunSlug(slug);
 }
 
-function serveFile(req, res) {
-  const requestUrl = new URL(req.url, `http://${host}:${port}`);
-
-  if (requestUrl.pathname === "/") {
-    res.writeHead(302, { Location: mountPath });
-    res.end();
-    return;
-  }
-
-  if (!requestUrl.pathname.startsWith(mountPath)) {
-    res.writeHead(404);
-    res.end("Not found");
-    return;
-  }
-
-  let relativePath = decodeURIComponent(requestUrl.pathname.slice(mountPath.length));
-  if (!relativePath || relativePath.endsWith("/")) {
-    relativePath = `${relativePath}index.html`;
-  }
-
-  const fullPath = path.resolve(rootDir, relativePath);
-  if (!fullPath.startsWith(rootDir)) {
-    res.writeHead(403);
-    res.end("Forbidden");
-    return;
-  }
-
-  if (!fs.existsSync(fullPath) || fs.statSync(fullPath).isDirectory()) {
-    res.writeHead(404);
-    res.end("Not found");
-    return;
-  }
-
-  const ext = path.extname(fullPath).toLowerCase();
-  res.writeHead(200, {
-    "Cache-Control": "no-store",
-    "Content-Type": contentTypes[ext] || "application/octet-stream",
-  });
-  fs.createReadStream(fullPath).pipe(res);
+function validateSelections() {
+  const unknownRoutes = Array.from(selectedRoutes).filter((slug) => !manifestSlugs.has(slug));
+  assert(unknownRoutes.length === 0, `Unknown --route slug(s): ${unknownRoutes.join(", ")}`);
+  assert(routeManifest.length > 0, `Missing or empty routes.manifest.json at ${routeManifestPath}`);
+  assert(
+    routeManifest.some((route) => shouldRunSlug(route.slug)),
+    `Route/group filters selected no manifest routes: routes=${Array.from(selectedRoutes).join(", ") || "(none)"}; groups=${Array.from(selectedGroups).join(", ") || "(none)"}`,
+  );
 }
 
-function startServer() {
-  const server = http.createServer(serveFile);
-  return new Promise((resolve) => {
-    server.listen(port, host, () => resolve(server));
-  });
+function selectedManifestRoutes() {
+  return routeManifest.filter((route) => shouldRunSlug(route.slug));
 }
+
+const { start: startServer } = createSmokeServer({ rootDir, host, port, mountPath });
 
 function assert(condition, message) {
   if (!condition) {
@@ -108,22 +169,497 @@ function assert(condition, message) {
   }
 }
 
+async function assertElementContract(page, selector, contract, label) {
+  const elements = page.locator(selector);
+  assert(await elements.count() === 1, `${label} expected one ${selector}`);
+  const matches = await elements.evaluate((element, expected) => {
+    const text = (element.textContent || "").replace(/\s+/g, " ").trim();
+    return (!expected.tagName || element.tagName === expected.tagName) &&
+      Object.entries(expected.attributes || {}).every(([name, value]) => element.getAttribute(name) === value) &&
+      (expected.textFragments || []).every((fragment) => text.includes(fragment));
+  }, contract);
+  assert(matches, `${label} content contract failed`);
+}
+
+async function assertLinkSequence(page, selector, expected, label) {
+  const actual = await page.locator(selector).evaluateAll((links) => links.map((link) => ({
+    text: (link.textContent || "").replace(/\s+/g, " ").trim(),
+    href: link.getAttribute("href"),
+    onclick: link.getAttribute("onclick"),
+  })));
+  assert(JSON.stringify(actual) === JSON.stringify(expected), `${label} link contract failed`);
+
+  const dead = await page.locator(selector).evaluateAll((links) => links.reduce((problems, link) => {
+    const href = link.getAttribute("href") || "";
+    if (href.startsWith("#") && href.length > 1 && !document.getElementById(href.slice(1))) {
+      problems.push(`missing fragment target ${href}`);
+    }
+    const onclick = link.getAttribute("onclick");
+    if (onclick) {
+      const handler = onclick.match(/^\s*([A-Za-z_$][\w$]*)\s*\(/);
+      if (!handler) {
+        problems.push(`unparsable onclick "${onclick}"`);
+      } else if (typeof window[handler[1]] !== "function") {
+        problems.push(`onclick handler ${handler[1]} is not a function`);
+      }
+    }
+    return problems;
+  }, []));
+  assert(dead.length === 0, `${label} link targets unresolved: ${dead.join("; ")}`);
+}
+
 async function assertRoute(page, relativePath, selector) {
   const response = await page.goto(new URL(relativePath, baseUrl).href, {
     waitUntil: "domcontentloaded",
   });
   assert(response && response.ok(), `Route failed: ${relativePath}`);
-  if (selector) {
-    await page.waitForSelector(selector, { timeout: 15000 });
+  try {
+    if (selector === "#reference-footer") {
+      await page.waitForFunction(() => Boolean(document.querySelector("#reference-footer")), null, { timeout: 15000 });
+    } else if (selector) {
+      await page.waitForSelector(selector, { timeout: 15000 });
+    }
+  } catch (error) {
+    throw new Error(`Selector ${selector} did not mount on ${relativePath}: ${error.message}`);
   }
+  await assertReferenceFooterFocusContract(page, relativePath);
   console.log(`OK route ${relativePath}`);
 }
 
-function createRuntimeMonitor(page) {
+async function clickWithoutNavigation(page, selector) {
+  await page.locator(selector).evaluate((element) => {
+    element.addEventListener("click", (event) => event.preventDefault(), { once: true });
+    element.click();
+  });
+}
+
+async function assertLearningPathControls(context, relativePath, slug, stepCount, selectedStep) {
+  const key = `ie-learning-progress:v1:${slug}`;
+  const routeUrl = new URL(relativePath, baseUrl).href;
+  const page = await context.newPage();
+  await assertRoute(page, relativePath, "#reference-footer");
+  await page.evaluate((storageKey) => window.localStorage.removeItem(storageKey), key);
+  await page.reload({ waitUntil: "domcontentloaded" });
+
+  const initial = await page.evaluate(() => ({
+    startHidden: document.querySelector("[data-learning-start]")?.hidden,
+    resumeHidden: document.querySelector("[data-learning-resume]")?.hidden,
+  }));
+  assert(initial.startHidden === false, `${slug} hid Start without saved progress`);
+  assert(initial.resumeHidden === true, `${slug} exposed Resume without saved progress`);
+
+  await clickWithoutNavigation(page, "[data-learning-start]");
+  const started = await page.evaluate((storageKey) => JSON.parse(window.localStorage.getItem(storageKey)), key);
+  assert(started.step === 1 && Number.isFinite(started.updatedAt), `${slug} did not save explicit Start progress`);
+
+  await clickWithoutNavigation(page, `[data-learning-step="${selectedStep}"]`);
+  const selected = await page.evaluate((storageKey) => JSON.parse(window.localStorage.getItem(storageKey)), key);
+  assert(selected.step === selectedStep, `${slug} did not save numbered-step progress`);
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+  const restored = await page.evaluate((storageKey) => ({
+    startHidden: document.querySelector("[data-learning-start]")?.hidden,
+    resumeHidden: document.querySelector("[data-learning-resume]")?.hidden,
+    resumeHref: document.querySelector("[data-learning-resume]")?.href,
+    stepHref: document.querySelector(`[data-learning-step="${JSON.parse(window.localStorage.getItem(storageKey))?.step}"]`)?.href,
+    stored: JSON.parse(window.localStorage.getItem(storageKey)),
+  }), key);
+  assert(restored.startHidden === true, `${slug} did not hide Start after restoring progress`);
+  assert(restored.resumeHidden === false, `${slug} did not expose Resume after restoring progress`);
+  assert(restored.resumeHref === restored.stepHref, `${slug} Resume did not target the stored step`);
+  assert(restored.stored.updatedAt === selected.updatedAt, `${slug} updated progress without an explicit action`);
+
+  await page.waitForTimeout(10);
+  await clickWithoutNavigation(page, "[data-learning-resume]");
+  const resumed = await page.evaluate((storageKey) => JSON.parse(window.localStorage.getItem(storageKey)), key);
+  assert(resumed.step === selectedStep && resumed.updatedAt > selected.updatedAt, `${slug} did not refresh progress on explicit Resume`);
+
+  await page.evaluate(({ storageKey, count }) => {
+    window.localStorage.setItem(storageKey, JSON.stringify({ step: count, updatedAt: Date.now() - 31 * 24 * 60 * 60 * 1000 }));
+  }, { storageKey: key, count: stepCount });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  const expired = await page.evaluate((storageKey) => ({
+    stored: window.localStorage.getItem(storageKey),
+    startHidden: document.querySelector("[data-learning-start]")?.hidden,
+    resumeHidden: document.querySelector("[data-learning-resume]")?.hidden,
+  }), key);
+  assert(expired.stored === null, `${slug} retained progress older than 30 days`);
+  assert(expired.startHidden === false && expired.resumeHidden === true, `${slug} restored expired progress`);
+  await page.close();
+
+  const sharePage = await context.newPage();
+  await sharePage.addInitScript(() => {
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      value: async (payload) => {
+        window.__learningSharePayload = payload;
+      },
+    });
+  });
+  await assertRoute(sharePage, relativePath, "#reference-footer");
+  await sharePage.locator("[data-share-route]").click();
+  await sharePage.waitForFunction(() => document.querySelector("[data-share-status]")?.textContent === "Path shared.");
+  const sharePayload = await sharePage.evaluate(() => window.__learningSharePayload);
+  assert(sharePayload?.url === routeUrl, `${slug} native share used an unexpected route URL`);
+  assert(sharePayload?.title === await sharePage.title(), `${slug} native share omitted the route title`);
+  await sharePage.close();
+
+  const clipboardPage = await context.newPage();
+  await clipboardPage.addInitScript(() => {
+    Object.defineProperty(navigator, "share", { configurable: true, value: undefined });
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (value) => {
+          window.__learningCopiedUrl = value;
+        },
+      },
+    });
+  });
+  await assertRoute(clipboardPage, relativePath, "#reference-footer");
+  await clipboardPage.locator("[data-share-route]").click();
+  await clipboardPage.waitForFunction(() => document.querySelector("[data-share-status]")?.textContent === "Path link copied.");
+  const copiedUrl = await clipboardPage.evaluate(() => window.__learningCopiedUrl);
+  assert(copiedUrl === routeUrl, `${slug} clipboard fallback used an unexpected route URL`);
+  await clipboardPage.close();
+}
+
+async function assertReferenceFooterFocusContract(page, relativePath) {
+  const state = await page.evaluate(() => {
+    const footer = document.querySelector("#reference-footer");
+    if (!footer) {
+      return { present: false };
+    }
+    const focusable = Array.from(
+      footer.querySelectorAll("a[href], button, input, select, textarea, [tabindex]"),
+    );
+    return {
+      present: true,
+      hidden: footer.dataset.visibility === "hidden",
+      inert: footer.inert === true || footer.hasAttribute("inert"),
+      ariaHidden: footer.getAttribute("aria-hidden") === "true",
+      focusableCount: focusable.length,
+      focusableInTabOrder: focusable.filter((element) => element.tabIndex >= 0).length,
+    };
+  });
+
+  if (!state.present) {
+    return;
+  }
+
+  if (state.hidden) {
+    assert(
+      state.inert && state.ariaHidden,
+      `Hidden reference footer on ${relativePath} was not removed from the accessibility tree (inert=${state.inert}, aria-hidden=${state.ariaHidden})`,
+    );
+    assert(
+      state.focusableInTabOrder === 0,
+      `Hidden reference footer on ${relativePath} left ${state.focusableInTabOrder} focusable element(s) in the tab order`,
+    );
+  } else {
+    assert(
+      !state.inert && !state.ariaHidden,
+      `Visible reference footer on ${relativePath} was incorrectly hidden from the accessibility tree`,
+    );
+  }
+}
+
+async function assertEngineeringSandboxShell(page, label, options = {}) {
+  const {
+    minimumChapters = 4,
+    navMode = "generated",
+    nativeSelector = "#toc a[href^='#'], nav a[href^='#']",
+    expectedFamily = null,
+    expectedRoute = null,
+    expectedVariant = "essay",
+    minimumNativeLinks = minimumChapters,
+    requireNativeAnchors = true,
+    allowNativeLinksInNoNav = false,
+  } = options;
+
+  await page.waitForFunction(() => {
+    return document.body?.dataset.storyShell === "engineering-sandbox" &&
+      document.querySelector(".story-hero") &&
+      document.querySelector(".story-hero [data-story-callout='play']");
+  }, null, { timeout: 15000 });
+
+  const shellState = await page.evaluate((selector) => {
+    const railLinks = Array.from(document.querySelectorAll(".story-rail__nav a"));
+    const mobileLinks = Array.from(document.querySelectorAll(".story-mobile-bar__nav a"));
+    const nativeLinks = Array.from(document.querySelectorAll(selector));
+
+    return {
+      storyShell: document.body?.dataset.storyShell || "",
+      storyVariant: document.body?.dataset.storyVariant || "essay",
+      storyFamily: document.body?.dataset.storyFamily || "",
+      storyNav: document.body?.dataset.storyNav || "generated",
+      storyRoute: document.body?.dataset.storyRoute || "",
+      heroTitle: document.querySelector(".story-hero__title")?.textContent?.trim() || "",
+      playButtonHref: document.querySelector(".story-hero [data-story-callout='play'] .story-button")?.getAttribute("href") || "",
+      chapterCount: document.querySelectorAll("[data-story-chapter]").length,
+      railCount: railLinks.length,
+      mobileCount: mobileLinks.length,
+      nativeCount: nativeLinks.length,
+      progressBarCount: document.querySelectorAll(".story-progress__bar").length,
+      progressValueCount: Array.from(document.querySelectorAll(".story-progress__value")).filter((node) => {
+        return (node.textContent || "").trim().length > 0;
+      }).length,
+      progressPositionCount: Array.from(document.querySelectorAll(".story-rail__position, .story-mobile-bar__position, .story-mobile-sheet__position")).filter((node) => {
+        return (node.textContent || "").trim().length > 0;
+      }).length,
+      allAnchorLinks: railLinks.concat(mobileLinks).every((link) => {
+        const href = link.getAttribute("href") || "";
+        return href.startsWith("#");
+      }),
+      nativeAnchorLinks: nativeLinks.every((link) => {
+        const href = link.getAttribute("href") || "";
+        return href.startsWith("#");
+      }),
+    };
+  }, nativeSelector);
+
+  assert(shellState.storyShell === "engineering-sandbox", `${label} did not opt into the engineering sandbox shell`);
+  assert(shellState.storyVariant === expectedVariant, `${label} did not expose the expected story variant`);
+  if (expectedFamily) {
+    assert(shellState.storyFamily === expectedFamily, `${label} did not expose the expected story family`);
+  } else {
+    assert(shellState.storyFamily.length > 0, `${label} did not expose a story family`);
+  }
+  assert(shellState.storyNav === navMode, `${label} did not expose the expected story nav mode`);
+  if (expectedRoute) {
+    assert(shellState.storyRoute === expectedRoute, `${label} did not expose the expected story route`);
+  }
+  assert(shellState.heroTitle.length > 0, `${label} did not render the engineering sandbox hero`);
+  assert(shellState.playButtonHref.startsWith("#"), `${label} did not expose a local play-first action`);
+  if (minimumChapters > 0) {
+    assert(shellState.chapterCount >= minimumChapters, `${label} exposed only ${shellState.chapterCount} chapter markers`);
+  }
+  if (navMode === "generated") {
+    assert(
+      shellState.railCount >= minimumChapters || shellState.mobileCount >= minimumChapters,
+      `${label} did not render generated chapter navigation`,
+    );
+    assert(shellState.progressBarCount > 0, `${label} did not render the story progress bar`);
+    assert(shellState.progressValueCount > 0, `${label} did not render the story progress label`);
+    assert(shellState.progressPositionCount > 0, `${label} did not render the chapter position label`);
+    assert(shellState.allAnchorLinks, `${label} exposed a non-local generated chapter link`);
+    return;
+  }
+
+  assert(shellState.railCount === 0, `${label} unexpectedly rendered the generated desktop rail`);
+  assert(shellState.mobileCount === 0, `${label} unexpectedly rendered the generated mobile bar`);
+
+  if (navMode === "native") {
+    assert(shellState.nativeCount >= minimumNativeLinks, `${label} exposed only ${shellState.nativeCount} native navigation links`);
+    if (requireNativeAnchors) {
+      assert(shellState.nativeAnchorLinks, `${label} exposed a non-local native chapter link`);
+    }
+    return;
+  }
+
+  if (!allowNativeLinksInNoNav) {
+    assert(shellState.nativeCount === 0, `${label} unexpectedly exposed native navigation links in no-nav mode`);
+  }
+}
+
+async function assertEngineeringSandboxLayout(context, relativePath, label, options = {}) {
+  const {
+    navMode = "generated",
+    readySelector = ".story-hero",
+    controlSelector = null,
+    containerSelector = null,
+  } = options;
+
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 1440, height: 1600 });
+  await assertRoute(page, relativePath, "#reference-footer");
+  await page.waitForSelector(readySelector, { timeout: 30000 });
+
+  if (navMode === "generated") {
+    await page.waitForSelector(".story-rail__nav a", { timeout: 15000 });
+    const layoutState = await page.evaluate(() => {
+      const hero = document.querySelector(".story-hero");
+      const firstChapter = document.querySelector("[data-story-chapter]");
+      const rail = document.querySelector(".story-rail");
+      const progress = document.querySelector(".story-rail .story-progress");
+      const heroRect = hero?.getBoundingClientRect();
+      const chapterRect = firstChapter?.getBoundingClientRect();
+      const railRect = rail?.getBoundingClientRect();
+      return {
+        heroAboveFirstChapter: Boolean(heroRect && chapterRect && heroRect.top <= chapterRect.top),
+        railVisible: Boolean(railRect && railRect.width > 0),
+        railProgressVisible: Boolean(progress && progress.getBoundingClientRect().width > 0),
+        railRight: railRect?.right || 0,
+        chapterLeft: chapterRect?.left || 0,
+        progressValue: document.querySelector(".story-rail .story-progress__value")?.textContent?.trim() || "",
+      };
+    });
+    assert(layoutState.heroAboveFirstChapter, `${label} did not render the hero before the first chapter`);
+    assert(layoutState.railVisible, `${label} did not expose the desktop rail at 1440px`);
+    assert(layoutState.railProgressVisible, `${label} did not expose the desktop story progress bar`);
+    assert(layoutState.progressValue.length > 0, `${label} did not expose the desktop story progress label`);
+    assert(
+      layoutState.railRight <= layoutState.chapterLeft - 12,
+      `${label} desktop rail overlapped the story column at 1440px`,
+    );
+    const initialDesktopProgress = Number.parseInt(layoutState.progressValue, 10) || 0;
+    await page.evaluate(() => {
+      window.scrollTo(0, Math.max(document.documentElement.scrollHeight - window.innerHeight - 200, 0));
+    });
+    await page.waitForFunction((previousProgress) => {
+      const currentValue = document.querySelector(".story-rail .story-progress__value")?.textContent?.trim() || "";
+      return (Number.parseInt(currentValue, 10) || 0) > previousProgress;
+    }, initialDesktopProgress, { timeout: 5000 });
+    const desktopScrolledState = await page.evaluate(() => {
+      return {
+        progressValue: document.querySelector(".story-rail .story-progress__value")?.textContent?.trim() || "",
+      };
+    });
+    assert((Number.parseInt(desktopScrolledState.progressValue, 10) || 0) > initialDesktopProgress, `${label} desktop story progress did not respond to scrolling`);
+
+    const mobilePage = await context.newPage();
+    await mobilePage.setViewportSize({ width: 390, height: 844 });
+    await assertRoute(mobilePage, relativePath, "#reference-footer");
+    await mobilePage.waitForSelector(readySelector, { timeout: 30000 });
+    await mobilePage.waitForSelector(".story-mobile-bar__nav a", { timeout: 15000 });
+
+    const mobileState = await mobilePage.evaluate(() => {
+      const mobileBar = document.querySelector(".story-mobile-bar");
+      const activeLink = document.querySelector(".story-mobile-bar__link.is-active");
+      const toggle = document.querySelector(".story-mobile-bar__toggle");
+      const article = document.querySelector(".article");
+      const barRect = mobileBar?.getBoundingClientRect();
+      const linkRect = activeLink?.getBoundingClientRect();
+      const articleRect = article?.getBoundingClientRect();
+      return {
+        mobileBarVisible: Boolean(barRect && barRect.height > 0),
+        placementValid: document.body.dataset.storyMobileNavPlacement !== "after-hero" || Boolean(
+          barRect &&
+          articleRect &&
+          barRect.top < articleRect.top &&
+          (mobileBar.compareDocumentPosition(article) & Node.DOCUMENT_POSITION_FOLLOWING)
+        ),
+        currentLabel: document.querySelector(".story-mobile-bar__current")?.textContent?.trim() || "",
+        progressValue: document.querySelector(".story-mobile-bar .story-progress__value")?.textContent?.trim() || "",
+        progressVisible: Boolean(document.querySelector(".story-mobile-bar .story-progress")?.getBoundingClientRect().width > 0),
+        positionLabel: document.querySelector(".story-mobile-bar__position")?.textContent?.trim() || "",
+        toggleVisible: Boolean(toggle && toggle.getBoundingClientRect().width > 0),
+        activeLinkVisible: Boolean(
+          barRect &&
+          linkRect &&
+          linkRect.left >= barRect.left - 1 &&
+          linkRect.right <= barRect.right + 1
+        ),
+      };
+    });
+    assert(mobileState.mobileBarVisible, `${label} did not expose the mobile chapter bar at 390px`);
+    assert(mobileState.placementValid, `${label} placed the route-specific mobile chapter bar after the article`);
+    assert(mobileState.currentLabel.length > 0, `${label} did not expose the active mobile chapter label`);
+    assert(mobileState.progressVisible, `${label} did not expose the mobile story progress bar`);
+    assert(mobileState.progressValue.length > 0, `${label} did not expose the mobile story progress label`);
+    assert(mobileState.positionLabel.length > 0, `${label} did not expose the mobile chapter position label`);
+    assert(mobileState.toggleVisible, `${label} did not expose the mobile chapter tray toggle`);
+    assert(mobileState.activeLinkVisible, `${label} did not keep the active mobile chapter chip in view`);
+
+    await mobilePage.locator(".story-mobile-bar__toggle").click();
+    await mobilePage.waitForFunction(() => document.querySelector(".story-mobile-sheet")?.open, null, { timeout: 5000 });
+    const sheetState = await mobilePage.evaluate(() => {
+      const sheet = document.querySelector(".story-mobile-sheet");
+      const panel = document.querySelector(".story-mobile-sheet__panel");
+      return {
+        isDialog: sheet?.tagName === "DIALOG",
+        sheetVisible: Boolean(sheet?.open && panel && panel.getBoundingClientRect().height > 0),
+        sheetLinkCount: document.querySelectorAll(".story-mobile-sheet__nav a").length,
+        sheetCurrent: document.querySelector(".story-mobile-sheet__current")?.textContent?.trim() || "",
+        sheetProgress: document.querySelector(".story-mobile-sheet .story-progress__value")?.textContent?.trim() || "",
+        sheetPosition: document.querySelector(".story-mobile-sheet__position")?.textContent?.trim() || "",
+      };
+    });
+    assert(sheetState.isDialog, `${label} mobile chapter tray is not a native dialog`);
+    assert(sheetState.sheetVisible, `${label} did not open the mobile chapter tray`);
+    assert(sheetState.sheetLinkCount > 0, `${label} did not populate the mobile chapter tray`);
+    assert(sheetState.sheetCurrent.length > 0, `${label} did not mirror the current chapter into the mobile tray`);
+    assert(sheetState.sheetProgress.length > 0, `${label} did not mirror story progress into the mobile tray`);
+    assert(sheetState.sheetPosition.length > 0, `${label} did not mirror chapter position into the mobile tray`);
+
+    await mobilePage.keyboard.press("Escape");
+    await mobilePage.waitForFunction(() => !document.querySelector(".story-mobile-sheet")?.open, null, { timeout: 5000 });
+    const focusRestored = await mobilePage.evaluate(() => document.activeElement?.classList.contains("story-mobile-bar__toggle"));
+    assert(focusRestored, `${label} did not restore focus after closing the mobile chapter tray`);
+
+    await mobilePage.locator(".story-mobile-bar__toggle").click();
+    await mobilePage.waitForFunction(() => document.querySelector(".story-mobile-sheet")?.open, null, { timeout: 5000 });
+    const chapterLink = mobilePage.locator(".story-mobile-sheet__link").nth(1);
+    const chapterTarget = await chapterLink.getAttribute("data-story-target");
+    assert(chapterTarget, `${label} mobile chapter link did not expose a target`);
+    await chapterLink.click();
+    await mobilePage.waitForFunction((targetId) => (
+      !document.querySelector(".story-mobile-sheet")?.open &&
+      window.location.hash === `#${targetId}`
+    ), chapterTarget, { timeout: 15000 });
+    if (await mobilePage.evaluate(() => document.body.dataset.storyMobileNavPlacement === "after-hero")) {
+      await mobilePage.waitForFunction((targetId) => document.activeElement === document.getElementById(targetId), chapterTarget, { timeout: 15000 });
+      await mobilePage.waitForFunction((targetId) => {
+        const rect = document.getElementById(targetId)?.getBoundingClientRect();
+        return Boolean(rect && rect.bottom > 0 && rect.top < window.innerHeight);
+      }, chapterTarget, { timeout: 15000 });
+    }
+
+    await mobilePage.close();
+  } else {
+    const layoutState = await page.evaluate(() => {
+      const hero = document.querySelector(".story-hero");
+      const firstChapter = document.querySelector("[data-story-chapter]");
+      const heroRect = hero?.getBoundingClientRect();
+      const chapterRect = firstChapter?.getBoundingClientRect();
+      return {
+        heroAboveFirstChapter: Boolean(heroRect && chapterRect && heroRect.top <= chapterRect.top),
+        generatedRailCount: document.querySelectorAll(".story-rail, .story-mobile-bar").length,
+      };
+    });
+    assert(layoutState.generatedRailCount === 0, `${label} rendered generated navigation in native mode`);
+  }
+
+  if (navMode !== "generated" && controlSelector) {
+    const controlState = await page.evaluate(({ controlSelector, containerSelector }) => {
+      const hero = document.querySelector(".story-hero");
+      const control = document.querySelector(controlSelector);
+      const footer = document.querySelector("#reference-footer");
+      const container = containerSelector ? document.querySelector(containerSelector) : null;
+      const heroRect = hero?.getBoundingClientRect();
+      const controlRect = control?.getBoundingClientRect();
+      const footerRect = footer?.getBoundingClientRect();
+      const containerRect = container?.getBoundingClientRect();
+
+      return {
+        heroBeforeControl: Boolean(heroRect && controlRect && heroRect.top <= controlRect.top),
+        footerWithinContainer: !footerRect || !containerRect ||
+          (footerRect.left >= containerRect.left - 2 && footerRect.right <= containerRect.right + 2),
+      };
+    }, { controlSelector, containerSelector });
+
+    assert(controlState.heroBeforeControl, `${label} did not render the hero before the first primary control cluster`);
+    assert(controlState.footerWithinContainer, `${label} footer exceeded the route content container`);
+  }
+
+  await assertViewportUsable(page, label);
+  await page.close();
+}
+
+function createRuntimeMonitor(page, options = {}) {
+  const { rejectOffOriginRequests = false } = options;
   const issues = [];
 
   page.on("pageerror", (error) => {
     issues.push(`pageerror: ${error.message}`);
+  });
+
+  page.on("request", (request) => {
+    const requestUrl = request.url();
+    const isLocalBlob = requestUrl.startsWith(`blob:${baseOrigin}/`);
+    if (rejectOffOriginRequests && !requestUrl.startsWith(baseUrl) && !isLocalBlob) {
+      issues.push(`off-origin request: ${requestUrl}`);
+    }
   });
 
   page.on("requestfailed", (request) => {
@@ -149,6 +685,50 @@ function createRuntimeMonitor(page) {
   return function assertRuntimeClean(label) {
     assert(issues.length === 0, `${label} had runtime issues:\n${issues.join("\n")}`);
   };
+}
+
+async function assertManifestRouteBaseline(context, route) {
+  const relativePath = `${route.slug}/`;
+  const viewports = [
+    { name: "desktop", width: 1400, height: 1000 },
+    { name: "mobile", width: 390, height: 844 },
+  ];
+
+  for (const viewport of viewports) {
+    const page = await context.newPage();
+    const assertRuntimeClean = createRuntimeMonitor(page, { rejectOffOriginRequests: true });
+    try {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await assertRoute(page, relativePath, "#reference-footer");
+      await page.waitForFunction(() => {
+        const main = document.querySelector("main[data-runtime-main]");
+        return !main || main.getAttribute("aria-busy") !== "true";
+      }, null, { timeout: 30000 });
+      const mainState = await page.evaluate(() => {
+        const mains = Array.from(document.querySelectorAll("main"));
+        const main = mains[0];
+        const style = main ? getComputedStyle(main) : null;
+        return {
+          count: mains.length,
+          visible: Boolean(main && !main.hidden && main.getAttribute("aria-hidden") !== "true" && !main.hasAttribute("inert") && style?.display !== "none" && style?.visibility !== "hidden"),
+          meaningful: Boolean(main && (
+            (main.textContent || "").trim() ||
+            main.getAttribute("aria-label") ||
+            main.getAttribute("aria-labelledby") ||
+            main.querySelector("iframe[title], canvas, svg, [role='application']")
+          )),
+        };
+      });
+      assert(mainState.count === 1, `${route.slug} ${viewport.name} baseline expected one main landmark, found ${mainState.count}`);
+      assert(mainState.visible, `${route.slug} ${viewport.name} baseline main landmark was hidden`);
+      assert(mainState.meaningful, `${route.slug} ${viewport.name} baseline main landmark was empty and unnamed`);
+      await assertViewportUsable(page, `${route.slug} ${viewport.name} baseline`);
+      assertRuntimeClean(`${route.slug} ${viewport.name} baseline`);
+      console.log(`OK ${route.slug} ${viewport.name} baseline`);
+    } finally {
+      await page.close();
+    }
+  }
 }
 
 async function setRangeValue(page, selector, value) {
@@ -186,6 +766,54 @@ async function assertRouteViewportUsable(context, relativePath, selector, readyS
   await page.close();
 }
 
+async function assertPrimaryControlVisible(page, label, selector = "[data-primary-control]") {
+  await page.locator(selector).scrollIntoViewIfNeeded();
+  await page.waitForTimeout(150);
+  const state = await page.evaluate((controlSelector) => {
+    const control = document.querySelector(controlSelector);
+    if (!control) {
+      return null;
+    }
+
+    const rect = control.getBoundingClientRect();
+    const visibleTop = Math.max(rect.top, 0);
+    const visibleBottom = Math.min(rect.bottom, window.innerHeight);
+    const visibleLeft = Math.max(rect.left, 0);
+    const visibleRight = Math.min(rect.right, window.innerWidth);
+
+    return {
+      width: rect.width,
+      height: rect.height,
+      top: rect.top,
+      left: rect.left,
+      right: rect.right,
+      bottom: rect.bottom,
+      visibleHeight: Math.max(0, visibleBottom - visibleTop),
+      visibleWidth: Math.max(0, visibleRight - visibleLeft),
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+    };
+  }, selector);
+
+  assert(state, `${label} did not expose the primary control surface`);
+  assert(state.width > 0 && state.height > 0, `${label} primary control surface collapsed`);
+  assert(state.bottom >= 80, `${label} primary control surface was clipped above the viewport`);
+  assert(state.left >= -4, `${label} primary control surface was clipped on the left edge`);
+  assert(state.right <= state.viewportWidth + 4, `${label} primary control surface overflowed the viewport width`);
+  assert(
+    state.top <= state.viewportHeight - 80,
+    `${label} primary control surface landed below the viewport fold`,
+  );
+  assert(
+    state.visibleHeight >= Math.min(160, Math.max(96, state.height * 0.2)),
+    `${label} primary control surface did not keep enough visible area after scroll`,
+  );
+  assert(
+    state.visibleWidth >= Math.min(240, Math.max(160, state.width * 0.6)),
+    `${label} primary control surface did not keep enough visible width after scroll`,
+  );
+}
+
 async function assertLocalScriptSources(page, expectedSources, label) {
   const scriptSources = await page.evaluate(() => {
     return Array.from(document.querySelectorAll("script[src]"))
@@ -199,6 +827,216 @@ async function assertLocalScriptSources(page, expectedSources, label) {
       `${label} did not load ${expectedSource} from local assets`,
     );
   }
+}
+
+async function assertNoRemotePlayableMediaRequests(page, label) {
+  const baseOrigin = new URL(baseUrl).origin;
+  const remoteMedia = await page.evaluate((origin) => {
+    const mediaExtension = /\.(mp3|ogg|wav|m4a|opus|mp4|webm)(?:[?#].*)?$/i;
+    return performance
+      .getEntriesByType("resource")
+      .map((entry) => ({ name: entry.name, initiatorType: entry.initiatorType || "" }))
+      .filter((entry) => {
+        try {
+          const url = new URL(entry.name, window.location.href);
+          return url.origin !== origin &&
+            (mediaExtension.test(url.pathname) || ["audio", "video"].includes(entry.initiatorType));
+        } catch {
+          return false;
+        }
+      });
+  }, baseOrigin);
+
+  assert(
+    remoteMedia.length === 0,
+    `${label} loaded remote playable media:\n${remoteMedia.map((entry) => entry.name).join("\n")}`,
+  );
+}
+
+function createRemoteRequestMonitor(page) {
+  const requests = [];
+
+  page.on("request", (request) => {
+    requests.push(request.url());
+  });
+
+  return {
+    snapshot() {
+      return requests.slice();
+    },
+    diff(fromIndex = 0) {
+      return requests.slice(fromIndex);
+    },
+  };
+}
+
+function assertOnlyAllowedRemoteRequests(requestUrls, allowedHosts, label) {
+  const baseOrigin = new URL(baseUrl).origin;
+  const disallowed = requestUrls.filter((requestUrl) => {
+    try {
+      const url = new URL(requestUrl);
+      if (url.origin === baseOrigin) {
+        return false;
+      }
+
+      return !allowedHosts.some((host) => url.hostname === host || url.hostname.endsWith(`.${host}`));
+    } catch {
+      return false;
+    }
+  });
+
+  assert(
+    disallowed.length === 0,
+    `${label} made disallowed remote requests:\n${disallowed.join("\n")}`,
+  );
+}
+
+function countFilesRecursive(relativePath) {
+  const fullPath = path.join(rootDir, relativePath);
+  let count = 0;
+
+  for (const entry of fs.readdirSync(fullPath, { withFileTypes: true })) {
+    const nextRelativePath = path.join(relativePath, entry.name);
+    if (entry.isDirectory()) {
+      count += countFilesRecursive(nextRelativePath);
+    } else if (entry.isFile()) {
+      count += 1;
+    }
+  }
+
+  return count;
+}
+
+async function setRangeControlByLabel(page, scopeSelector, labelText, value) {
+  await page.locator(scopeSelector).evaluate((scope, payload) => {
+    const wrapper = Array.from(scope.querySelectorAll("div")).find((candidate) => {
+      return candidate.querySelector("label")?.textContent?.trim() === payload.labelText;
+    });
+    const input = wrapper?.querySelector("input[type='range']");
+    if (!input) {
+      throw new Error(`Missing range control for ${payload.labelText}`);
+    }
+    input.value = String(payload.value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }, { labelText, value });
+}
+
+async function setSelectControlByLabel(page, scopeSelector, labelText, value) {
+  await page.locator(scopeSelector).evaluate((scope, payload) => {
+    const wrapper = Array.from(scope.querySelectorAll("div")).find((candidate) => {
+      return candidate.querySelector("label")?.textContent?.trim() === payload.labelText;
+    });
+    const select = wrapper?.querySelector("select");
+    if (!select) {
+      throw new Error(`Missing select control for ${payload.labelText}`);
+    }
+    select.value = payload.value;
+    select.dispatchEvent(new Event("input", { bubbles: true }));
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  }, { labelText, value });
+}
+
+async function assertLongformResponsiveShell(context, page, relativePath, readySelector, label, options = {}) {
+  const {
+    expectedRoute = null,
+    minimumChapters = 4,
+    playHref = null,
+  } = options;
+
+  if (expectedRoute) {
+    await assertEngineeringSandboxShell(page, label, {
+      minimumChapters,
+      navMode: "generated",
+      expectedFamily: "engineering-longform",
+      expectedRoute,
+    });
+
+    if (playHref) {
+      const actualPlayHref = await page.locator(".story-hero [data-story-callout='play'] .story-button").first().getAttribute("href");
+      assert(actualPlayHref === playHref, `${label} exposed unexpected play-first href ${actualPlayHref}`);
+    }
+
+    await assertEngineeringSandboxLayout(context, relativePath, label, {
+      navMode: "generated",
+      readySelector: ".story-hero",
+    });
+  }
+
+  await assertViewportUsable(page, label);
+  await assertRouteViewportUsable(
+    context,
+    relativePath,
+    "#reference-footer",
+    readySelector,
+    label,
+    390,
+    844,
+  );
+}
+
+async function dragKnob(page, knobSelector, deltaX, deltaY, label) {
+  const knob = page.locator(knobSelector).first();
+  await knob.scrollIntoViewIfNeeded();
+  const knobBox = await knob.boundingBox();
+  assert(knobBox, `${label} did not expose ${knobSelector}`);
+  await page.mouse.move(knobBox.x + knobBox.width / 2, knobBox.y + knobBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(
+    knobBox.x + knobBox.width / 2 + deltaX,
+    knobBox.y + knobBox.height / 2 + deltaY,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+}
+
+async function dragCanvasUntilChanged(page, canvasSelector, drags, label) {
+  const canvas = page.locator(canvasSelector);
+  await canvas.scrollIntoViewIfNeeded();
+  const box = await canvas.boundingBox();
+  assert(box, `${label} did not expose ${canvasSelector}`);
+
+  const idleFirst = await canvas.evaluate((element) => element.toDataURL());
+  await page.waitForTimeout(150);
+  const idleSecond = await canvas.evaluate((element) => element.toDataURL());
+  const selfAnimating = idleFirst !== idleSecond;
+
+  if (selfAnimating) {
+    await page.evaluate(() => {
+      window.__smokeDragAccepted = 0;
+      document.addEventListener("mousedown", (event) => {
+        if (event.defaultPrevented) {
+          window.__smokeDragAccepted += 1;
+        }
+      }, false);
+    });
+  }
+
+  for (const drag of drags) {
+    const before = selfAnimating ? null : await canvas.evaluate((element) => element.toDataURL());
+    await page.mouse.move(box.x + box.width * drag.from.x, box.y + box.height * drag.from.y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * drag.to.x, box.y + box.height * drag.to.y, { steps: 12 });
+    await page.mouse.up();
+    await page.waitForTimeout(150);
+    if (selfAnimating) {
+      const accepted = await page.evaluate(() => window.__smokeDragAccepted);
+      if (accepted > 0) {
+        return;
+      }
+      continue;
+    }
+    const after = await canvas.evaluate((element) => element.toDataURL());
+    if (after !== before) {
+      return;
+    }
+  }
+
+  throw new Error(
+    selfAnimating
+      ? `${label} never consumed a pointer grab on ${canvasSelector}`
+      : `${label} did not update after drag attempts`,
+  );
 }
 
 async function dragNativeTouch(page, selector, deltaX, deltaY, label) {
@@ -247,14 +1085,14 @@ async function dragNativeTouch(page, selector, deltaX, deltaY, label) {
 }
 
 async function clickChoice(page, text) {
-  const choice = page.locator("#game_choices > div").filter({ hasText: text }).first();
+  const choice = page.locator("#game_choices > button").filter({ hasText: text }).first();
   await choice.waitFor({ state: "visible", timeout: 20000 });
   await choice.click();
 }
 
 async function waitForIntroChoices(page) {
   await page.waitForFunction(() => {
-    const choices = Array.from(document.querySelectorAll("#game_choices > div"));
+    const choices = Array.from(document.querySelectorAll("#game_choices > button"));
     return choices.some((choice) => /PLAY|REPLAY|Chapter Select|content notes/i.test(choice.textContent || ""));
   }, null, { timeout: 20000 });
 }
@@ -263,6 +1101,10 @@ async function smokeRemember(context) {
   const page = await context.newPage();
 
   await assertRoute(page, "remember/", "iframe.splash");
+  await page.waitForFunction(() => document.querySelectorAll("iframe.simulation").length > 0, null, { timeout: 15000 });
+  const iframeNames = await page.locator("iframe").evaluateAll((iframes) => iframes.map((iframe) => iframe.title));
+  assert(iframeNames.every(Boolean), "Remember generated iframe lacked a title");
+  assert(new Set(iframeNames).size === iframeNames.length, "Remember generated iframe titles were not unique");
   const rememberDownloadLabels = await page.evaluate((cardNames) => {
     const labelIds = [
       "download_all",
@@ -449,7 +1291,38 @@ async function smokeAnxiety(context) {
     const words = document.querySelector("#game_words")?.textContent || "";
     return /Welcome! This is less of a "game," more of an interactive story/i.test(words);
   }, null, { timeout: 20000 });
-  console.log("OK anxiety intro start");
+  const anxietyControls = await introPage.evaluate(() => ({
+    gearIsButton: document.querySelector("#gear")?.tagName === "BUTTON",
+    aboutIsButton: document.querySelector("#huh")?.tagName === "BUTTON",
+    choicesAreButtons: Array.from(document.querySelectorAll("#game_choices > *")).every((choice) => choice.tagName === "BUTTON"),
+  }));
+  assert(anxietyControls.gearIsButton && anxietyControls.aboutIsButton, "anxiety persistent controls are not native buttons");
+  assert(anxietyControls.choicesAreButtons, "anxiety actionable choices are not native buttons");
+
+  await introPage.evaluate(() => {
+    const opener = document.querySelector("#huh");
+    opener.style.display = "block";
+    opener.focus();
+    opener.click();
+  });
+  await introPage.waitForFunction(() => document.querySelector("#about")?.open, null, { timeout: 5000 });
+  await introPage.keyboard.press("Escape");
+  await introPage.waitForFunction(() => !document.querySelector("#about")?.open, null, { timeout: 5000 });
+  const aboutFocusRestored = await introPage.evaluate(() => document.activeElement?.id === "huh");
+  assert(aboutFocusRestored, "anxiety about dialog did not restore focus to its opener");
+
+  await introPage.evaluate(() => {
+    const opener = document.querySelector("#gear");
+    opener.style.display = "block";
+    opener.focus();
+    publish("show_cn");
+  });
+  await introPage.waitForFunction(() => document.querySelector("#content_notes")?.open, null, { timeout: 5000 });
+  await introPage.keyboard.press("Escape");
+  await introPage.waitForFunction(() => !document.querySelector("#content_notes")?.open, null, { timeout: 5000 });
+  const contentNotesFocusRestored = await introPage.evaluate(() => document.activeElement?.id === "gear");
+  assert(contentNotesFocusRestored, "anxiety content-notes dialog did not restore focus to its opener");
+  console.log("OK anxiety intro start and native dialogs");
   await introPage.close();
 
   const replayPage = await context.newPage();
@@ -465,7 +1338,7 @@ async function smokeAnxiety(context) {
   await waitForIntroChoices(replayPage);
   await clickChoice(replayPage, "Chapter Select");
   await replayPage.waitForFunction(() => {
-    return Array.from(document.querySelectorAll("#game_choices > div")).some((choice) => {
+    return Array.from(document.querySelectorAll("#game_choices > button")).some((choice) => {
       return /IV\. The Other Sandwich/i.test(choice.textContent || "");
     });
   }, null, { timeout: 20000 });
@@ -670,12 +1543,19 @@ async function smokeCovid(context) {
   const articlePage = await context.newPage();
   await assertRoute(articlePage, "covid-19/", "#reference-footer");
   const embeddedStages = await articlePage.evaluate(() => {
-    return Array.from(document.querySelectorAll("iframe[src*='sim/?stage=']")).map((frame) => frame.getAttribute("src") || "");
+    return Array.from(document.querySelectorAll("iframe[src*='sim/?stage=']")).map((frame) => ({
+      src: frame.getAttribute("src") || "",
+      title: frame.getAttribute("title")?.trim() || "",
+      loading: frame.getAttribute("loading") || "",
+    }));
   });
-  assert(embeddedStages.some((src) => src.includes("stage=epi-7")), "covid-19 article is missing the SEIR-with-R stage");
-  assert(embeddedStages.some((src) => src.includes("stage=int-4")), "covid-19 article is missing the lockdown stage");
-  assert(embeddedStages.some((src) => src.includes("stage=yrs-5")), "covid-19 article is missing the ICU-capacity stage");
-  assert(embeddedStages.some((src) => src.includes("stage=SB")), "covid-19 article is missing the sandbox stage");
+  assert(embeddedStages.some((frame) => frame.src.includes("stage=epi-7")), "covid-19 article is missing the SEIR-with-R stage");
+  assert(embeddedStages.some((frame) => frame.src.includes("stage=int-4")), "covid-19 article is missing the lockdown stage");
+  assert(embeddedStages.some((frame) => frame.src.includes("stage=yrs-5")), "covid-19 article is missing the ICU-capacity stage");
+  assert(embeddedStages.some((frame) => frame.src.includes("stage=SB")), "covid-19 article is missing the sandbox stage");
+  assert(embeddedStages.every((frame) => frame.title), "covid-19 article has an unnamed simulation iframe");
+  assert(new Set(embeddedStages.map((frame) => frame.title)).size === embeddedStages.length, "covid-19 article reuses iframe titles");
+  assert(embeddedStages.some((frame) => frame.loading === "lazy"), "covid-19 article does not lazy-load below-fold simulation iframes");
   console.log("OK covid article stage map");
   await articlePage.close();
 
@@ -685,10 +1565,22 @@ async function smokeCovid(context) {
   });
   await seirPage.waitForSelector("#bb_start", { timeout: 15000 });
   await seirPage.waitForFunction(() => typeof daysCurrent === "number" && typeof restart === "function", null, { timeout: 10000 });
-  await seirPage.evaluate(() => document.querySelector(".big_button").onclick());
+  const simAccessibility = await seirPage.evaluate(() => ({
+    primaryIsButton: document.querySelector(".big_button")?.tagName === "BUTTON",
+    resetIsButton: document.querySelector("#sb_reset")?.tagName === "BUTTON",
+    replayIsButton: document.querySelector("#sb_replay")?.tagName === "BUTTON",
+    namedInputs: Array.from(document.querySelectorAll("input")).every((input) => input.labels?.length > 0),
+    graphDescription: document.querySelector("#graphCanvas")?.getAttribute("aria-describedby") === "graph_summary",
+  }));
+  assert(simAccessibility.primaryIsButton && simAccessibility.resetIsButton && simAccessibility.replayIsButton, "covid-19 simulation controls are not native buttons");
+  assert(simAccessibility.namedInputs, "covid-19 simulation has an input without a native label");
+  assert(simAccessibility.graphDescription, "covid-19 simulation graph is missing its text alternative");
+  await seirPage.locator(".big_button").focus();
+  await seirPage.keyboard.press("Enter");
   await seirPage.waitForFunction(() => daysCurrent > 5, null, { timeout: 10000 });
-  await seirPage.evaluate(() => document.querySelector(".big_button").onclick());
-  await seirPage.evaluate(() => document.querySelector("#sb_reset").onclick());
+  await seirPage.waitForFunction(() => (document.querySelector("#graph_summary")?.textContent || "").trim().length > 0, null, { timeout: 5000 });
+  await seirPage.locator(".big_button").click();
+  await seirPage.locator("#sb_reset").click();
   await seirPage.waitForFunction(() => daysCurrent <= 1 && IS_PLAYING === false, null, { timeout: 5000 });
   console.log("OK covid SEIR run and reset");
   await seirPage.close();
@@ -851,6 +1743,54 @@ async function smokeSimulating(context) {
   await modelPage.close();
 }
 
+async function smokeNeurons(context) {
+  const page = await context.newPage();
+  await assertRoute(page, "neurons/", "iframe[title='Neurotic Neurons interactive']");
+  const frame = page.frames().find((candidate) => /\/neurons\/interactive\.html$/.test(candidate.url()));
+  assert(frame, "Neurons interactive frame did not load");
+  await frame.waitForSelector("#canvas[loading='no']", { timeout: 30000 });
+  const canvasName = await frame.locator("#canvas").getAttribute("aria-label");
+  assert(Boolean(canvasName), "Neurons canvas lacked an accessible name");
+  const controls = frame.locator("#control_play, #control_volume, #control_captions");
+  assert(await controls.count() === 3, "Neurons native controls did not mount");
+  assert(await controls.evaluateAll((elements) => elements.every((element) => element.tagName === "BUTTON" && Boolean(element.getAttribute("aria-label")))), "Neurons controls were not named native buttons");
+  await frame.locator("#control_play").click();
+  assert(await frame.locator("#control_play").getAttribute("aria-label") === "Resume", "Neurons play control did not expose paused state");
+  await frame.locator("#control_volume").click();
+  assert(await frame.locator("#control_volume").getAttribute("aria-label") === "Unmute", "Neurons volume control did not expose muted state");
+  await frame.locator("#control_captions").click();
+  assert(await frame.locator("#control_captions").getAttribute("aria-label") === "Show captions", "Neurons caption control did not expose hidden state");
+  console.log("OK neurons accessible controls");
+  await page.close();
+}
+
+async function smokeLoopy(context) {
+  const page = await context.newPage();
+  await assertRoute(page, "loopy/", "#sidebar");
+  await page.waitForFunction(() => Boolean(window.loopy), null, { timeout: 15000 });
+  await page.evaluate(() => publish("modal", ["examples"]));
+  assert(await page.locator("iframe[title='LOOPY simulation examples']").count() === 1, "LOOPY examples frame lacked its deterministic title");
+  await page.evaluate(() => publish("modal", ["embed"]));
+  const preview = page.locator("iframe[title='LOOPY embed preview']");
+  await preview.waitFor({ state: "visible", timeout: 5000 });
+  const embedCode = await page.locator("#modal_page .component_output:visible").inputValue();
+  assert(embedCode.includes('title="LOOPY simulation"'), "LOOPY generated embed code lacked a title");
+  console.log("OK loopy generated iframe titles");
+  await page.close();
+}
+
+async function smokeTrustFallback(context) {
+  const page = await context.newPage();
+  await page.route("**/trust/words.html*", (route) => route.fulfill({ status: 500, body: "failed" }));
+  await page.goto(new URL("trust/", baseUrl).href, { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => document.querySelector("main")?.getAttribute("aria-busy") === "false", null, { timeout: 15000 });
+  const main = page.locator("main");
+  assert(await main.isVisible(), "Trust failure fallback main remained hidden");
+  assert(/could not load/i.test(await main.textContent()), "Trust failure fallback did not explain the failure");
+  console.log("OK trust load failure fallback");
+  await page.close();
+}
+
 async function smokeSim(context) {
   const simPage = await context.newPage();
   await assertRoute(simPage, "sim/", "#play_controls");
@@ -901,11 +1841,23 @@ async function smokeSim(context) {
   assert(description.includes("../polygons/"), "sim schelling preset did not localize the polygons reference");
   console.log("OK sim preset loading");
   await presetPage.close();
+
+  for (const query of ["?lz=invalid", "?lz=%E0%A4%A"]) {
+    const failurePage = await context.newPage();
+    await failurePage.goto(new URL(`sim/${query}`, baseUrl).href, { waitUntil: "domcontentloaded" });
+    await failurePage.waitForFunction(() => document.querySelector("main")?.getAttribute("aria-busy") === "false", null, { timeout: 15000 });
+    const main = failurePage.locator("main");
+    assert(await main.isVisible(), `sim ${query} failure fallback main remained hidden`);
+    assert(/could not load/i.test(await main.textContent()), `sim ${query} failure fallback did not explain the failure`);
+    await failurePage.close();
+  }
+  console.log("OK sim malformed URL fallbacks");
 }
 
 async function smokeDecisionTree(context) {
   const page = await context.newPage();
   await assertRoute(page, "decision-tree/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "decision-tree route", { minimumChapters: 6, navMode: "generated" });
   await page.waitForFunction(() => {
     return document.querySelector("#chart svg") &&
       document.querySelector("#entropy-chart svg") &&
@@ -955,6 +1907,8 @@ async function smokeDecisionTree(context) {
   await page.waitForFunction((previousValue) => {
     return (document.querySelector("#ig-tooltip-ig")?.textContent || "").trim() !== previousValue;
   }, initialIg, { timeout: 5000 });
+  await assertViewportUsable(page, "decision-tree route");
+  await assertEngineeringSandboxLayout(context, "decision-tree/", "decision-tree route", { navMode: "generated" });
   console.log("OK decision-tree information gain hover");
   await page.close();
 }
@@ -962,6 +1916,7 @@ async function smokeDecisionTree(context) {
 async function smokeRandomForest(context) {
   const page = await context.newPage();
   await assertRoute(page, "random-forest/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "random-forest route", { minimumChapters: 5, navMode: "generated" });
   await page.waitForFunction(() => {
     return document.querySelector("#gridOfTrees svg") &&
       document.querySelector("#chart-rf") &&
@@ -1018,6 +1973,8 @@ async function smokeRandomForest(context) {
   await page.waitForFunction(() => {
     return (document.querySelector("#cantor-scatter")?.textContent || "").includes("Forest");
   }, null, { timeout: 10000 });
+  await assertViewportUsable(page, "random-forest route");
+  await assertEngineeringSandboxLayout(context, "random-forest/", "random-forest route", { navMode: "generated" });
   console.log("OK random-forest ensemble panels");
   await page.close();
 }
@@ -1025,6 +1982,12 @@ async function smokeRandomForest(context) {
 async function smokeConditionalProbability(context) {
   const page = await context.newPage();
   await assertRoute(page, "conditional-probability/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "conditional-probability route", {
+    minimumChapters: 4,
+    navMode: "generated",
+    expectedFamily: "ev-essay",
+    expectedRoute: "conditional-probability",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("waterfall svg") &&
       document.querySelectorAll("bar-chart svg").length === 2;
@@ -1054,6 +2017,10 @@ async function smokeConditionalProbability(context) {
       (document.querySelector("button.active")?.textContent || "").includes("P(B|A)");
   }, null, { timeout: 5000 });
   console.log("OK conditional-probability controls");
+  await assertViewportUsable(page, "conditional-probability route");
+  await assertEngineeringSandboxLayout(context, "conditional-probability/", "conditional-probability route", {
+    navMode: "generated",
+  });
   await page.close();
 }
 
@@ -1061,6 +2028,12 @@ async function smokeMarkovChains(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "markov-chains/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "markov-chains route", {
+    minimumChapters: 5,
+    navMode: "generated",
+    expectedFamily: "ev-essay",
+    expectedRoute: "markov-chains",
+  });
   await page.waitForFunction(() => {
     return document.querySelectorAll(".st-diagram svg").length >= 2 &&
       document.querySelector("iframe.playground");
@@ -1089,6 +2062,8 @@ async function smokeMarkovChains(context) {
   assert(fullscreenHref === "./playground/", "markov-chains fullscreen handoff did not localize");
   await page.waitForTimeout(250);
   assertPageRuntimeClean("markov-chains article");
+  await assertViewportUsable(page, "markov-chains route");
+  await assertEngineeringSandboxLayout(context, "markov-chains/", "markov-chains route", { navMode: "generated" });
   console.log("OK markov-chains article handoff");
   await page.close();
 
@@ -1120,6 +2095,12 @@ async function smokePrincipalComponentAnalysis(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "principal-component-analysis/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "principal-component-analysis route", {
+    minimumChapters: 3,
+    navMode: "generated",
+    expectedFamily: "ev-essay",
+    expectedRoute: "principal-component-analysis",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("pca-d2 svg") &&
       document.querySelector("pca-d1 svg") &&
@@ -1220,6 +2201,10 @@ async function smokePrincipalComponentAnalysis(context) {
   assert(datasetState.text.includes("pc2"), "principal-component-analysis DEFRA plots are missing the pc2 label");
   await page.waitForTimeout(250);
   assertPageRuntimeClean("principal-component-analysis route");
+  await assertViewportUsable(page, "principal-component-analysis route");
+  await assertEngineeringSandboxLayout(context, "principal-component-analysis/", "principal-component-analysis route", {
+    navMode: "generated",
+  });
   console.log("OK principal-component-analysis dataset views");
   await page.close();
 }
@@ -1228,6 +2213,12 @@ async function smokeExponentiation(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "exponentiation/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "exponentiation route", {
+    minimumChapters: 5,
+    navMode: "generated",
+    expectedFamily: "ev-essay",
+    expectedRoute: "exponentiation",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("simple-growth svg") &&
       document.querySelectorAll("growth-demo svg").length === 2 &&
@@ -1321,6 +2312,8 @@ async function smokeExponentiation(context) {
   }, null, { timeout: 10000 });
   await page.waitForTimeout(250);
   assertPageRuntimeClean("exponentiation route");
+  await assertViewportUsable(page, "exponentiation route");
+  await assertEngineeringSandboxLayout(context, "exponentiation/", "exponentiation route", { navMode: "generated" });
   console.log("OK exponentiation virus demo");
   await page.close();
 }
@@ -1329,6 +2322,12 @@ async function smokePi(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "pi/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "pi route", {
+    minimumChapters: 4,
+    navMode: "generated",
+    expectedFamily: "ev-essay",
+    expectedRoute: "pi",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("circle-demo svg circle.circle") &&
       document.querySelector("pi-demo svg path.circum") &&
@@ -1363,6 +2362,8 @@ async function smokePi(context) {
   assert(Number(circumDashOpacity) < 1, "pi wrap control did not reduce the circumference guide opacity");
   await page.waitForTimeout(250);
   assertPageRuntimeClean("pi route");
+  await assertViewportUsable(page, "pi route");
+  await assertEngineeringSandboxLayout(context, "pi/", "pi route", { navMode: "generated" });
   console.log("OK pi geometry and wrap controls");
   await page.close();
 }
@@ -1371,6 +2372,12 @@ async function smokeSineAndCosine(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "sine-and-cosine/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "sine-and-cosine route", {
+    minimumChapters: 6,
+    navMode: "generated",
+    expectedFamily: "ev-essay",
+    expectedRoute: "sine-and-cosine",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("similar-triangles svg") &&
       document.querySelectorAll("trig-transform svg").length === 2 &&
@@ -1437,6 +2444,10 @@ async function smokeSineAndCosine(context) {
   }, null, { timeout: 18000 });
   await page.waitForTimeout(250);
   assertPageRuntimeClean("sine-and-cosine route");
+  await assertViewportUsable(page, "sine-and-cosine route");
+  await assertEngineeringSandboxLayout(context, "sine-and-cosine/", "sine-and-cosine route", {
+    navMode: "generated",
+  });
   console.log("OK sine-and-cosine cosine autoplay");
   await page.close();
 }
@@ -1445,6 +2456,12 @@ async function smokeEigenvectorsAndEigenvalues(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "eigenvectors-and-eigenvalues/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "eigenvectors-and-eigenvalues route", {
+    minimumChapters: 5,
+    navMode: "generated",
+    expectedFamily: "ev-essay",
+    expectedRoute: "eigenvectors-and-eigenvalues",
+  });
   await page.waitForFunction(() => {
     return document.querySelectorAll("simple-plot svg").length >= 3 &&
       document.querySelector("bacteria-simulation svg") &&
@@ -1505,15 +2522,17 @@ async function smokeEigenvectorsAndEigenvalues(context) {
 
   const bacteriaBefore = await page.evaluate(() => {
     const scope = angular.element(document.querySelector('[ng-controller="BacteriaCtrl"]')).scope();
+    const readouts = document.querySelectorAll('[ng-controller="BacteriaCtrl"] div[style*="text-align: center"]');
     return {
       curGen: scope.opt.curGen,
-      readout: document.querySelector('[ng-controller="BacteriaCtrl"] div[style*="text-align: center"]')?.textContent || "",
+      readout: readouts[readouts.length - 1]?.textContent || "",
     };
   });
   await page.locator('[ng-controller="BacteriaCtrl"] button').filter({ hasText: /^forward$/i }).click();
   await page.waitForFunction((previous) => {
     const scope = angular.element(document.querySelector('[ng-controller="BacteriaCtrl"]')).scope();
-    const readout = document.querySelector('[ng-controller="BacteriaCtrl"] div[style*="text-align: center"]')?.textContent || "";
+    const readouts = document.querySelectorAll('[ng-controller="BacteriaCtrl"] div[style*="text-align: center"]');
+    const readout = readouts[readouts.length - 1]?.textContent || "";
     return scope.opt.curGen > previous.curGen && readout !== previous.readout;
   }, bacteriaBefore, { timeout: 5000 });
   console.log("OK eigenvectors-and-eigenvalues Fibonacci controls");
@@ -1563,6 +2582,10 @@ async function smokeEigenvectorsAndEigenvalues(context) {
   }, spiralBefore, { timeout: 5000 });
   await page.waitForTimeout(250);
   assertPageRuntimeClean("eigenvectors-and-eigenvalues route");
+  await assertViewportUsable(page, "eigenvectors-and-eigenvalues route");
+  await assertEngineeringSandboxLayout(context, "eigenvectors-and-eigenvalues/", "eigenvectors-and-eigenvalues route", {
+    navMode: "generated",
+  });
   console.log("OK eigenvectors-and-eigenvalues complex spiral");
   await page.close();
 }
@@ -1571,6 +2594,12 @@ async function smokeImageKernels(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "image-kernels/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "image-kernels route", {
+    minimumChapters: 4,
+    navMode: "generated",
+    expectedFamily: "ev-essay",
+    expectedRoute: "image-kernels",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("image-as-matrix canvas") &&
       document.querySelector("kernel-matrix svg") &&
@@ -1657,6 +2686,8 @@ async function smokeImageKernels(context) {
   assert(hasBoundaryPlaceholder, "image-kernels edge handling did not expose missing-neighbor placeholders");
   await page.waitForTimeout(250);
   assertPageRuntimeClean("image-kernels route");
+  await assertViewportUsable(page, "image-kernels route");
+  await assertEngineeringSandboxLayout(context, "image-kernels/", "image-kernels route", { navMode: "generated" });
   console.log("OK image-kernels boundary handling");
   await page.close();
 }
@@ -1665,6 +2696,12 @@ async function smokeOrdinaryLeastSquaresRegression(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "ordinary-least-squares-regression/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "ordinary-least-squares-regression route", {
+    minimumChapters: 3,
+    navMode: "generated",
+    expectedFamily: "ev-essay",
+    expectedRoute: "ordinary-least-squares-regression",
+  });
   await page.waitForFunction(() => {
     return document.querySelector(".myApp") &&
       document.querySelectorAll("svg").length >= 3 &&
@@ -1706,6 +2743,7 @@ async function smokeOrdinaryLeastSquaresRegression(context) {
   );
 
   const pointNob = page.locator(".point-nobs .nob").first();
+  await page.locator(".myApp").scrollIntoViewIfNeeded();
   const pointBox = await pointNob.boundingBox();
   assert(pointBox, "ordinary-least-squares-regression did not expose a draggable point control");
   await page.mouse.move(pointBox.x + pointBox.width / 2, pointBox.y + pointBox.height / 2);
@@ -1724,9 +2762,8 @@ async function smokeOrdinaryLeastSquaresRegression(context) {
       .slice(0, 7)
       .map((rect) => [rect.getAttribute("transform"), rect.getAttribute("width"), rect.getAttribute("height")].join("|"))
       .join("||");
-    return equation !== previous.equation &&
-      line !== previous.line &&
-      errorSignature !== previous.errorSignature;
+    return (line !== previous.line || errorSignature !== previous.errorSignature) &&
+      (equation !== previous.equation || line !== previous.line);
   }, initialState, { timeout: 5000 });
   console.log("OK ordinary-least-squares-regression point drag");
 
@@ -1742,6 +2779,9 @@ async function smokeOrdinaryLeastSquaresRegression(context) {
   );
   await page.waitForTimeout(250);
   assertPageRuntimeClean("ordinary-least-squares-regression route");
+  await assertEngineeringSandboxLayout(context, "ordinary-least-squares-regression/", "ordinary-least-squares-regression route", {
+    navMode: "generated",
+  });
   console.log("OK ordinary-least-squares-regression responsive shell");
   await page.close();
 }
@@ -1750,6 +2790,16 @@ async function smokeBlockchain(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "blockchain/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "blockchain route", {
+    minimumChapters: 0,
+    navMode: "native",
+    nativeSelector: "nav a",
+    minimumNativeLinks: 6,
+    requireNativeAnchors: false,
+    expectedFamily: "anders-lab",
+    expectedRoute: "blockchain",
+    expectedVariant: "lab",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("#block1chain1data") &&
       document.querySelector("#block1chain1hash") &&
@@ -1803,6 +2853,20 @@ async function smokeBlockchain(context) {
       document.querySelector("#block1chain2well") &&
       document.querySelector("#block1chain3well");
   }, null, { timeout: 10000 });
+  await assertEngineeringSandboxLayout(context, "blockchain/", "blockchain route", {
+    navMode: "native",
+    controlSelector: "#block1chain1data",
+    containerSelector: ".story-lab-main",
+  });
+  await assertRouteViewportUsable(
+    context,
+    "blockchain/",
+    "#reference-footer",
+    "#block1chain1data",
+    "blockchain route",
+    390,
+    844,
+  );
   await page.waitForTimeout(250);
   assertPageRuntimeClean("blockchain route");
   console.log("OK blockchain distributed scene");
@@ -1813,6 +2877,16 @@ async function smokePublicPrivateKeys(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "public-private-keys/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "public-private-keys route", {
+    minimumChapters: 0,
+    navMode: "native",
+    nativeSelector: "nav a",
+    minimumNativeLinks: 4,
+    requireNativeAnchors: false,
+    expectedFamily: "anders-lab",
+    expectedRoute: "public-private-keys",
+    expectedVariant: "lab",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("#privateKey") &&
       document.querySelector("#publicKey") &&
@@ -1878,6 +2952,11 @@ async function smokePublicPrivateKeys(context) {
       document.querySelector("#block2chain1tx0sig") &&
       document.querySelector("#block1chain1mineButton");
   }, null, { timeout: 10000 });
+  await assertEngineeringSandboxLayout(context, "public-private-keys/", "public-private-keys route", {
+    navMode: "native",
+    controlSelector: "#privateKey",
+    containerSelector: ".story-lab-main",
+  });
   await assertRouteViewportUsable(
     context,
     "public-private-keys/",
@@ -1893,10 +2972,4011 @@ async function smokePublicPrivateKeys(context) {
   await page.close();
 }
 
+async function smokeZeroKnowledgeProofDemo(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "zero-knowledge-proof-demo/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "zero-knowledge-proof-demo route", {
+    minimumChapters: 0,
+    navMode: "none",
+    minimumNativeLinks: 0,
+    expectedFamily: "anders-lab",
+    expectedRoute: "zero-knowledge-proof-demo",
+    expectedVariant: "lab",
+  });
+  await page.waitForFunction(() => {
+    return window.map &&
+      document.querySelector("#map .jvectormap-container") &&
+      document.querySelectorAll("#map path").length > 20 &&
+      document.querySelector("#show-hide-colors-button") &&
+      document.querySelector("#shuffle-colors-button");
+  }, null, { timeout: 30000 });
+
+  const initialState = await page.evaluate(() => ({
+    label: document.querySelector("#show-hide-colors-button")?.textContent?.trim() || "",
+    fills: Array.from(document.querySelectorAll("#map path"))
+      .map((node) => node.getAttribute("fill"))
+      .filter(Boolean),
+  }));
+  assert(initialState.label === "Show Colors", "zero-knowledge-proof-demo did not start with the Show Colors label");
+  assert(
+    initialState.fills.some((fill) => /^(?:white|#?fff(?:fff)?)$/i.test(fill)),
+    "zero-knowledge-proof-demo did not start in the hidden-color state",
+  );
+
+  await page.locator("#show-hide-colors-button").click();
+  await page.waitForFunction(() => {
+    const label = document.querySelector("#show-hide-colors-button")?.textContent?.trim() || "";
+    const fills = Array.from(document.querySelectorAll("#map path"))
+      .map((node) => node.getAttribute("fill"))
+      .filter(Boolean);
+    return label === "Hide Colors" && fills.some((fill) => fill && !/^(?:white|#?fff(?:fff)?)$/i.test(fill));
+  }, null, { timeout: 5000 });
+  console.log("OK zero-knowledge-proof-demo color toggle");
+
+  const fillsBeforeShuffle = await page.evaluate(() => {
+    return Array.from(document.querySelectorAll("#map path"))
+      .map((node) => node.getAttribute("fill"))
+      .filter(Boolean);
+  });
+  await page.locator("#shuffle-colors-button").click();
+  await page.waitForFunction((previousFills) => {
+    const fills = Array.from(document.querySelectorAll("#map path"))
+      .map((node) => node.getAttribute("fill"))
+      .filter(Boolean);
+    return fills.some((fill, index) => fill !== previousFills[index]);
+  }, fillsBeforeShuffle, { timeout: 5000 });
+  console.log("OK zero-knowledge-proof-demo palette shuffle");
+
+  await page.locator("#map path:not(.jvectormap-background)").first().click();
+  await page.waitForFunction(() => {
+    const label = document.querySelector("#show-hide-colors-button")?.textContent?.trim() || "";
+    const fills = Array.from(document.querySelectorAll("#map path"))
+      .map((node) => node.getAttribute("fill"))
+      .filter(Boolean);
+    const visibleFills = fills.filter((fill) => fill && !/^(?:white|#?fff(?:fff)?)$/i.test(fill));
+    return label === "Show Colors" && visibleFills.length >= 1;
+  }, null, { timeout: 5000 });
+  console.log("OK zero-knowledge-proof-demo region selection");
+
+  await page.locator("#map svg").click({ position: { x: 10, y: 10 } });
+  await page.waitForFunction(() => {
+    const label = document.querySelector("#show-hide-colors-button")?.textContent?.trim() || "";
+    const fills = Array.from(document.querySelectorAll("#map path"))
+      .map((node) => node.getAttribute("fill"))
+      .filter(Boolean);
+    return label === "Show Colors" && fills.every((fill) => /^(?:white|#?fff(?:fff)?)$/i.test(fill) || fill === "none");
+  }, null, { timeout: 5000 });
+  console.log("OK zero-knowledge-proof-demo background reset");
+
+  await assertEngineeringSandboxLayout(context, "zero-knowledge-proof-demo/", "zero-knowledge-proof-demo route", {
+    navMode: "none",
+    controlSelector: "#show-hide-colors-button",
+    containerSelector: "main.story-lab-main",
+  });
+  await assertViewportUsable(page, "zero-knowledge-proof-demo route");
+  await assertRouteViewportUsable(
+    context,
+    "zero-knowledge-proof-demo/",
+    "#reference-footer",
+    "#map .jvectormap-container",
+    "zero-knowledge-proof-demo route",
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("zero-knowledge-proof-demo route");
+  console.log("OK zero-knowledge-proof-demo responsive shell");
+  await page.close();
+}
+
+async function smokeAlphaCompositing(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "alpha-compositing/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#alpha_rose_glasses_container canvas") &&
+      document.querySelector("#alpha_coverage_geometry_canvas_container canvas") &&
+      document.querySelector("#alpha_lerper_container canvas") &&
+      document.querySelector("#alpha_pd_over_canvas_container canvas") &&
+      document.querySelector("#alpha_pd_example_container canvas") &&
+      document.querySelector("#alpha_pd_example_step") &&
+      document.querySelector("#alpha_lerper_slider_container .slider_knob");
+  }, null, { timeout: 30000 });
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/alpha_compositing.js"], "alpha-compositing");
+  await assertElementContract(page, ".alpha_observation", {
+    attributes: { role: "note" },
+    textFragments: ["Observation:", "fully covered scene still has no gaps", "uniform opacity"],
+  }, "alpha-compositing observation note");
+
+  await dragCanvasUntilChanged(page, "#alpha_rose_glasses_container canvas", [
+    { from: { x: 0.45, y: 0.45 }, to: { x: 0.7, y: 0.3 } },
+    { from: { x: 0.55, y: 0.55 }, to: { x: 0.3, y: 0.65 } },
+  ], "alpha-compositing rose-tinted drag scene");
+  console.log("OK alpha-compositing rose-tinted drag scene");
+
+  await dragCanvasUntilChanged(page, "#alpha_coverage_geometry_canvas_container canvas", [
+    { from: { x: 0.18, y: 0.32 }, to: { x: 0.32, y: 0.56 } },
+    { from: { x: 0.3, y: 0.35 }, to: { x: 0.42, y: 0.58 } },
+    { from: { x: 0.7, y: 0.35 }, to: { x: 0.78, y: 0.52 } },
+    { from: { x: 0.82, y: 0.28 }, to: { x: 0.68, y: 0.44 } },
+  ], "alpha-compositing coverage drag scene");
+  console.log("OK alpha-compositing coverage drag scene");
+
+  const lerperCanvas = page.locator("#alpha_lerper_container canvas");
+  await lerperCanvas.scrollIntoViewIfNeeded();
+  const lerperBefore = await lerperCanvas.evaluate((canvas) => canvas.toDataURL());
+  const sliderKnob = page.locator("#alpha_lerper_slider_container .slider_knob");
+  await sliderKnob.scrollIntoViewIfNeeded();
+  const knobBox = await sliderKnob.boundingBox();
+  assert(knobBox, "alpha-compositing did not expose the lerp slider control");
+  await page.mouse.move(knobBox.x + knobBox.width / 2, knobBox.y + knobBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(knobBox.x + knobBox.width / 2 + 70, knobBox.y + knobBox.height / 2, { steps: 12 });
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#alpha_lerper_container canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, lerperBefore, { timeout: 5000 });
+  console.log("OK alpha-compositing alpha slider scene");
+
+  await dragCanvasUntilChanged(page, "#alpha_pd_over_canvas_container canvas", [
+    { from: { x: 0.45, y: 0.45 }, to: { x: 0.62, y: 0.32 } },
+    { from: { x: 0.52, y: 0.52 }, to: { x: 0.3, y: 0.65 } },
+  ], "alpha-compositing Porter-Duff drag scene");
+  console.log("OK alpha-compositing Porter-Duff drag scene");
+
+  const pdExampleBefore = (await page.locator("#alpha_pd_example_step").textContent())?.trim() || "";
+  const pdExampleContainer = page.locator("#alpha_pd_example_container");
+  await pdExampleContainer.scrollIntoViewIfNeeded();
+  const pdExampleBox = await pdExampleContainer.boundingBox();
+  assert(pdExampleBox, "alpha-compositing did not expose the step-driven Porter-Duff container");
+  for (const xFactor of [0.75, 0.9]) {
+    await pdExampleContainer.click({
+      position: {
+        x: Math.max(10, Math.min(pdExampleBox.width - 10, pdExampleBox.width * xFactor)),
+        y: Math.max(10, Math.min(pdExampleBox.height - 10, pdExampleBox.height * 0.5)),
+      },
+    });
+    await page.waitForTimeout(150);
+    const pdExampleAfter = (await page.locator("#alpha_pd_example_step").textContent())?.trim() || "";
+    if (pdExampleAfter && pdExampleAfter !== pdExampleBefore) {
+      console.log("OK alpha-compositing step-driven Porter-Duff scene");
+      await assertLongformResponsiveShell(
+        context,
+        page,
+        "alpha-compositing/",
+        "#alpha_rose_glasses_container canvas",
+        "alpha-compositing route",
+        {
+          expectedRoute: "alpha-compositing",
+          minimumChapters: 8,
+          playHref: "#alpha_rose_glasses_container",
+        },
+      );
+      await page.waitForTimeout(250);
+      assertPageRuntimeClean("alpha-compositing route");
+      console.log("OK alpha-compositing responsive shell");
+      await page.close();
+      return;
+    }
+  }
+  throw new Error("alpha-compositing step-driven Porter-Duff scene did not advance");
+}
+
+async function smokeColorSpaces(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "color-spaces/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#color_plain_linear_quadratic_slider_container .color_slider_knob") &&
+      document.querySelector("#color_plot_narrow_container canvas") &&
+      document.querySelector("#color_plot_wide_container canvas") &&
+      document.querySelector("#color_gamut_canvas") &&
+      document.querySelector("#color_gamut_plot_canvas") &&
+      document.querySelector("#color_gamut_canvas_slider_container .slider_knob");
+  }, null, { timeout: 30000 });
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/color_spaces.js"], "color-spaces");
+  await assertElementContract(page, ".color_experiment_prompt", {
+    textFragments: ["Two-number test:", "Matching RGB numbers", "until the color space is known"],
+  }, "color-spaces experiment prompt");
+
+  const earlyKnob = page.locator("#color_plain_linear_quadratic_slider_container .color_slider_knob").first();
+  await earlyKnob.scrollIntoViewIfNeeded();
+  const earlyBefore = await page.evaluate(() => ({
+    top: document.querySelector("#color_plain_linear_quadratic_slider_container .color_match0_halfs")?.style.background || "",
+    bottom: document.querySelector("#color_plain_linear_quadratic_slider_container .color_match1_halfs")?.style.background || "",
+  }));
+  const earlyKnobBox = await earlyKnob.boundingBox();
+  assert(earlyKnobBox, "color-spaces did not expose an early color-picker slider");
+  await page.mouse.move(earlyKnobBox.x + earlyKnobBox.width / 2, earlyKnobBox.y + earlyKnobBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(earlyKnobBox.x + earlyKnobBox.width / 2 + 80, earlyKnobBox.y + earlyKnobBox.height / 2, { steps: 12 });
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const top = document.querySelector("#color_plain_linear_quadratic_slider_container .color_match0_halfs")?.style.background || "";
+    const bottom = document.querySelector("#color_plain_linear_quadratic_slider_container .color_match1_halfs")?.style.background || "";
+    return top !== previous.top && bottom !== previous.bottom;
+  }, earlyBefore, { timeout: 5000 });
+  console.log("OK color-spaces early picker scene");
+
+  const narrowPlot = page.locator("#color_plot_narrow_container canvas");
+  await narrowPlot.scrollIntoViewIfNeeded();
+  const narrowBefore = await narrowPlot.evaluate((canvas) => canvas.toDataURL());
+  const cubeKnob = page.locator("#color_rgb_cube_slider_container .color_slider_knob").first();
+  await cubeKnob.scrollIntoViewIfNeeded();
+  const cubeKnobBox = await cubeKnob.boundingBox();
+  assert(cubeKnobBox, "color-spaces did not expose the synchronized cube slider");
+  await page.mouse.move(cubeKnobBox.x + cubeKnobBox.width / 2, cubeKnobBox.y + cubeKnobBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(cubeKnobBox.x + cubeKnobBox.width / 2 + 70, cubeKnobBox.y + cubeKnobBox.height / 2, { steps: 12 });
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#color_plot_narrow_container canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, narrowBefore, { timeout: 5000 });
+  console.log("OK color-spaces synchronized plot scene");
+
+  await dragCanvasUntilChanged(page, "#color_plot_wide_container canvas", [
+    { from: { x: 0.5, y: 0.5 }, to: { x: 0.62, y: 0.38 } },
+    { from: { x: 0.55, y: 0.45 }, to: { x: 0.35, y: 0.58 } },
+  ], "color-spaces draggable 3D plot scene");
+  console.log("OK color-spaces draggable 3D plot scene");
+
+  const gamutPlot = page.locator("#color_gamut_plot_canvas");
+  await gamutPlot.scrollIntoViewIfNeeded();
+  const gamutBefore = await gamutPlot.evaluate((canvas) => canvas.toDataURL());
+  const gamutKnob = page.locator("#color_gamut_canvas_slider_container .slider_knob");
+  await gamutKnob.scrollIntoViewIfNeeded();
+  const gamutKnobBox = await gamutKnob.boundingBox();
+  assert(gamutKnobBox, "color-spaces did not expose the gamut slider control");
+  await page.mouse.move(gamutKnobBox.x + gamutKnobBox.width / 2, gamutKnobBox.y + gamutKnobBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(gamutKnobBox.x + gamutKnobBox.width / 2 + 80, gamutKnobBox.y + gamutKnobBox.height / 2, { steps: 12 });
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#color_gamut_plot_canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, gamutBefore, { timeout: 5000 });
+  console.log("OK color-spaces gamut scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "color-spaces/",
+    "#color_plain_linear_quadratic_slider_container .color_slider_knob",
+    "color-spaces route",
+    {
+      expectedRoute: "color-spaces",
+      minimumChapters: 12,
+      playHref: "#color_plain_srgb_slider_container",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("color-spaces route");
+  console.log("OK color-spaces responsive shell");
+  await page.close();
+}
+
+async function smokeSound(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "sound/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#hero canvas") &&
+      document.querySelector("#hero_keyboard .keyboard_button") &&
+      document.querySelector("#waveform1 canvas") &&
+      document.querySelector("#waveform1_keyboard .keyboard_button") &&
+      document.querySelector("#particles1 canvas") &&
+      document.querySelector("#particles4 canvas") &&
+      document.querySelector("#particles4_sl0 .slider_knob") &&
+      document.querySelector("#waveform_addition1 canvas") &&
+      document.querySelector("#waveform_addition1_sl0 .slider_knob") &&
+      document.querySelector(".play_pause_button");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(2000);
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/sound.js"], "sound");
+  await assertElementContract(page, "#hero_keyboard", {
+    attributes: {
+      role: "group",
+      "aria-label": "Three-note sound keyboard",
+      "aria-describedby": "hero_keyboard_cue",
+    },
+  }, "sound keyboard group");
+  await assertElementContract(page, "#hero_keyboard_cue", {
+    textFragments: ["Listening cue:", "W", "E", "R", "map left to right"],
+  }, "sound keyboard listening cue");
+
+  const waveformButton = page.locator("#waveform1_keyboard .keyboard_button").first();
+  const waveformCanvas = page.locator("#waveform1 canvas");
+  await waveformButton.scrollIntoViewIfNeeded();
+  const waveformBefore = await waveformCanvas.evaluate((canvas) => canvas.toDataURL());
+  const waveformButtonBox = await waveformButton.boundingBox();
+  assert(waveformButtonBox, "sound did not expose the early waveform keyboard");
+  await page.mouse.move(
+    waveformButtonBox.x + waveformButtonBox.width / 2,
+    waveformButtonBox.y + waveformButtonBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.waitForFunction(() => {
+    const button = document.querySelector("#waveform1_keyboard .keyboard_button");
+    const canvas = document.querySelector("#waveform1 canvas");
+    return button?.classList.contains("pressed") && !!canvas;
+  }, null, { timeout: 5000 });
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#waveform1 canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, waveformBefore, { timeout: 5000 });
+  await page.mouse.up();
+  console.log("OK sound waveform keyboard click");
+
+  const heroButton = page.locator("#hero_keyboard .keyboard_button").first();
+  await heroButton.scrollIntoViewIfNeeded();
+  await page.keyboard.down("w");
+  await page.waitForFunction(() => {
+    return document.querySelector("#hero_keyboard .keyboard_button")?.classList.contains("pressed");
+  }, null, { timeout: 5000 });
+  await page.keyboard.up("w");
+  await page.waitForFunction(() => {
+    return !document.querySelector("#hero_keyboard .keyboard_button")?.classList.contains("pressed");
+  }, null, { timeout: 5000 });
+  console.log("OK sound W keyboard routing");
+
+  await dragCanvasUntilChanged(page, "#particles1 canvas", [
+    { from: { x: 0.5, y: 0.5 }, to: { x: 0.68, y: 0.38 } },
+    { from: { x: 0.55, y: 0.45 }, to: { x: 0.32, y: 0.62 } },
+  ], "sound particle drag scene");
+  console.log("OK sound particle drag scene");
+
+  const particles4Canvas = page.locator("#particles4 canvas");
+  await particles4Canvas.scrollIntoViewIfNeeded();
+  const particles4Before = await particles4Canvas.evaluate((canvas) => canvas.toDataURL());
+  const particles4Knob = page.locator("#particles4_sl0 .slider_knob");
+  await particles4Knob.scrollIntoViewIfNeeded();
+  const particles4KnobBox = await particles4Knob.boundingBox();
+  assert(particles4KnobBox, "sound did not expose the pressure-box slider");
+  await page.mouse.move(
+    particles4KnobBox.x + particles4KnobBox.width / 2,
+    particles4KnobBox.y + particles4KnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    particles4KnobBox.x + particles4KnobBox.width / 2 + 90,
+    particles4KnobBox.y + particles4KnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#particles4 canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, particles4Before, { timeout: 5000 });
+  console.log("OK sound pressure slider scene");
+
+  const additionCanvas = page.locator("#waveform_addition1 canvas");
+  await additionCanvas.scrollIntoViewIfNeeded();
+  const additionBefore = await additionCanvas.evaluate((canvas) => canvas.toDataURL());
+  const additionKnob = page.locator("#waveform_addition1_sl0 .slider_knob");
+  await additionKnob.scrollIntoViewIfNeeded();
+  const additionKnobBox = await additionKnob.boundingBox();
+  assert(additionKnobBox, "sound did not expose the waveform addition slider");
+  await page.mouse.move(
+    additionKnobBox.x + additionKnobBox.width / 2,
+    additionKnobBox.y + additionKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    additionKnobBox.x + additionKnobBox.width / 2 + 90,
+    additionKnobBox.y + additionKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#waveform_addition1 canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, additionBefore, { timeout: 5000 });
+  console.log("OK sound waveform addition scene");
+
+  const playButton = page.locator(".play_pause_button").first();
+  await playButton.scrollIntoViewIfNeeded();
+  const playBefore = await playButton.getAttribute("class");
+  await playButton.click();
+  await page.waitForFunction((previous) => {
+    const classes = document.querySelector(".play_pause_button")?.className || "";
+    return classes !== previous;
+  }, playBefore || "", { timeout: 5000 });
+  console.log("OK sound play-pause control");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "sound/",
+    "#hero_keyboard .keyboard_button",
+    "sound route",
+    {
+      expectedRoute: "sound",
+      minimumChapters: 6,
+      playHref: "#hero_keyboard",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("sound route");
+  console.log("OK sound responsive shell");
+  await page.close();
+}
+
+async function smokeCamerasAndLenses(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "cameras-and-lenses/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#lens_detector canvas") &&
+      document.querySelector("#lens_detector_sl0 .slider_knob") &&
+      document.querySelector("#lens_scene canvas") &&
+      document.querySelector("#lens_film canvas") &&
+      document.querySelector("#lens_film_sl0 .slider_knob") &&
+      document.querySelector("#lens_film_sl1 .slider_knob") &&
+      document.querySelector("#lens_glass_rays canvas") &&
+      document.querySelector("#lens_glass_rays_sl0 .slider_knob") &&
+      document.querySelector(".play_pause_button") &&
+      document.querySelector("#lens_chromatic canvas") &&
+      document.querySelector("#lens_chromatic_sl0 .slider_knob");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(2500);
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/lenses.js"], "cameras-and-lenses");
+  await assertElementContract(page, ".lens_hero_guide", {
+    tagName: "OL",
+    attributes: { "aria-label": "Opening camera experiment" },
+    textFragments: ["Move one control at a time", "compare its sharpness with the background", "tradeoff"],
+  }, "cameras-and-lenses opening guide");
+  assert(await page.locator(".lens_hero_guide > li").count() === 3, "cameras-and-lenses opening guide did not keep three steps");
+
+  const detectorCanvas = page.locator("#lens_detector canvas").first();
+  await detectorCanvas.scrollIntoViewIfNeeded();
+  const detectorBefore = await detectorCanvas.evaluate((canvas) => canvas.toDataURL());
+  const detectorKnob = page.locator("#lens_detector_sl0 .slider_knob");
+  await detectorKnob.scrollIntoViewIfNeeded();
+  const detectorKnobBox = await detectorKnob.boundingBox();
+  assert(detectorKnobBox, "cameras-and-lenses did not expose the detector exposure slider");
+  await page.mouse.move(
+    detectorKnobBox.x + detectorKnobBox.width / 2,
+    detectorKnobBox.y + detectorKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    detectorKnobBox.x + detectorKnobBox.width / 2 + 90,
+    detectorKnobBox.y + detectorKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#lens_detector canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, detectorBefore, { timeout: 5000 });
+  console.log("OK cameras-and-lenses detector exposure scene");
+
+  await dragCanvasUntilChanged(page, "#lens_scene canvas", [
+    { from: { x: 0.5, y: 0.5 }, to: { x: 0.68, y: 0.38 } },
+    { from: { x: 0.55, y: 0.45 }, to: { x: 0.32, y: 0.62 } },
+  ], "cameras-and-lenses early drag scene");
+  console.log("OK cameras-and-lenses early drag scene");
+
+  const filmCanvas = page.locator("#lens_film canvas").first();
+  await filmCanvas.scrollIntoViewIfNeeded();
+  const filmBefore = await filmCanvas.evaluate((canvas) => canvas.toDataURL());
+  const filmDiameterKnob = page.locator("#lens_film_sl0 .slider_knob");
+  await filmDiameterKnob.scrollIntoViewIfNeeded();
+  const filmDiameterKnobBox = await filmDiameterKnob.boundingBox();
+  assert(filmDiameterKnobBox, "cameras-and-lenses did not expose the pinhole diameter slider");
+  await page.mouse.move(
+    filmDiameterKnobBox.x + filmDiameterKnobBox.width / 2,
+    filmDiameterKnobBox.y + filmDiameterKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    filmDiameterKnobBox.x + filmDiameterKnobBox.width / 2 + 80,
+    filmDiameterKnobBox.y + filmDiameterKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#lens_film canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, filmBefore, { timeout: 5000 });
+
+  const filmMid = await filmCanvas.evaluate((canvas) => canvas.toDataURL());
+  const filmDistanceKnob = page.locator("#lens_film_sl1 .slider_knob");
+  await filmDistanceKnob.scrollIntoViewIfNeeded();
+  const filmDistanceKnobBox = await filmDistanceKnob.boundingBox();
+  assert(filmDistanceKnobBox, "cameras-and-lenses did not expose the pinhole distance slider");
+  await page.mouse.move(
+    filmDistanceKnobBox.x + filmDistanceKnobBox.width / 2,
+    filmDistanceKnobBox.y + filmDistanceKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    filmDistanceKnobBox.x + filmDistanceKnobBox.width / 2 + 80,
+    filmDistanceKnobBox.y + filmDistanceKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#lens_film canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, filmMid, { timeout: 5000 });
+  console.log("OK cameras-and-lenses pinhole dual-slider scene");
+
+  const glassCanvas = page.locator("#lens_glass_rays canvas").first();
+  await glassCanvas.scrollIntoViewIfNeeded();
+  const glassBefore = await glassCanvas.evaluate((canvas) => canvas.toDataURL());
+  const glassKnob = page.locator("#lens_glass_rays_sl0 .slider_knob");
+  await glassKnob.scrollIntoViewIfNeeded();
+  const glassKnobBox = await glassKnob.boundingBox();
+  assert(glassKnobBox, "cameras-and-lenses did not expose the glass-ray slider");
+  await page.mouse.move(
+    glassKnobBox.x + glassKnobBox.width / 2,
+    glassKnobBox.y + glassKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    glassKnobBox.x + glassKnobBox.width / 2 + 70,
+    glassKnobBox.y + glassKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#lens_glass_rays canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, glassBefore, { timeout: 5000 });
+  await dragCanvasUntilChanged(page, "#lens_glass_rays canvas", [
+    { from: { x: 0.5, y: 0.5 }, to: { x: 0.66, y: 0.4 } },
+    { from: { x: 0.55, y: 0.45 }, to: { x: 0.36, y: 0.58 } },
+  ], "cameras-and-lenses glass drag scene");
+  console.log("OK cameras-and-lenses glass ray scene");
+
+  const playButton = page.locator(".play_pause_button").first();
+  await playButton.scrollIntoViewIfNeeded();
+  const playBefore = await playButton.getAttribute("class");
+  await playButton.click();
+  await page.waitForFunction((previous) => {
+    const classes = document.querySelector(".play_pause_button")?.className || "";
+    return classes !== previous;
+  }, playBefore || "", { timeout: 5000 });
+  console.log("OK cameras-and-lenses play-pause control");
+
+  const chromaticCanvas = page.locator("#lens_chromatic canvas").first();
+  await chromaticCanvas.scrollIntoViewIfNeeded();
+  const chromaticBefore = await chromaticCanvas.evaluate((canvas) => canvas.toDataURL());
+  const chromaticKnob = page.locator("#lens_chromatic_sl0 .slider_knob");
+  await chromaticKnob.scrollIntoViewIfNeeded();
+  const chromaticKnobBox = await chromaticKnob.boundingBox();
+  assert(chromaticKnobBox, "cameras-and-lenses did not expose the chromatic aberration slider");
+  await page.mouse.move(
+    chromaticKnobBox.x + chromaticKnobBox.width / 2,
+    chromaticKnobBox.y + chromaticKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    chromaticKnobBox.x + chromaticKnobBox.width / 2 + 90,
+    chromaticKnobBox.y + chromaticKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#lens_chromatic canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, chromaticBefore, { timeout: 5000 });
+  console.log("OK cameras-and-lenses later lens scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "cameras-and-lenses/",
+    "#lens_detector_sl0 .slider_knob",
+    "cameras-and-lenses route",
+    {
+      expectedRoute: "cameras-and-lenses",
+      minimumChapters: 6,
+      playHref: "#lens_hero",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("cameras-and-lenses route");
+  console.log("OK cameras-and-lenses responsive shell");
+  await page.close();
+}
+
+async function smokeLightsAndShadows(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "lights-and-shadows/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#lns_shadow2 canvas") &&
+      document.querySelector("#lns_shadow2_rot_y_slider_container .slider_knob") &&
+      document.querySelector("#lns_power canvas") &&
+      document.querySelector("#lns_power_slider_container .slider_knob") &&
+      document.querySelector("#lns_hemisphere_proj canvas") &&
+      document.querySelector("#lns_hemisphere_proj_1_slider_container .slider_knob") &&
+      document.querySelector("#lns_bounce canvas") &&
+      document.querySelector("#lns_bounce_slider_container .slider_knob");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(2500);
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/light.js"], "lights-and-shadows");
+  await assertElementContract(page, ".lns_prediction", {
+    attributes: { role: "note" },
+    textFragments: ["Prediction:", "shadow edge sharper or softer", "effect of size from direction"],
+  }, "lights-and-shadows prediction note");
+
+  const openingCanvas = page.locator("#lns_shadow2 canvas").first();
+  await openingCanvas.scrollIntoViewIfNeeded();
+  const openingBefore = await openingCanvas.evaluate((canvas) => canvas.toDataURL());
+  const openingKnob = page.locator("#lns_shadow2_rot_y_slider_container .slider_knob");
+  await openingKnob.scrollIntoViewIfNeeded();
+  const openingKnobBox = await openingKnob.boundingBox();
+  assert(openingKnobBox, "lights-and-shadows did not expose the opening light-size slider");
+  await page.mouse.move(
+    openingKnobBox.x + openingKnobBox.width / 2,
+    openingKnobBox.y + openingKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    openingKnobBox.x + openingKnobBox.width / 2 + 90,
+    openingKnobBox.y + openingKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#lns_shadow2 canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, openingBefore, { timeout: 5000 });
+  await dragCanvasUntilChanged(page, "#lns_shadow2 canvas", [
+    { from: { x: 0.55, y: 0.5 }, to: { x: 0.72, y: 0.36 } },
+    { from: { x: 0.5, y: 0.45 }, to: { x: 0.32, y: 0.62 } },
+  ], "lights-and-shadows opening drag scene");
+  console.log("OK lights-and-shadows opening light scene");
+
+  const powerCanvas = page.locator("#lns_power canvas").first();
+  await powerCanvas.scrollIntoViewIfNeeded();
+  const powerBefore = await powerCanvas.evaluate((canvas) => canvas.toDataURL());
+  const powerKnob = page.locator("#lns_power_slider_container .slider_knob");
+  await powerKnob.scrollIntoViewIfNeeded();
+  const powerKnobBox = await powerKnob.boundingBox();
+  assert(powerKnobBox, "lights-and-shadows did not expose the power slider");
+  await page.mouse.move(
+    powerKnobBox.x + powerKnobBox.width / 2,
+    powerKnobBox.y + powerKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    powerKnobBox.x + powerKnobBox.width / 2 + 90,
+    powerKnobBox.y + powerKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#lns_power canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, powerBefore, { timeout: 5000 });
+  console.log("OK lights-and-shadows power scene");
+
+  const projectedCanvas = page.locator("#lns_hemisphere_proj canvas").first();
+  await projectedCanvas.scrollIntoViewIfNeeded();
+  const projectedBefore = await projectedCanvas.evaluate((canvas) => canvas.toDataURL());
+  const projectedKnob = page.locator("#lns_hemisphere_proj_1_slider_container .slider_knob");
+  await projectedKnob.scrollIntoViewIfNeeded();
+  const projectedKnobBox = await projectedKnob.boundingBox();
+  assert(projectedKnobBox, "lights-and-shadows did not expose the projected-solid-angle slider");
+  await page.mouse.move(
+    projectedKnobBox.x + projectedKnobBox.width / 2,
+    projectedKnobBox.y + projectedKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    projectedKnobBox.x + projectedKnobBox.width / 2 + 75,
+    projectedKnobBox.y + projectedKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#lns_hemisphere_proj canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, projectedBefore, { timeout: 5000 });
+  console.log("OK lights-and-shadows projected solid-angle scene");
+
+  const bounceCanvas = page.locator("#lns_bounce canvas").first();
+  await bounceCanvas.scrollIntoViewIfNeeded();
+  const bounceBefore = await bounceCanvas.evaluate((canvas) => canvas.toDataURL());
+  const bounceKnob = page.locator("#lns_bounce_slider_container .slider_knob");
+  await bounceKnob.scrollIntoViewIfNeeded();
+  const bounceKnobBox = await bounceKnob.boundingBox();
+  assert(bounceKnobBox, "lights-and-shadows did not expose the bounce-light slider");
+  await page.mouse.move(
+    bounceKnobBox.x + bounceKnobBox.width / 2,
+    bounceKnobBox.y + bounceKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    bounceKnobBox.x + bounceKnobBox.width / 2 + 90,
+    bounceKnobBox.y + bounceKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#lns_bounce canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, bounceBefore, { timeout: 5000 });
+  console.log("OK lights-and-shadows later bounce scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "lights-and-shadows/",
+    "#lns_shadow2_rot_y_slider_container .slider_knob",
+    "lights-and-shadows route",
+    {
+      expectedRoute: "lights-and-shadows",
+      minimumChapters: 10,
+      playHref: "#lns_shadow2",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("lights-and-shadows route");
+  console.log("OK lights-and-shadows responsive shell");
+  await page.close();
+}
+
+async function smokeTesseract(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "tesseract/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#ts_3D_demo_slice_container canvas") &&
+      document.querySelector("#ts_3D_demo_slice_slider_container .slider_knob") &&
+      document.querySelector("#ts_3D_cube_container canvas") &&
+      document.querySelector("#ts_3D_cube_slider_container .slider_knob") &&
+      document.querySelector("#ts_3D_proj_rot_container canvas") &&
+      document.querySelector("#ts_3D_projxw_slider_container .slider_knob") &&
+      document.querySelector("#ts_3D_slice_container canvas") &&
+      document.querySelector("#ts_3D_slice_xw_rot_slider_container .slider_knob");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(2500);
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/tesseract.js"], "tesseract");
+  await assertElementContract(page, ".tesseract-slice-cue", {
+    textFragments: ["Reading the slice:", "only the 3D viewpoint", "4D object intersects our world"],
+  }, "tesseract slice-reading cue");
+
+  const openingCanvas = page.locator("#ts_3D_demo_slice_container canvas").first();
+  await openingCanvas.scrollIntoViewIfNeeded();
+  const openingBefore = await openingCanvas.evaluate((canvas) => canvas.toDataURL());
+  const openingKnob = page.locator("#ts_3D_demo_slice_slider_container .slider_knob");
+  await openingKnob.scrollIntoViewIfNeeded();
+  const openingKnobBox = await openingKnob.boundingBox();
+  assert(openingKnobBox, "tesseract did not expose the opening slider scene");
+  await page.mouse.move(
+    openingKnobBox.x + openingKnobBox.width / 2,
+    openingKnobBox.y + openingKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    openingKnobBox.x + openingKnobBox.width / 2 + 90,
+    openingKnobBox.y + openingKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#ts_3D_demo_slice_container canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, openingBefore, { timeout: 5000 });
+  console.log("OK tesseract opening slider scene");
+
+  const constructionCanvas = page.locator("#ts_3D_cube_container canvas").first();
+  await constructionCanvas.scrollIntoViewIfNeeded();
+  const constructionBefore = await constructionCanvas.evaluate((canvas) => canvas.toDataURL());
+  const constructionKnob = page.locator("#ts_3D_cube_slider_container .slider_knob");
+  await constructionKnob.scrollIntoViewIfNeeded();
+  const constructionKnobBox = await constructionKnob.boundingBox();
+  assert(constructionKnobBox, "tesseract did not expose the early construction slider");
+  await page.mouse.move(
+    constructionKnobBox.x + constructionKnobBox.width / 2,
+    constructionKnobBox.y + constructionKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    constructionKnobBox.x + constructionKnobBox.width / 2 + 85,
+    constructionKnobBox.y + constructionKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#ts_3D_cube_container canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, constructionBefore, { timeout: 5000 });
+  console.log("OK tesseract early construction scene");
+
+  await dragCanvasUntilChanged(page, "#ts_3D_proj_rot_container canvas", [
+    { from: { x: 0.55, y: 0.5 }, to: { x: 0.72, y: 0.35 } },
+    { from: { x: 0.45, y: 0.5 }, to: { x: 0.28, y: 0.66 } },
+  ], "tesseract perspective drag scene");
+  console.log("OK tesseract perspective drag scene");
+
+  const rotationCanvas = page.locator("#ts_3D_proj_rot_container canvas").first();
+  await rotationCanvas.scrollIntoViewIfNeeded();
+  const rotationBefore = await rotationCanvas.evaluate((canvas) => canvas.toDataURL());
+  const rotationKnob = page.locator("#ts_3D_projxw_slider_container .slider_knob");
+  await rotationKnob.scrollIntoViewIfNeeded();
+  const rotationKnobBox = await rotationKnob.boundingBox();
+  assert(rotationKnobBox, "tesseract did not expose the xw-plane rotation slider");
+  await page.mouse.move(
+    rotationKnobBox.x + rotationKnobBox.width / 2,
+    rotationKnobBox.y + rotationKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    rotationKnobBox.x + rotationKnobBox.width / 2 + 90,
+    rotationKnobBox.y + rotationKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#ts_3D_proj_rot_container canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, rotationBefore, { timeout: 5000 });
+  console.log("OK tesseract plane-of-rotation scene");
+
+  const sliceCanvas = page.locator("#ts_3D_slice_container canvas").first();
+  await sliceCanvas.scrollIntoViewIfNeeded();
+  const sliceBefore = await sliceCanvas.evaluate((canvas) => canvas.toDataURL());
+  const sliceKnob = page.locator("#ts_3D_slice_xw_rot_slider_container .slider_knob");
+  await sliceKnob.scrollIntoViewIfNeeded();
+  const sliceKnobBox = await sliceKnob.boundingBox();
+  assert(sliceKnobBox, "tesseract did not expose the later 3D slice rotation slider");
+  await page.mouse.move(
+    sliceKnobBox.x + sliceKnobBox.width / 2,
+    sliceKnobBox.y + sliceKnobBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    sliceKnobBox.x + sliceKnobBox.width / 2 + 90,
+    sliceKnobBox.y + sliceKnobBox.height / 2,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#ts_3D_slice_container canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, sliceBefore, { timeout: 5000 });
+  console.log("OK tesseract later slice scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "tesseract/",
+    "#ts_3D_demo_slice_slider_container .slider_knob",
+    "tesseract route",
+    {
+      expectedRoute: "tesseract",
+      minimumChapters: 10,
+      playHref: "#ts_3D_demo_slice_container",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("tesseract route");
+  console.log("OK tesseract responsive shell");
+  await page.close();
+}
+
+async function smokeGears(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "gears/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#gears_demo canvas") &&
+      document.querySelector("#gears_demo .play_pause_button") &&
+      document.querySelector("#gears_angular_velocity canvas") &&
+      document.querySelector("#gears_angular_velocity_slider_container .slider_knob") &&
+      document.querySelector("#gears_resize canvas") &&
+      document.querySelector("#gears_resize_slider_container .slider_knob") &&
+      document.querySelector("#gears_four canvas") &&
+      document.querySelector("#gears_four_slider_container .slider_knob");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(2500);
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/gears.js"], "gears");
+  await assertElementContract(page, ".gear-ratio-check", {
+    attributes: { role: "note" },
+    textFragments: ["Ratio check:", "half as many turns", "direction still reverses"],
+  }, "gears ratio note");
+
+  const openingCanvas = page.locator("#gears_angular_velocity canvas").first();
+  await openingCanvas.scrollIntoViewIfNeeded();
+  const openingBefore = await openingCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#gears_angular_velocity_slider_container .slider_knob", 90, 0, "gears opening slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#gears_angular_velocity canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, openingBefore, { timeout: 5000 });
+  console.log("OK gears opening angular-velocity scene");
+
+  const playButton = page.locator("#gears_demo .play_pause_button").first();
+  await playButton.scrollIntoViewIfNeeded();
+  await playButton.click();
+  await page.waitForFunction(() => {
+    const button = document.querySelector("#gears_demo .play_pause_button");
+    return button && !button.classList.contains("playing");
+  }, null, { timeout: 5000 });
+  await playButton.click();
+  await page.waitForFunction(() => {
+    const button = document.querySelector("#gears_demo .play_pause_button");
+    return button && button.classList.contains("playing");
+  }, null, { timeout: 5000 });
+  console.log("OK gears play-pause control");
+
+  const ratioCanvas = page.locator("#gears_resize canvas").first();
+  await ratioCanvas.scrollIntoViewIfNeeded();
+  const ratioBefore = await ratioCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#gears_resize_slider_container .slider_knob", 90, 0, "gears ratio slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#gears_resize canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, ratioBefore, { timeout: 5000 });
+  console.log("OK gears ratio scene");
+
+  const compoundCanvas = page.locator("#gears_four canvas").first();
+  await compoundCanvas.scrollIntoViewIfNeeded();
+  const compoundBefore = await compoundCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#gears_four_slider_container .slider_knob", 90, 0, "gears compound slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#gears_four canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, compoundBefore, { timeout: 5000 });
+  console.log("OK gears compound-gear scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "gears/",
+    "#gears_angular_velocity_slider_container .slider_knob",
+    "gears route",
+    {
+      expectedRoute: "gears",
+      minimumChapters: 10,
+      playHref: "#gears_demo",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("gears route");
+  console.log("OK gears responsive shell");
+  await page.close();
+}
+
+async function smokeStargazingDashboard(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "stargazing-dashboard/", "#reference-footer");
+
+  await page.waitForFunction(() => {
+    return document.body && typeof document.body.dataset.stargazingReady === "string";
+  }, null, { timeout: 30000 });
+
+  const readyState = await page.evaluate(() => document.body.dataset.stargazingReady);
+  assert(
+    readyState === "true",
+    `stargazing-dashboard did not reach WebGL ready state (was "${readyState}")`,
+  );
+
+  await assertLocalScriptSources(
+    page,
+    [
+      "./js/astro.js",
+      "./js/state.js",
+      "./js/controls.js",
+      "./js/catalog.js",
+      "./js/scene.js",
+      "./js/hud.js",
+      "./js/main.js",
+    ],
+    "stargazing-dashboard",
+  );
+
+  const canvasTabindex = await page.evaluate(() => {
+    const canvas = document.querySelector("#sky-canvas");
+    return canvas ? canvas.getAttribute("tabindex") : null;
+  });
+  assert(canvasTabindex === "0", `#sky-canvas missing tabindex="0" (was ${canvasTabindex})`);
+
+  await page.locator("#sky-canvas").focus();
+  const canvasFocused = await page.evaluate(() => {
+    return document.activeElement === document.querySelector("#sky-canvas");
+  });
+  assert(canvasFocused, "#sky-canvas did not become the active element after focus()");
+
+  const lookBefore = await page.evaluate(() => window.StargazingState.getState().look);
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowUp");
+  await page.waitForFunction((previous) => {
+    const look = window.StargazingState.getState().look;
+    return look.azDeg !== previous.azDeg && look.altDeg !== previous.altDeg;
+  }, lookBefore, { timeout: 5000 });
+  console.log("OK stargazing-dashboard keyboard navigation");
+
+  await page.waitForSelector("#tonight-button", { timeout: 15000 });
+  await page.waitForSelector("#shortcut-toggle", { timeout: 15000 });
+  await page.waitForSelector("#shortcut-help", { state: "attached", timeout: 15000 });
+  await page.waitForSelector("#sky-tooltip", { state: "attached", timeout: 15000 });
+  await page.waitForSelector("#object-details", { state: "attached", timeout: 15000 });
+  await page.waitForSelector("#sky-legend", { timeout: 15000 });
+  await page.waitForSelector('[data-display="zoom"]', { timeout: 15000 });
+  await page.waitForSelector('[data-display="brightness"]', { timeout: 15000 });
+  await page.waitForSelector('[data-display="starScale"]', { timeout: 15000 });
+  await page.waitForSelector('[data-display="magLimit"]', { timeout: 15000 });
+
+  const constellationToggleBefore = await page.evaluate(() => {
+    return window.StargazingState.getState().toggles.constellations;
+  });
+  await page.locator('[data-toggle="constellations"]').click();
+  await page.waitForFunction((previous) => {
+    return window.StargazingState.getState().toggles.constellations !== previous;
+  }, constellationToggleBefore, { timeout: 5000 });
+
+  await page.locator('[data-display="magLimit"]').evaluate((input) => {
+    input.value = "4.5";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await page.waitForFunction(() => {
+    return Math.abs(window.StargazingState.getState().display.magLimit - 4.5) < 0.01;
+  }, null, { timeout: 5000 });
+
+  const playingBefore = await page.evaluate(() => window.StargazingState.getState().time.playing);
+  await page.locator("#time-play").click();
+  await page.waitForFunction((previous) => {
+    return window.StargazingState.getState().time.playing !== previous;
+  }, playingBefore, { timeout: 5000 });
+
+  await page.locator("#shortcut-toggle").click();
+  await page.waitForFunction(() => {
+    const help = document.querySelector("#shortcut-help");
+    return help && !help.hidden;
+  }, null, { timeout: 5000 });
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => {
+    const help = document.querySelector("#shortcut-help");
+    return help && help.hidden;
+  }, null, { timeout: 5000 });
+
+  await page.locator("#tonight-button").click();
+  await page.waitForFunction(() => {
+    const state = window.StargazingState.getState();
+    const details = document.querySelector("#object-details");
+    return Boolean(state.selectedTargetId) && details && details.dataset.open === "true";
+  }, null, { timeout: 5000 });
+  console.log("OK stargazing-dashboard selective map controls");
+
+  await page.locator("#details-close").click();
+  await page.waitForFunction(() => {
+    const details = document.querySelector("#object-details");
+    return details && details.hidden && details.dataset.open === "false";
+  }, null, { timeout: 5000 });
+  console.log("OK stargazing-dashboard details close state");
+
+  // RED: #sky-tooltip shows a fallback instruction on mousemove over empty
+  // sky ("Select a target or point at a star to see details"), and changes
+  // to the selected object's data when an object is beneath the cursor.
+  // Trigger a mousemove over the canvas to make the tooltip visible.
+  const canvas = page.locator("#sky-canvas");
+  await canvas.hover({ force: true });
+  await page.waitForFunction(() => {
+    const tooltip = document.getElementById("sky-tooltip");
+    return tooltip && !tooltip.hidden && tooltip.textContent.length > 0;
+  }, null, { timeout: 5000 });
+
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("stargazing-dashboard route");
+  await page.close();
+}
+
+async function smokeGps(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "gps/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#gps_orbits_hero canvas") &&
+      document.querySelector("#map0 canvas") &&
+      document.querySelector("#map_drone0 canvas") &&
+      document.querySelector("#map_drone0_sl0 .slider_knob") &&
+      document.querySelector("#orbital_inclination canvas") &&
+      document.querySelector("#orbital_inclination_sl1 .slider_knob");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(3000);
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/gps.js"], "gps");
+  await assertElementContract(page, ".gps-orbit-cue", {
+    textFragments: ["Orientation check:", "not the satellite timing", "turns the constellation into ranges"],
+  }, "gps orbit-orientation cue");
+
+  await dragCanvasUntilChanged(
+    page,
+    "#map0 canvas",
+    [
+      { from: { x: 0.35, y: 0.45 }, to: { x: 0.7, y: 0.45 } },
+      { from: { x: 0.65, y: 0.55 }, to: { x: 0.35, y: 0.4 } },
+    ],
+    "gps simple positioning drag scene",
+  );
+  console.log("OK gps drag scene");
+
+  const timeCanvas = page.locator("#map_drone0 canvas").first();
+  await timeCanvas.scrollIntoViewIfNeeded();
+  const timeBefore = await timeCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#map_drone0_sl0 .slider_knob", 120, 0, "gps time slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#map_drone0 canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, timeBefore, { timeout: 5000 });
+  console.log("OK gps time slider scene");
+
+  const orbitCanvas = page.locator("#orbital_inclination canvas").first();
+  await orbitCanvas.scrollIntoViewIfNeeded();
+  const orbitBefore = await orbitCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#orbital_inclination_sl1 .slider_knob", 120, 0, "gps inclination slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#orbital_inclination canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, orbitBefore, { timeout: 5000 });
+  console.log("OK gps orbital inclination scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "gps/",
+    "#map0 canvas",
+    "gps route",
+    {
+      expectedRoute: "gps",
+      minimumChapters: 15,
+      playHref: "#gps_orbits_hero",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("gps route");
+  console.log("OK gps responsive shell");
+  await page.close();
+}
+
+async function smokeEarthAndSun(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "earth-and-sun/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#es_earth_sunlight canvas") &&
+      document.querySelector("#es_earth_sunlight_date_slider_container .slider_knob") &&
+      document.querySelector("#es_earth_sunlight_time_slider_container .slider_knob") &&
+      document.querySelector("#es_plane canvas") &&
+      document.querySelector("#es_tropical_year canvas") &&
+      document.querySelector("#es_tropical_year_slider_container .slider_knob");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(3000);
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/earth_sun.js"], "earth-and-sun");
+  await assertElementContract(page, ".earth-sun-comparison-cue", {
+    textFragments: ["hold the date fixed while moving time", "reveals rotation", "seasonal shift in sunlight"],
+  }, "earth-and-sun comparison cue");
+
+  await dragCanvasUntilChanged(
+    page,
+    "#es_earth_sunlight canvas",
+    [
+      { from: { x: 0.35, y: 0.45 }, to: { x: 0.7, y: 0.55 } },
+      { from: { x: 0.65, y: 0.55 }, to: { x: 0.35, y: 0.35 } },
+    ],
+    "earth-and-sun opening globe drag scene",
+  );
+  console.log("OK earth-and-sun opening globe drag scene");
+
+  const sunlightCanvas = page.locator("#es_earth_sunlight canvas").first();
+  await sunlightCanvas.scrollIntoViewIfNeeded();
+  const timeBefore = await sunlightCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(
+    page,
+    "#es_earth_sunlight_time_slider_container .slider_knob",
+    120,
+    0,
+    "earth-and-sun opening time slider",
+  );
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#es_earth_sunlight canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, timeBefore, { timeout: 5000 });
+  console.log("OK earth-and-sun opening time slider");
+
+  const tropicalCanvas = page.locator("#es_tropical_year canvas").first();
+  await tropicalCanvas.scrollIntoViewIfNeeded();
+  const tropicalBefore = await tropicalCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(
+    page,
+    "#es_tropical_year_slider_container .slider_knob",
+    120,
+    0,
+    "earth-and-sun tropical-year slider",
+  );
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#es_tropical_year canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, tropicalBefore, { timeout: 5000 });
+  console.log("OK earth-and-sun tropical-year scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "earth-and-sun/",
+    "#es_earth_sunlight canvas",
+    "earth-and-sun route",
+    {
+      expectedRoute: "earth-and-sun",
+      minimumChapters: 11,
+      playHref: "#es_earth_sunlight",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("earth-and-sun route");
+  console.log("OK earth-and-sun responsive shell");
+  await page.close();
+}
+
+async function smokeBicycle(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "bicycle/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#hero canvas") &&
+      document.querySelector("#hero .play_pause_button") &&
+      document.querySelector("#hero_sl0 .slider_knob") &&
+      document.querySelector("#force1 canvas") &&
+      document.querySelector("#force1_sl0 .slider_knob") &&
+      document.querySelector("#slip_angle2 canvas") &&
+      document.querySelector("#slip_angle2_sl0 .slider_knob") &&
+      document.querySelector("#torsion1 canvas") &&
+      document.querySelector("#torsion1_sl0 .slider_knob");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(3000);
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/bicycle.js"], "bicycle");
+  await assertElementContract(page, ".wheel-velocity-guide", {
+    tagName: "NAV",
+    attributes: { "aria-label": "Wheel motion presets" },
+  }, "bicycle wheel-motion presets");
+  await assertLinkSequence(page, ".wheel-velocity-guide a", [
+    { text: "sliding", href: "#wheel_velocity1", onclick: "wheel_velocity1_f0();return false;" },
+    { text: "spinning", href: "#wheel_velocity1", onclick: "wheel_velocity1_f1();return false;" },
+    { text: "rolling", href: "#wheel_velocity1", onclick: "wheel_velocity1_f2();return false;" },
+  ], "bicycle wheel-motion presets");
+
+  const heroPlayButton = page.locator("#hero .play_pause_button").first();
+  await heroPlayButton.scrollIntoViewIfNeeded();
+  await heroPlayButton.click();
+  await page.waitForFunction(() => {
+    const button = document.querySelector("#hero .play_pause_button");
+    return button && !button.classList.contains("playing");
+  }, null, { timeout: 5000 });
+  await dragCanvasUntilChanged(
+    page,
+    "#hero canvas",
+    [
+      { from: { x: 0.35, y: 0.45 }, to: { x: 0.7, y: 0.55 } },
+      { from: { x: 0.65, y: 0.55 }, to: { x: 0.35, y: 0.35 } },
+    ],
+    "bicycle opening hero drag scene",
+  );
+  await heroPlayButton.click();
+  await page.waitForFunction(() => {
+    const button = document.querySelector("#hero .play_pause_button");
+    return button && button.classList.contains("playing");
+  }, null, { timeout: 5000 });
+  console.log("OK bicycle opening hero scene");
+
+  const forceCanvas = page.locator("#force1 canvas").first();
+  await forceCanvas.scrollIntoViewIfNeeded();
+  const forceBefore = await forceCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#force1_sl0 .slider_knob", 90, 0, "bicycle force slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#force1 canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, forceBefore, { timeout: 5000 });
+  console.log("OK bicycle force scene");
+
+  const slipCanvas = page.locator("#slip_angle2 canvas").first();
+  await slipCanvas.scrollIntoViewIfNeeded();
+  const slipBefore = await slipCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#slip_angle2_sl0 .slider_knob", 90, 0, "bicycle slip-angle slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#slip_angle2 canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, slipBefore, { timeout: 5000 });
+  console.log("OK bicycle slip-angle scene");
+
+  const torsionCanvas = page.locator("#torsion1 canvas").first();
+  await torsionCanvas.scrollIntoViewIfNeeded();
+  const torsionBefore = await torsionCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#torsion1_sl0 .slider_knob", 90, 0, "bicycle torsion slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#torsion1 canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, torsionBefore, { timeout: 5000 });
+  console.log("OK bicycle torsion scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "bicycle/",
+    "#hero canvas",
+    "bicycle route",
+    {
+      expectedRoute: "bicycle",
+      minimumChapters: 12,
+      playHref: "#hero",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("bicycle route");
+  console.log("OK bicycle responsive shell");
+  await page.close();
+}
+
+async function smokeAirfoil(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "airfoil/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#hero_fvm canvas") &&
+      document.querySelector("#hero_fvm_sl0 .slider_knob") &&
+      document.querySelector("#fdm_hero canvas") &&
+      document.querySelector("#fdm_hero_sl0 .slider_knob") &&
+      document.querySelector("#particles1 canvas") &&
+      document.querySelector("#airfoil_fvm2 canvas") &&
+      document.querySelector("#airfoil_fvm2_sl0 .slider_knob");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(3000);
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/airfoil.js"], "airfoil");
+  await assertElementContract(page, ".airfoil_flow_prompt[open]", {
+    tagName: "DETAILS",
+    textFragments: ["What to watch in the opening flow", "leading edge", "trailing edge"],
+  }, "airfoil opening-flow guide");
+
+  const heroCanvas = page.locator("#hero_fvm canvas").first();
+  await heroCanvas.scrollIntoViewIfNeeded();
+  const heroBefore = await heroCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#hero_fvm_sl0 .slider_knob", 90, 0, "airfoil opening slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#hero_fvm canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, heroBefore, { timeout: 5000 });
+  console.log("OK airfoil opening airfoil scene");
+
+  await dragCanvasUntilChanged(
+    page,
+    "#particles1 canvas",
+    [
+      { from: { x: 0.35, y: 0.45 }, to: { x: 0.7, y: 0.55 } },
+      { from: { x: 0.65, y: 0.55 }, to: { x: 0.35, y: 0.35 } },
+    ],
+    "airfoil particle drag scene",
+  );
+  console.log("OK airfoil particle drag scene");
+
+  const viscosityKnob = page.locator("#fdm_hero_sl0 .slider_knob").first();
+  await viscosityKnob.scrollIntoViewIfNeeded();
+  const viscosityBeforeBox = await viscosityKnob.boundingBox();
+  assert(viscosityBeforeBox, "airfoil did not expose the viscosity slider control");
+  await dragKnob(page, "#fdm_hero_sl0 .slider_knob", 90, 0, "airfoil viscosity slider");
+  await page.waitForTimeout(250);
+  const viscosityAfterBox = await viscosityKnob.boundingBox();
+  assert(viscosityAfterBox, "airfoil viscosity slider disappeared after drag");
+  assert(
+    Math.abs(viscosityAfterBox.x - viscosityBeforeBox.x) > 20,
+    "airfoil viscosity slider did not move under drag input",
+  );
+  console.log("OK airfoil viscosity scene");
+
+  const laterCanvas = page.locator("#airfoil_fvm2 canvas").first();
+  await laterCanvas.scrollIntoViewIfNeeded();
+  const laterBefore = await laterCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#airfoil_fvm2_sl0 .slider_knob", 90, 0, "airfoil later airfoil slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#airfoil_fvm2 canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, laterBefore, { timeout: 10000 });
+  console.log("OK airfoil later airfoil scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "airfoil/",
+    "#hero_fvm canvas",
+    "airfoil route",
+    {
+      expectedRoute: "airfoil",
+      minimumChapters: 8,
+      playHref: "#hero_fvm",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("airfoil route");
+  console.log("OK airfoil responsive shell");
+  await page.close();
+}
+
+async function smokeCurvesAndSurfaces(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "curves-and-surfaces/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#cs_control_points canvas") &&
+      document.querySelector("#cs_linear_segment canvas") &&
+      document.querySelector("#cs_linear_segment_sl0 .slider_knob") &&
+      document.querySelector("#cs_curve_subdiv_topo canvas") &&
+      document.querySelector("#cs_curve_subdiv_topo_sl0 .slider_knob") &&
+      document.querySelector("#cs_subdiv0 canvas") &&
+      document.querySelector("#cs_subdiv0_sl0 .slider_knob");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(2500);
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/curves.js"], "curves-and-surfaces");
+  await assertElementContract(page, ".curves-handle-cue", {
+    textFragments: ["white points are handles", "does not pass through them"],
+  }, "curves-and-surfaces handle cue");
+
+  const controlCanvas = page.locator("#cs_control_points canvas").first();
+  await controlCanvas.scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => {
+    return typeof control_points !== "undefined" && control_points?.[0]?.visible === true;
+  }, null, { timeout: 5000 });
+  const controlBox = await controlCanvas.boundingBox();
+  assert(controlBox, "curves-and-surfaces control-point drag scene did not expose its canvas");
+  let dragOrigin = null;
+  for (let yi = 1; yi <= 15 && !dragOrigin; yi += 1) {
+    for (let xi = 1; xi <= 19 && !dragOrigin; xi += 1) {
+      const x = controlBox.x + (controlBox.width * xi / 20);
+      const y = controlBox.y + (controlBox.height * yi / 16);
+      await page.mouse.move(x, y);
+      const cursor = await controlCanvas.evaluate((element) => element.style.cursor || getComputedStyle(element).cursor);
+      if (cursor === "move" || cursor === "pointer") {
+        dragOrigin = { x, y };
+      }
+    }
+  }
+  assert(dragOrigin, "curves-and-surfaces control-point drag scene did not expose a draggable hotspot");
+  const controlBefore = await page.evaluate(() => JSON.stringify(control_points[0].points()));
+  await page.mouse.move(dragOrigin.x, dragOrigin.y);
+  await page.mouse.down();
+  await page.mouse.move(dragOrigin.x + 40, dragOrigin.y - 30, { steps: 12 });
+  await page.mouse.up();
+  await page.waitForFunction((previous) => {
+    return JSON.stringify(control_points[0].points()) !== previous;
+  }, controlBefore, { timeout: 5000 });
+  console.log("OK curves-and-surfaces control-point scene");
+
+  const segmentCanvas = page.locator("#cs_linear_segment canvas").first();
+  await segmentCanvas.scrollIntoViewIfNeeded();
+  const segmentBefore = await segmentCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#cs_linear_segment_sl0 .slider_knob", 100, 0, "curves-and-surfaces linear slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#cs_linear_segment canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, segmentBefore, { timeout: 5000 });
+  console.log("OK curves-and-surfaces linear interpolation scene");
+
+  const splineCanvas = page.locator("#cs_curve_subdiv_topo canvas").first();
+  await splineCanvas.scrollIntoViewIfNeeded();
+  const splineBefore = await splineCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#cs_curve_subdiv_topo_sl0 .slider_knob", 100, 0, "curves-and-surfaces subdivision curve slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#cs_curve_subdiv_topo canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, splineBefore, { timeout: 5000 });
+  console.log("OK curves-and-surfaces subdivision curve scene");
+
+  const surfaceCanvas = page.locator("#cs_subdiv0 canvas").first();
+  await surfaceCanvas.scrollIntoViewIfNeeded();
+  const surfaceBefore = await surfaceCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#cs_subdiv0_sl0 .slider_knob", 100, 0, "curves-and-surfaces surface subdivision slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#cs_subdiv0 canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, surfaceBefore, { timeout: 5000 });
+  console.log("OK curves-and-surfaces surface subdivision scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "curves-and-surfaces/",
+    "#cs_control_points canvas",
+    "curves-and-surfaces route",
+    {
+      expectedRoute: "curves-and-surfaces",
+      minimumChapters: 13,
+      playHref: "#cs_subdiv_hero",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("curves-and-surfaces route");
+  console.log("OK curves-and-surfaces responsive shell");
+  await page.close();
+}
+
+async function smokeInternalCombustionEngine(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "internal-combustion-engine/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#ice_hero canvas") &&
+      document.querySelector("#ice_cannon canvas") &&
+      document.querySelector("#ice_cannon_sl0 .slider_knob") &&
+      document.querySelector("#ice_pressure canvas") &&
+      document.querySelector("#ice_pressure_sl0 .slider_knob") &&
+      document.querySelector("#ice_starter canvas") &&
+      document.querySelector("#ice_starter_sl0 .slider_knob");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(3000);
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/ice.js"], "internal-combustion-engine");
+  await assertElementContract(page, ".ice-cycle-map", {
+    tagName: "OL",
+    attributes: { "aria-label": "Four-stroke cycle" },
+  }, "internal-combustion-engine cycle map");
+  await assertLinkSequence(page, ".ice-cycle-map a", [
+    { text: "Intake", href: "#ice_cylinder_valve_stroke0", onclick: null },
+    { text: "Compression", href: "#ice_cylinder_valve_stroke1", onclick: null },
+    { text: "Power", href: "#ice_cylinder_valve_stroke2", onclick: null },
+    { text: "Exhaust", href: "#ice_cylinder_valve_stroke3", onclick: null },
+  ], "internal-combustion-engine cycle map");
+
+  await dragCanvasUntilChanged(
+    page,
+    "#ice_hero canvas",
+    [
+      { from: { x: 0.35, y: 0.45 }, to: { x: 0.7, y: 0.55 } },
+      { from: { x: 0.65, y: 0.55 }, to: { x: 0.35, y: 0.35 } },
+    ],
+    "internal-combustion-engine opening hero drag scene",
+  );
+  console.log("OK internal-combustion-engine opening hero scene");
+
+  const cannonCanvas = page.locator("#ice_cannon canvas").first();
+  await cannonCanvas.scrollIntoViewIfNeeded();
+  const cannonBefore = await cannonCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#ice_cannon_sl0 .slider_knob", 90, 0, "internal-combustion-engine cannon slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#ice_cannon canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, cannonBefore, { timeout: 5000 });
+  console.log("OK internal-combustion-engine cannon scene");
+
+  const pressureCanvas = page.locator("#ice_pressure canvas").first();
+  await pressureCanvas.scrollIntoViewIfNeeded();
+  const pressureBefore = await pressureCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#ice_pressure_sl0 .slider_knob", 90, 0, "internal-combustion-engine pressure slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#ice_pressure canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, pressureBefore, { timeout: 5000 });
+  console.log("OK internal-combustion-engine pressure scene");
+
+  const starterCanvas = page.locator("#ice_starter canvas").first();
+  await starterCanvas.scrollIntoViewIfNeeded();
+  const starterBefore = await starterCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#ice_starter_sl0 .slider_knob", 90, 0, "internal-combustion-engine starter slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#ice_starter canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, starterBefore, { timeout: 5000 });
+  console.log("OK internal-combustion-engine starter scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "internal-combustion-engine/",
+    "#ice_hero canvas",
+    "internal-combustion-engine route",
+    {
+      expectedRoute: "internal-combustion-engine",
+      minimumChapters: 8,
+      playHref: "#ice_hero",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("internal-combustion-engine route");
+  console.log("OK internal-combustion-engine responsive shell");
+  await page.close();
+}
+
+async function smokeMechanicalWatch(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "mechanical-watch/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#hero canvas") &&
+      document.querySelector("#hero_sl0 .slider_knob") &&
+      document.querySelector("#coil_spring canvas") &&
+      document.querySelector("#coil_spring_sl0 .slider_knob") &&
+      document.querySelector("#automatic_behavior canvas") &&
+      document.querySelector("#automatic_behavior_sl0 .slider_knob") &&
+      document.querySelector("#credit_card_size canvas") &&
+      document.querySelector("#credit_card_size_sl0 .slider_knob");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(3000);
+
+  await assertLocalScriptSources(page, ["../shared/mechanical-watch/js/base.js", "../shared/mechanical-watch/js/watch.js"], "mechanical-watch");
+  const escapementStatuses = await page.locator(".gear_train5_explainer").evaluateAll((elements) => elements.map((element) => ({
+    id: element.id,
+    role: element.getAttribute("role"),
+    live: element.getAttribute("aria-live"),
+    atomic: element.getAttribute("aria-atomic"),
+    text: (element.textContent || "").replace(/\s+/g, " ").trim(),
+  })));
+  assert(escapementStatuses.length === 6, "mechanical-watch escapement did not expose six phase statuses");
+  assert(
+    escapementStatuses.every((status, index) =>
+      status.id === `gear_train5_explainer${index + 1}` &&
+      status.role === "status" &&
+      status.live === "polite" &&
+      status.atomic === "true"),
+    "mechanical-watch escapement status semantics changed",
+  );
+  assert(escapementStatuses[0].text.includes("balance wheel is swinging back"), "mechanical-watch first escapement phase changed");
+  assert(escapementStatuses[5].text.includes("balance wheel continues its swing"), "mechanical-watch final escapement phase changed");
+
+  await dragCanvasUntilChanged(
+    page,
+    "#hero canvas",
+    [
+      { from: { x: 0.35, y: 0.45 }, to: { x: 0.7, y: 0.55 } },
+      { from: { x: 0.65, y: 0.55 }, to: { x: 0.35, y: 0.35 } },
+    ],
+    "mechanical-watch opening movement drag scene",
+  );
+  console.log("OK mechanical-watch opening movement scene");
+
+  const springCanvas = page.locator("#coil_spring canvas").first();
+  await springCanvas.scrollIntoViewIfNeeded();
+  const springBefore = await springCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#coil_spring_sl0 .slider_knob", 90, 0, "mechanical-watch coil spring slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#coil_spring canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, springBefore, { timeout: 5000 });
+  console.log("OK mechanical-watch power scene");
+
+  const automaticCanvas = page.locator("#automatic_behavior canvas").first();
+  await automaticCanvas.scrollIntoViewIfNeeded();
+  const automaticBefore = await automaticCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#automatic_behavior_sl0 .slider_knob", 90, 0, "mechanical-watch automatic winding slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#automatic_behavior canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, automaticBefore, { timeout: 5000 });
+  console.log("OK mechanical-watch automatic winding scene");
+
+  const sizeCanvas = page.locator("#credit_card_size canvas").first();
+  await sizeCanvas.scrollIntoViewIfNeeded();
+  const sizeBefore = await sizeCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#credit_card_size_sl0 .slider_knob", 90, 0, "mechanical-watch size slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#credit_card_size canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, sizeBefore, { timeout: 5000 });
+  console.log("OK mechanical-watch final size scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "mechanical-watch/",
+    "#hero canvas",
+    "mechanical-watch route",
+    {
+      expectedRoute: "mechanical-watch",
+      minimumChapters: 10,
+      playHref: "#hero",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("mechanical-watch route");
+  console.log("OK mechanical-watch responsive shell");
+  await page.close();
+}
+
+async function smokeInteractiveMechanicalWatch(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  const label = "interactive-mechanical-watch route";
+  const canvasSelector = "[data-exploded-canvas] canvas.exploded-watch__webgl";
+
+  await assertRoute(page, "interactive-mechanical-watch/", "#reference-footer");
+  await assertLocalScriptSources(
+    page,
+    [
+      "../shared/mechanical-watch/js/base.js",
+      "../shared/mechanical-watch/js/watch.js",
+      "./js/legacy-watch-accessibility.js",
+      "./js/watch-parts.js",
+      "./js/exploded-view.js",
+      "./js/exploded-view-three.js",
+    ],
+    "interactive-mechanical-watch",
+  );
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "interactive-mechanical-watch/",
+    canvasSelector,
+    label,
+    {
+      expectedRoute: "interactive-mechanical-watch",
+      minimumChapters: 10,
+      playHref: "#hero",
+    },
+  );
+  await page.waitForSelector("#hero canvas", { timeout: 30000 });
+  await page.waitForSelector(canvasSelector, { timeout: 30000 });
+  await page.waitForFunction(() => document.body.dataset.watchAccessibility === "ready", null, { timeout: 5000 });
+
+  const chapterState = await page.evaluate(() => {
+    const ids = Array.from(document.querySelectorAll("[data-story-chapter]")).map((section) => section.id);
+    const labels = Object.fromEntries(Array.from(document.querySelectorAll(".story-rail__link")).map((link) => [
+      link.dataset.storyTarget,
+      {
+        text: link.textContent?.trim() || "",
+        title: link.title,
+        ariaLabel: link.getAttribute("aria-label"),
+      },
+    ]));
+    return { ids, labels };
+  });
+  assert(
+    chapterState.ids.indexOf("from-pixels-to-resin") < chapterState.ids.indexOf("further-watching-and-reading"),
+    `${label} should place the resin synthesis before references`,
+  );
+  assert(chapterState.labels["from-pixels-to-resin"]?.text === "Resin prototype", `${label} did not expose the compact resin label`);
+  assert(chapterState.labels["from-pixels-to-resin"]?.title === "From Pixels to Resin", `${label} compact resin label lost its full title`);
+  assert(chapterState.labels["from-pixels-to-resin"]?.ariaLabel === "From Pixels to Resin", `${label} compact resin label lost its accessible name`);
+
+  const legacyCanvas = page.locator("#hero canvas").first();
+  await legacyCanvas.scrollIntoViewIfNeeded();
+  await legacyCanvas.evaluate((canvas) => canvas.closest(".drawer_container")?.drawer?.set_paused(true));
+  const legacyCanvasBefore = await legacyCanvas.evaluate((canvas) => canvas.toDataURL());
+  await legacyCanvas.focus();
+  await legacyCanvas.press("ArrowRight");
+  await page.waitForFunction((previous) => document.querySelector("#hero canvas")?.toDataURL() !== previous, legacyCanvasBefore, { timeout: 5000 });
+  assert(await legacyCanvas.getAttribute("tabindex") === "0", `${label} legacy canvas should be keyboard focusable`);
+
+  const verticalCanvas = page.locator("#hero_movement canvas").first();
+  await verticalCanvas.scrollIntoViewIfNeeded();
+  await verticalCanvas.evaluate((canvas) => canvas.closest(".drawer_container")?.drawer?.set_paused(true));
+  const verticalCanvasBefore = await verticalCanvas.evaluate((canvas) => canvas.toDataURL());
+  await verticalCanvas.focus();
+  await verticalCanvas.press("ArrowUp");
+  await page.waitForFunction((previous) => document.querySelector("#hero_movement canvas")?.toDataURL() !== previous, verticalCanvasBefore, { timeout: 5000 });
+  assert(await verticalCanvas.getAttribute("aria-keyshortcuts") === "ArrowUp ArrowDown Escape", `${label} y-only canvas advertised ineffective horizontal keys`);
+
+  const multiSliderLabels = await page.locator("#torsion_spring3_sl0 .slider_knob, #torsion_spring3_sl1 .slider_knob, #torsion_spring3_sl2 .slider_knob").evaluateAll((knobs) => knobs.map((knob) => knob.getAttribute("aria-label")));
+  assert(new Set(multiSliderLabels).size === 3 && multiSliderLabels.every(Boolean), `${label} multi-slider controls should expose unique accessible names`);
+
+  const legacySlider = page.locator("#hero_sl0 .slider_knob").first();
+  await legacySlider.scrollIntoViewIfNeeded();
+  const legacySliderBefore = await legacySlider.getAttribute("aria-valuenow");
+  await legacySlider.focus();
+  await legacySlider.press("ArrowRight");
+  assert(await legacySlider.getAttribute("role") === "slider", `${label} legacy slider should expose slider semantics`);
+  assert(await legacySlider.getAttribute("aria-valuenow") !== legacySliderBefore, `${label} legacy slider keyboard action did not update its value`);
+
+  const legacySegment = page.locator("#gear_train3_seg0 [role='radio']").first();
+  await legacySegment.scrollIntoViewIfNeeded();
+  await legacySegment.focus();
+  await legacySegment.press("ArrowRight");
+  assert(await legacySegment.getAttribute("aria-checked") === "false", `${label} legacy segmented control keyboard action did not update its state`);
+  assert(await page.locator("#gear_train3_seg0 [role='radio']").nth(1).getAttribute("aria-checked") === "true", `${label} legacy segmented control did not select the next option`);
+
+  const legacyPlay = page.locator("#hero .play_pause_button").first();
+  const playStateBefore = await legacyPlay.getAttribute("aria-pressed");
+  await legacyPlay.focus();
+  await legacyPlay.press("Space");
+  assert(await legacyPlay.getAttribute("role") === "button", `${label} legacy play control should expose button semantics`);
+  assert(await legacyPlay.getAttribute("aria-pressed") !== playStateBefore, `${label} legacy play control keyboard action did not toggle state`);
+  console.log("OK interactive-mechanical-watch legacy keyboard controls");
+
+  const explodedState = await page.evaluate(() => {
+    const root = document.querySelector("[data-exploded-watch]");
+    const mount = root?.querySelector("[data-exploded-canvas]");
+    const canvas = mount?.querySelector("canvas.exploded-watch__webgl");
+    return {
+      ready: root?.dataset.threeReady || "",
+      renderMode: mount?.dataset.renderMode || "",
+      componentCount: Number(canvas?.dataset.componentCount || 0),
+      transformedSourceCount: Number(canvas?.dataset.transformedSourceCount || 0),
+      sourceRotationOrder: canvas?.dataset.sourceRotationOrder || "",
+      ariaHidden: canvas?.getAttribute("aria-hidden") || "",
+      svgCount: mount?.querySelectorAll("svg").length || 0,
+    };
+  });
+  assert(explodedState.ready === "true", `${label} did not report a ready Three.js renderer`);
+  assert(explodedState.renderMode === "three", `${label} exposed render mode ${explodedState.renderMode || "none"}`);
+  assert(explodedState.componentCount === 71, `${label} expected 71 Three.js components, got ${explodedState.componentCount}`);
+  assert(explodedState.transformedSourceCount === 16, `${label} expected 16 authored source transforms, got ${explodedState.transformedSourceCount}`);
+  assert(explodedState.sourceRotationOrder === "ZYX", `${label} source transforms should preserve archived ZYX rotation order`);
+  assert(explodedState.ariaHidden === "true", `${label} pointer canvas should remain hidden from assistive technology`);
+  assert(explodedState.svgCount === 0, `${label} should replace the SVG after Three.js initialization`);
+
+  await assertElementContract(page, ".exploded-watch__firstrun", {
+    tagName: "OL",
+    attributes: { "aria-label": "Where to start with the exploded view" },
+    textFragments: ["Explosion depth", "read which system it belongs to", "8×"],
+  }, `${label} exploded-view first-run guide`);
+  assert(
+    await page.locator(".exploded-watch__firstrun > li").count() === 3,
+    `${label} exploded-view first-run guide expected three steps`,
+  );
+  assert(
+    await page.locator("[data-exploded-detail]").getAttribute("aria-atomic") === "true",
+    `${label} exploded-view detail region should announce atomically`,
+  );
+
+  const webglCanvas = page.locator(canvasSelector);
+  await webglCanvas.evaluate((canvas) => canvas.scrollIntoView({ block: "center" }));
+  const mechanismState = await page.evaluate(() => {
+    const root = document.querySelector("[data-exploded-watch]");
+    const canvas = root?.querySelector("canvas.exploded-watch__webgl");
+    return {
+      objectCount: Number(root?.dataset.objectCount || 0),
+      partCount: Number(root?.dataset.partCount || 0),
+      playing: canvas?.dataset.playing || "",
+      speed: canvas?.dataset.speed || "",
+      time: Number(canvas?.dataset.simulationTime || 0),
+      windingTravel: Number(canvas?.dataset.windingTravel || 0),
+    };
+  });
+  assert(mechanismState.partCount === 71, `${label} expected the canonical 71-part inventory, got ${mechanismState.partCount}`);
+  assert(mechanismState.objectCount > mechanismState.partCount, `${label} should render generated detail beyond one object per part`);
+  assert(mechanismState.playing === "true", `${label} mechanism should start playing without reduced motion`);
+  assert(mechanismState.speed === "8", `${label} mechanism should default to 8x, got ${mechanismState.speed || "none"}`);
+  await page.waitForFunction(({ time, windingTravel }) => {
+    const canvas = document.querySelector("[data-exploded-canvas] canvas");
+    return Number(canvas?.dataset.simulationTime || 0) > time
+      && Number(canvas?.dataset.windingTravel || 0) > windingTravel;
+  }, { time: mechanismState.time, windingTravel: mechanismState.windingTravel }, { timeout: 5000 });
+  await page.locator("[data-exploded-play]").click();
+  await page.waitForFunction(() => document.querySelector("[data-exploded-canvas] canvas")?.dataset.playing === "false", null, { timeout: 5000 });
+  assert(await page.locator("[data-exploded-play]").getAttribute("aria-pressed") === "false", `${label} play control did not expose paused state`);
+  await page.locator("[data-exploded-speed] [data-speed='60']").click();
+  await page.waitForFunction(() => document.querySelector("[data-exploded-canvas] canvas")?.dataset.speed === "60", null, { timeout: 5000 });
+  const speed60 = page.locator("[data-exploded-speed] [data-speed='60']");
+  assert(await speed60.getAttribute("aria-checked") === "true", `${label} speed control did not select 60x`);
+  await speed60.focus();
+  await speed60.press("Home");
+  assert(await page.locator("[data-exploded-speed] [data-speed='1']").getAttribute("aria-checked") === "true", `${label} speed radiogroup Home key did not select 1x`);
+  await page.keyboard.press("End");
+  assert(await speed60.getAttribute("aria-checked") === "true", `${label} speed radiogroup End key did not select 60x`);
+  await page.keyboard.press("ArrowLeft");
+  const speed8 = page.locator("[data-exploded-speed] [data-speed='8']");
+  assert(await speed8.getAttribute("aria-checked") === "true", `${label} speed radiogroup ArrowLeft key did not select 8x`);
+  assert(await speed8.getAttribute("tabindex") === "0", `${label} selected speed did not receive the roving tab stop`);
+  await page.locator("[data-exploded-play]").click();
+  console.log("OK interactive-mechanical-watch mechanism playback");
+
+  const partsRole = await page.locator("[data-exploded-parts]").getAttribute("role");
+  assert(partsRole === "group", `${label} parts selector should use button-group semantics, got ${partsRole || "none"}`);
+
+  const initialDepthValueText = await page.locator("[data-exploded-depth]").getAttribute("aria-valuetext");
+  assert(initialDepthValueText === "74 percent exploded", `${label} expected initial depth aria-valuetext, got ${initialDepthValueText || "none"}`);
+
+  const initialPartPressed = await page.locator("[data-exploded-parts] .is-selected").getAttribute("aria-pressed");
+  assert(initialPartPressed === "true", `${label} selected part should expose aria-pressed=true`);
+
+  const renderCountBeforeDepth = Number(await webglCanvas.getAttribute("data-render-count") || 0);
+  await page.locator("[data-exploded-parts]").evaluate((parts) => {
+    parts.scrollTop = 48;
+    parts.firstElementChild.dataset.depthIdentity = "preserved";
+  });
+  await setRangeValue(page, "[data-exploded-depth]", 24);
+  await page.waitForFunction((previousCount) => {
+    return Number(document.querySelector("[data-exploded-canvas] canvas")?.dataset.renderCount || 0) > previousCount;
+  }, renderCountBeforeDepth, { timeout: 5000 });
+  const updatedDepthState = await page.evaluate(() => ({
+    valueText: document.querySelector("[data-exploded-depth]")?.getAttribute("aria-valuetext") || "",
+    identity: document.querySelector("[data-exploded-parts]")?.firstElementChild?.dataset.depthIdentity || "",
+    scrollTop: document.querySelector("[data-exploded-parts]")?.scrollTop || 0,
+  }));
+  assert(updatedDepthState.valueText === "24 percent exploded", `${label} expected updated depth aria-valuetext, got ${updatedDepthState.valueText || "none"}`);
+  assert(updatedDepthState.identity === "preserved", `${label} rebuilt the component list during a depth-only change`);
+  assert(updatedDepthState.scrollTop > 0, `${label} reset component-list scroll during a depth-only change`);
+  console.log("OK interactive-mechanical-watch explosion depth control");
+
+  const detailBeforeClick = await page.locator("[data-exploded-detail] h3").textContent();
+  await page.locator("[data-exploded-parts] [data-component-id]").first().click();
+  await page.waitForFunction((previousText) => {
+    return (document.querySelector("[data-exploded-detail] h3")?.textContent || "").trim() !== (previousText || "").trim();
+  }, detailBeforeClick, { timeout: 5000 });
+  const selectedPartPressed = await page.locator("[data-exploded-parts] .is-selected").getAttribute("aria-pressed");
+  assert(selectedPartPressed === "true", `${label} clicked part should expose aria-pressed=true`);
+  const caseLessonHref = await page.locator("[data-exploded-detail] .exploded-watch__lesson-link").getAttribute("href");
+  assert(caseLessonHref === "#mainplate", `${label} case detail should link back to assembly, got ${caseLessonHref || "none"}`);
+  await page.locator("[data-exploded-parts] [data-component-id='barrel-drum']").click();
+  const barrelLessonHref = await page.locator("[data-exploded-detail] .exploded-watch__lesson-link").getAttribute("href");
+  assert(barrelLessonHref === "#power", `${label} barrel detail should link back to power, got ${barrelLessonHref || "none"}`);
+  console.log("OK interactive-mechanical-watch part button selection");
+
+  const detailBeforeKeyboard = await page.locator("[data-exploded-detail] h3").textContent();
+  await page.locator("[data-exploded-parts] [data-component-id='winding-stem']").focus();
+  await page.keyboard.press("Enter");
+  await page.waitForFunction((previousText) => {
+    return (document.querySelector("[data-exploded-detail] h3")?.textContent || "").trim() !== (previousText || "").trim();
+  }, detailBeforeKeyboard, { timeout: 5000 });
+  const keyboardState = await page.evaluate(() => ({
+    componentId: document.activeElement?.getAttribute("data-component-id") || "",
+    pressed: document.activeElement?.getAttribute("aria-pressed") || "",
+  }));
+  assert(keyboardState.pressed === "true", `${label} keyboard-selected part should expose aria-pressed=true`);
+  assert(keyboardState.componentId === "winding-stem", `${label} should restore focus to the selected part button, got ${keyboardState.componentId || "none"}`);
+  console.log("OK interactive-mechanical-watch keyboard component selection");
+
+  await page.locator("[data-exploded-play]").click();
+  await page.waitForFunction(() => document.querySelector("[data-exploded-canvas] canvas")?.dataset.playing === "false", null, { timeout: 5000 });
+  await webglCanvas.evaluate((canvas) => canvas.scrollIntoView({ block: "center" }));
+  const canvasBox = await webglCanvas.boundingBox();
+  assert(canvasBox, `${label} did not expose the Three.js canvas bounds`);
+  const selectedBeforeRaycast = await page.locator("[data-exploded-parts] .is-selected").getAttribute("data-component-id");
+  let selectedAfterRaycast = selectedBeforeRaycast;
+  const raycastPoints = [[0.5, 0.5], [0.4, 0.45], [0.6, 0.45], [0.35, 0.6], [0.65, 0.6]];
+  for (const [x, y] of raycastPoints) {
+    const clickX = canvasBox.x + canvasBox.width * x;
+    const clickY = canvasBox.y + canvasBox.height * y;
+    const canvasReceivesClick = await page.evaluate(({ clickX, clickY }) => {
+      return document.elementFromPoint(clickX, clickY)?.matches("canvas.exploded-watch__webgl") || false;
+    }, { clickX, clickY });
+    if (!canvasReceivesClick) continue;
+    await page.mouse.click(clickX, clickY);
+    selectedAfterRaycast = await page.locator("[data-exploded-parts] .is-selected").getAttribute("data-component-id");
+    if (selectedAfterRaycast !== selectedBeforeRaycast) break;
+  }
+  assert(selectedAfterRaycast !== selectedBeforeRaycast, `${label} raycast selection did not update the active component`);
+  console.log("OK interactive-mechanical-watch raycast selection");
+
+  const cameraBeforeOrbit = await webglCanvas.getAttribute("data-camera-position");
+  await page.mouse.move(canvasBox.x + canvasBox.width * 0.58, canvasBox.y + canvasBox.height * 0.5);
+  await page.mouse.down();
+  await page.mouse.move(canvasBox.x + canvasBox.width * 0.72, canvasBox.y + canvasBox.height * 0.58, { steps: 12 });
+  await page.mouse.up();
+  await page.waitForFunction((previousPosition) => {
+    return document.querySelector("[data-exploded-canvas] canvas")?.dataset.cameraPosition !== previousPosition;
+  }, cameraBeforeOrbit, { timeout: 5000 });
+  const cameraBeforeZoom = await webglCanvas.getAttribute("data-camera-position");
+  await page.mouse.move(canvasBox.x + canvasBox.width / 2, canvasBox.y + canvasBox.height / 2);
+  await page.mouse.wheel(0, -360);
+  await page.waitForFunction((previousPosition) => {
+    return document.querySelector("[data-exploded-canvas] canvas")?.dataset.cameraPosition !== previousPosition;
+  }, cameraBeforeZoom, { timeout: 5000 });
+  console.log("OK interactive-mechanical-watch orbit and zoom controls");
+
+  const fallbackPage = await context.newPage();
+  await fallbackPage.route("**/models/watch_vertices.dat", (route) => route.fulfill({ status: 503, body: "" }));
+  await fallbackPage.goto(new URL("interactive-mechanical-watch/?smoke-fallback=1", baseUrl).href, { waitUntil: "domcontentloaded" });
+  await fallbackPage.waitForSelector("[data-exploded-canvas] svg", { timeout: 30000 });
+  await fallbackPage.waitForFunction(() => document.querySelector("[data-exploded-watch]")?.dataset.threeError, null, { timeout: 30000 });
+  const fallbackState = await fallbackPage.evaluate(() => {
+    const root = document.querySelector("[data-exploded-watch]");
+    const image = root?.querySelector("[data-exploded-canvas] svg image");
+    const imageHref = image?.getAttribute("href") || image?.getAttribute("xlink:href") || "";
+    return {
+      canvasCount: root?.querySelectorAll("[data-exploded-canvas] canvas").length || 0,
+      componentCount: root?.querySelectorAll("[data-exploded-canvas] [data-component-id]").length || 0,
+      diagramRole: root?.querySelector("[data-exploded-canvas] svg")?.getAttribute("role") || "",
+      imageHref,
+      resolvedImageHref: image ? new URL(imageHref, document.location.href).href : "",
+    };
+  });
+  assert(fallbackState.canvasCount === 0, `${label} fallback should retain the SVG without a canvas`);
+  assert(fallbackState.componentCount === 71, `${label} fallback expected 71 SVG components, got ${fallbackState.componentCount}`);
+  assert(fallbackState.diagramRole === "group", `${label} fallback SVG should use group semantics`);
+  const expectedImageUrl = new URL("interactive-mechanical-watch/images/generated/components/exploded-sheet.png", baseUrl).href;
+  assert(
+    fallbackState.resolvedImageHref === expectedImageUrl,
+    `${label} fallback resolved exploded sheet to ${fallbackState.resolvedImageHref || "none"}; expected ${expectedImageUrl} from href ${fallbackState.imageHref || "none"}`,
+  );
+  const imageResponse = await fallbackPage.request.get(fallbackState.resolvedImageHref);
+  assert(imageResponse.status() === 200, `${label} fallback exploded sheet returned HTTP ${imageResponse.status()}`);
+  const firstComponentMarkup = await fallbackPage.locator("[data-exploded-canvas] [data-component-id]").first().innerHTML();
+  await setRangeValue(fallbackPage, "[data-exploded-depth]", 24);
+  await fallbackPage.waitForFunction((previousMarkup) => {
+    return document.querySelector("[data-exploded-canvas] [data-component-id]")?.innerHTML !== previousMarkup;
+  }, firstComponentMarkup, { timeout: 5000 });
+  await fallbackPage.locator("[data-exploded-canvas] [data-component-id='winding-stem']").focus();
+  await fallbackPage.keyboard.press("Enter");
+  const focusedFallbackId = await fallbackPage.evaluate(() => document.activeElement?.getAttribute("data-component-id") || "");
+  assert(focusedFallbackId === "winding-stem", `${label} fallback should restore SVG focus, got ${focusedFallbackId || "none"}`);
+  console.log("OK interactive-mechanical-watch SVG fallback");
+  await fallbackPage.close();
+
+  const browser = context.browser();
+  assert(browser, `${label} could not create route-specific input contexts`);
+
+  const reducedContext = await browser.newContext({
+    reducedMotion: "reduce",
+    viewport: { width: 1280, height: 900 },
+  });
+  const reducedPage = await reducedContext.newPage();
+  await assertRoute(reducedPage, "interactive-mechanical-watch/", "#hero canvas");
+  await reducedPage.waitForFunction(() => document.body.dataset.watchReducedMotion === "paused", null, { timeout: 30000 });
+  const reducedState = await reducedPage.evaluate(() => ({
+    playingCount: document.querySelectorAll(".play_pause_button.playing").length,
+    runningDrawerCount: Array.from(document.querySelectorAll(".drawer_container")).filter((container) => container.drawer && !container.drawer.paused).length,
+  }));
+  assert(reducedState.playingCount === 0, `${label} reduced-motion startup left ${reducedState.playingCount} play controls running`);
+  assert(reducedState.runningDrawerCount === 0, `${label} reduced-motion startup left ${reducedState.runningDrawerCount} drawers running`);
+  await reducedPage.waitForSelector(canvasSelector, { timeout: 30000 });
+  assert(await reducedPage.locator("[data-exploded-play]").getAttribute("aria-pressed") === "false", `${label} reduced motion should pause the exploded mechanism at startup`);
+  assert(await reducedPage.locator(canvasSelector).getAttribute("data-playing") === "false", `${label} reduced motion left the Three.js mechanism running`);
+  await reducedPage.locator("[data-exploded-play]").click();
+  await reducedPage.waitForFunction(() => document.querySelector("[data-exploded-canvas] canvas")?.dataset.playing === "true", null, { timeout: 5000 });
+  const reducedPlay = reducedPage.locator("#hero .play_pause_button").first();
+  await reducedPlay.focus();
+  await reducedPlay.press("Space");
+  assert(await reducedPlay.getAttribute("aria-pressed") === "true", `${label} reduced-motion policy should allow explicit playback`);
+  await reducedContext.close();
+  console.log("OK interactive-mechanical-watch reduced motion");
+
+  const touchContext = await browser.newContext({
+    hasTouch: true,
+    isMobile: true,
+    viewport: { width: 390, height: 844 },
+  });
+  const touchPage = await touchContext.newPage();
+  await assertRoute(touchPage, "interactive-mechanical-watch/", "#hero_sl0 .slider_knob");
+  await touchPage.waitForSelector(canvasSelector, { timeout: 30000 });
+  const touchCutaway = touchPage.locator("#hero canvas").first();
+  await touchCutaway.scrollIntoViewIfNeeded();
+  await touchPage.waitForFunction(() => {
+    const hero = document.querySelector("#hero");
+    hero?.drawer?.set_visible(true);
+    hero?.drawer?.request_repaint();
+    return !hero?.querySelector(".loading_text");
+  }, null, { timeout: 30000 });
+  await touchCutaway.evaluate((canvas) => canvas.closest(".drawer_container")?.drawer?.set_paused(true));
+  const touchCutawayBefore = await touchCutaway.evaluate((canvas) => canvas.toDataURL());
+  const touchSliderBefore = await touchPage.locator("#hero_sl0 .slider_knob").getAttribute("aria-valuenow");
+  await dragNativeTouch(touchPage, "#hero_sl0 .slider_knob", 70, 0, `${label} touch slider`);
+  assert(await touchPage.locator("#hero_sl0 .slider_knob").getAttribute("aria-valuenow") !== touchSliderBefore, `${label} touch slider did not update its value`);
+  await touchPage.waitForFunction((previous) => document.querySelector("#hero canvas")?.toDataURL() !== previous, touchCutawayBefore, { timeout: 5000 });
+  const touchWebgl = touchPage.locator(canvasSelector);
+  await touchPage.locator("[data-exploded-play]").click();
+  await touchPage.waitForFunction(() => document.querySelector("[data-exploded-canvas] canvas")?.dataset.playing === "false", null, { timeout: 5000 });
+  const touchCameraBefore = await touchWebgl.getAttribute("data-camera-position");
+  await dragNativeTouch(touchPage, canvasSelector, 54, 28, `${label} touch orbit`);
+  await touchPage.waitForFunction((previousPosition) => document.querySelector("[data-exploded-canvas] canvas")?.dataset.cameraPosition !== previousPosition, touchCameraBefore, { timeout: 5000 });
+  await touchPage.locator("[data-exploded-parts] [data-component-id='rotor']").tap();
+  assert(await touchPage.locator("[data-exploded-detail] .exploded-watch__lesson-link").getAttribute("href") === "#automatic-winding", `${label} touch selection did not expose the rotor lesson link`);
+  await assertViewportUsable(touchPage, `${label} touch mobile`);
+  await touchContext.close();
+  console.log("OK interactive-mechanical-watch touch controls");
+
+  const narrowPage = await context.newPage();
+  await narrowPage.setViewportSize({ width: 320, height: 844 });
+  await assertRoute(narrowPage, "interactive-mechanical-watch/", "[data-exploded-parts]");
+  const narrowState = await narrowPage.locator("[data-exploded-parts]").evaluate((parts) => {
+    const button = parts.querySelector("button");
+    const style = getComputedStyle(parts);
+    return {
+      clientHeight: parts.clientHeight,
+      scrollHeight: parts.scrollHeight,
+      overflowY: style.overflowY,
+      buttonHeight: button?.getBoundingClientRect().height || 0,
+      detailTop: document.querySelector("[data-exploded-detail]")?.getBoundingClientRect().top || 0,
+    };
+  });
+  assert(narrowState.scrollHeight > narrowState.clientHeight, `${label} 320px component list should remain capped and scrollable`);
+  assert(["auto", "scroll"].includes(narrowState.overflowY), `${label} 320px component list exposed overflow-y ${narrowState.overflowY}`);
+  assert(narrowState.buttonHeight >= 44, `${label} 320px part target measured ${narrowState.buttonHeight}px`);
+  assert(narrowState.detailTop > 0, `${label} 320px detail panel was not reachable below the component list`);
+  await assertViewportUsable(narrowPage, `${label} 320px`);
+  await narrowPage.close();
+  console.log("OK interactive-mechanical-watch narrow layout");
+
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean(label);
+  await assertViewportUsable(page, label);
+  console.log("OK interactive-mechanical-watch exploded view");
+  await page.close();
+}
+
+async function smokeNavalArchitecture(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "naval-architecture/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#na_syringe_pressure canvas") &&
+      document.querySelector("#na_syringe_pressure_sl0 .slider_knob") &&
+      document.querySelector("#na_3d_forces canvas") &&
+      document.querySelector("#na_wind_tilt canvas") &&
+      document.querySelector("#na_wind_tilt_sl0 .slider_knob") &&
+      document.querySelector("#na_free_surface canvas") &&
+      document.querySelector("#na_free_surface_sl1 .slider_knob") &&
+      document.querySelector("#na_propeller_pitch canvas") &&
+      document.querySelector("#na_propeller_pitch_sl0 .slider_knob");
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(3000);
+
+  await assertLocalScriptSources(page, ["./js/base.js", "./js/navarch.js"], "naval-architecture");
+  await assertElementContract(page, ".na-tank-states", {
+    tagName: "UL",
+    attributes: { "aria-label": "Free-surface comparison" },
+  }, "naval-architecture tank-state comparison");
+  await assertLinkSequence(page, ".na-tank-states a", [
+    { text: "Empty", href: "#na_free_surface", onclick: "free_surface_3();return false;" },
+    { text: "full", href: "#na_free_surface", onclick: "free_surface_4();return false;" },
+    { text: "Partly filled", href: "#na_free_surface", onclick: "free_surface_0();return false;" },
+  ], "naval-architecture tank-state comparison");
+
+  const pressureCanvas = page.locator("#na_syringe_pressure canvas").first();
+  await pressureCanvas.scrollIntoViewIfNeeded();
+  const pressureBefore = await pressureCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#na_syringe_pressure_sl0 .slider_knob", 90, 0, "naval-architecture pressure slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#na_syringe_pressure canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, pressureBefore, { timeout: 5000 });
+  console.log("OK naval-architecture pressure scene");
+
+  await dragCanvasUntilChanged(
+    page,
+    "#na_3d_forces canvas",
+    [
+      { from: { x: 0.35, y: 0.45 }, to: { x: 0.7, y: 0.55 } },
+      { from: { x: 0.65, y: 0.55 }, to: { x: 0.35, y: 0.35 } },
+    ],
+    "naval-architecture buoyancy drag scene",
+  );
+  console.log("OK naval-architecture buoyancy drag scene");
+
+  const windCanvas = page.locator("#na_wind_tilt canvas").first();
+  await windCanvas.scrollIntoViewIfNeeded();
+  const windBefore = await windCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#na_wind_tilt_sl0 .slider_knob", 90, 0, "naval-architecture wind slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#na_wind_tilt canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, windBefore, { timeout: 5000 });
+  console.log("OK naval-architecture stability scene");
+
+  const freeSurfaceCanvas = page.locator("#na_free_surface canvas").first();
+  await freeSurfaceCanvas.scrollIntoViewIfNeeded();
+  const freeSurfaceBefore = await freeSurfaceCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#na_free_surface_sl1 .slider_knob", 90, 0, "naval-architecture free-surface slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#na_free_surface canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, freeSurfaceBefore, { timeout: 5000 });
+  console.log("OK naval-architecture free-surface scene");
+
+  const propellerCanvas = page.locator("#na_propeller_pitch canvas").first();
+  await propellerCanvas.scrollIntoViewIfNeeded();
+  const propellerBefore = await propellerCanvas.evaluate((canvas) => canvas.toDataURL());
+  await dragKnob(page, "#na_propeller_pitch_sl0 .slider_knob", 90, 0, "naval-architecture propeller slider");
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#na_propeller_pitch canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, propellerBefore, { timeout: 5000 });
+  console.log("OK naval-architecture propulsion scene");
+
+  await assertLongformResponsiveShell(
+    context,
+    page,
+    "naval-architecture/",
+    "#na_syringe_pressure canvas",
+    "naval-architecture route",
+    {
+      expectedRoute: "naval-architecture",
+      minimumChapters: 10,
+      playHref: "#na_hero",
+    },
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("naval-architecture route");
+  console.log("OK naval-architecture responsive shell");
+  await page.close();
+}
+
+async function smokeReadingQrCodesWithoutAComputer(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "reading-qr-codes-without-a-computer/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("input[type='text']") &&
+      Array.from(document.querySelectorAll("button")).some((node) => /Random code/i.test(node.textContent || "")) &&
+      document.getElementById("anatomy") &&
+      document.getElementById("mask") &&
+      document.getElementById("length") &&
+      document.getElementById("content") &&
+      document.querySelectorAll("svg").length > 10;
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(2500);
+
+  const assetState = await page.evaluate(() => ({
+    scripts: Array.from(document.querySelectorAll("script[src]")).map((node) => node.getAttribute("src") || ""),
+    styles: Array.from(document.querySelectorAll("link[rel='stylesheet']")).map((node) => node.getAttribute("href") || ""),
+    bodyText: document.body.innerText,
+  }));
+  assert(
+    assetState.scripts.includes("./assets/index-m4DBYcND.js") &&
+      assetState.styles.includes("./assets/index-s1eyThQf.css"),
+    "reading-qr-codes-without-a-computer did not load the published hashed bundle from local assets",
+  );
+  assert(
+    !/Made in love by Piko and blinry for 37C3/i.test(assetState.bodyText) &&
+      !/Found a bug\? Feature request\?/i.test(assetState.bodyText) &&
+      !/Codeberg/i.test(assetState.bodyText),
+    "reading-qr-codes-without-a-computer left body-level promo or source surfaces visible",
+  );
+
+  const before = await page.evaluate(() => ({
+    anatomySvg: document.getElementById("anatomy")?.nextElementSibling?.nextElementSibling?.outerHTML || "",
+    maskText: document.getElementById("mask")?.nextElementSibling?.nextElementSibling?.nextElementSibling?.nextElementSibling?.textContent?.replace(/\s+/g, " ").trim() || "",
+    lengthText: document.getElementById("length")?.nextElementSibling?.nextElementSibling?.textContent?.replace(/\s+/g, " ").trim() || "",
+    contentText: document.getElementById("content")?.nextElementSibling?.nextElementSibling?.nextElementSibling?.textContent?.replace(/\s+/g, " ").trim() || "",
+  }));
+
+  const targetContent = "OPENAI GPS PILOT 2026";
+  await page.locator("input[type='text']").fill(targetContent);
+  await page.waitForFunction(({ previous, targetContent }) => {
+    const anatomySvg = document.getElementById("anatomy")?.nextElementSibling?.nextElementSibling?.outerHTML || "";
+    const maskText = document.getElementById("mask")?.nextElementSibling?.nextElementSibling?.nextElementSibling?.nextElementSibling?.textContent?.replace(/\s+/g, " ").trim() || "";
+    const lengthText = document.getElementById("length")?.nextElementSibling?.nextElementSibling?.textContent?.replace(/\s+/g, " ").trim() || "";
+    const contentText = document.getElementById("content")?.nextElementSibling?.nextElementSibling?.nextElementSibling?.textContent?.replace(/\s+/g, " ").trim() || "";
+    const inputValue = document.querySelector("input[type='text']")?.value || "";
+    return inputValue === targetContent &&
+      anatomySvg !== previous.anatomySvg &&
+      lengthText !== previous.lengthText &&
+      contentText !== previous.contentText &&
+      maskText.length > 0;
+  }, { previous: before, targetContent }, { timeout: 5000 });
+  console.log("OK reading-qr-codes-without-a-computer deterministic input flow");
+
+  await assertViewportUsable(page, "reading-qr-codes-without-a-computer route");
+  await assertRouteViewportUsable(
+    context,
+    "reading-qr-codes-without-a-computer/",
+    "#reference-footer",
+    "#anatomy",
+    "reading-qr-codes-without-a-computer route",
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("reading-qr-codes-without-a-computer route");
+  console.log("OK reading-qr-codes-without-a-computer responsive shell");
+  await page.close();
+}
+
+const TEORIA_AUDIO_SAMPLE_COUNT = 63;
+
+function teoriaExerciseScripts(exerciseScript, musikaScript = "musika_250207.js") {
+  return [
+    "./vendor/jquery.min.js",
+    `./res/js/min_24/musika/${musikaScript}`,
+    "./res/js/min_24/musika/musika_en_250207.js",
+    "./res/js/min_24/exe_babel/exe_babel_en_250614.js",
+    `./res/js/min_24/exe/${exerciseScript}`,
+  ];
+}
+
+async function waitForTeoriaOptions(page, expectedSampleCount = TEORIA_AUDIO_SAMPLE_COUNT) {
+  await page.waitForFunction((sampleCount) => {
+    return window.exe?.teoExe?.webAudio?.p_soundsCount === sampleCount &&
+      (
+        document.querySelector("#opts")?.offsetParent !== null ||
+        document.querySelector("#ov_continue")?.offsetParent !== null ||
+        document.querySelector("#ov_save")?.offsetParent !== null
+      );
+  }, expectedSampleCount, { timeout: 45000 });
+}
+
+async function startTeoriaExercise(page, config) {
+  const continueVisible = await page.locator("#ov_continue").isVisible().catch(() => false);
+  if (continueVisible) {
+    await page.click("#ov_continue");
+    await page.waitForTimeout(250);
+  }
+
+  for (const selector of config.optionSelectors || []) {
+    await page.click(selector);
+  }
+
+  await page.click("#ov_save");
+  await page.waitForSelector("#exe", { state: "visible", timeout: 20000 });
+  await page.waitForFunction((selector) => {
+    return getComputedStyle(document.querySelector(selector)).display !== "none";
+  }, config.exerciseSelector, { timeout: 10000 });
+}
+
+async function assertTeoriaCanvasInteraction(page, config) {
+  const beforeCanvas = await page.locator(config.canvasSelector).evaluate((canvas) => canvas.toDataURL());
+  const selectors = config.interactionSelectors || [config.interactionSelector];
+
+  for (const selector of selectors) {
+    await page.click(selector);
+    await page.waitForTimeout(300);
+    const afterCanvas = await page.locator(config.canvasSelector).evaluate((canvas) => canvas.toDataURL());
+    if (afterCanvas !== beforeCanvas) {
+      return;
+    }
+  }
+
+  throw new Error(`${config.label} did not redraw the expected notation surface`);
+}
+
+async function assertTeoriaMessageInteraction(page, config) {
+  const beforeMessage = ((await page.locator("#tsp_mess").textContent()) || "").trim();
+  await page.click(config.interactionSelector);
+  await page.waitForFunction((previousMessage) => {
+    return ((document.querySelector("#tsp_mess")?.textContent || "").trim()) !== previousMessage;
+  }, beforeMessage, { timeout: 5000 });
+}
+
+async function assertTeoriaRevealFlow(page, label) {
+  const scoreBeforeReveal = ((await page.locator("#tsp_score").textContent()) || "").trim();
+  const messageBeforeReveal = ((await page.locator("#tsp_mess").textContent()) || "").trim();
+  await page.click("#pp_tellMe");
+  await page.waitForFunction((previousMessage) => {
+    return getComputedStyle(document.querySelector("#ev_next")).display !== "none" ||
+      ((document.querySelector("#tsp_mess")?.textContent || "").trim()) !== previousMessage;
+  }, messageBeforeReveal, { timeout: 5000 });
+  const revealState = await page.evaluate(() => ({
+    message: (document.querySelector("#tsp_mess")?.textContent || "").trim(),
+    score: (document.querySelector("#tsp_score")?.textContent || "").trim(),
+    nextVisible: getComputedStyle(document.querySelector("#ev_next")).display,
+  }));
+  assert(
+    revealState.message !== messageBeforeReveal ||
+      revealState.score !== scoreBeforeReveal ||
+      revealState.nextVisible !== "none",
+    `${label} did not advance the correctness state after reveal`,
+  );
+  assert(revealState.nextVisible !== "none", `${label} did not advance to the next-exercise state`);
+}
+
+async function smokeTeoriaExercise(context, config) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, `${config.slug}/`, "#reference-footer");
+  await assertEngineeringSandboxShell(page, config.label, {
+    minimumChapters: 0,
+    navMode: "none",
+    expectedFamily: "teoria-practice",
+    expectedRoute: config.slug,
+    expectedVariant: "practice",
+  });
+  await assertLocalScriptSources(page, teoriaExerciseScripts(config.exerciseScript, config.musikaScript), config.label);
+  await waitForTeoriaOptions(page);
+
+  const preloadStats = await page.evaluate(() => ({
+    soundsCount: window.exe?.teoExe?.webAudio?.p_soundsCount ?? 0,
+    totalSounds: window.exe?.teoExe?.webAudio?.p_totalSounds ?? 0,
+    audioPath: window.exe?.teoExe?.webAudio?.p_path ?? "",
+  }));
+  assert(preloadStats.soundsCount === TEORIA_AUDIO_SAMPLE_COUNT, `${config.label} did not preload the full local piano bank`);
+  assert(preloadStats.totalSounds === TEORIA_AUDIO_SAMPLE_COUNT, `${config.label} expected ${TEORIA_AUDIO_SAMPLE_COUNT} local piano samples`);
+  assert(preloadStats.audioPath === "./res/musika_2024/audio/", `${config.label} did not use the local audio tree`);
+  await assertNoRemotePlayableMediaRequests(page, config.label);
+  console.log(`OK ${config.slug} local assets`);
+
+  await startTeoriaExercise(page, config);
+  for (const selector of config.requiredSelectors || []) {
+    await page.waitForSelector(selector, { timeout: 5000 });
+  }
+  if (config.readyMessage) {
+    await page.waitForFunction((expectedMessage) => {
+      return ((document.querySelector("#tsp_mess")?.textContent || "").trim()) === expectedMessage;
+    }, config.readyMessage, { timeout: 20000 });
+  }
+
+  if (config.interactionType === "canvas-change") {
+    await assertTeoriaCanvasInteraction(page, config);
+  } else if (config.interactionType === "message-change") {
+    await assertTeoriaMessageInteraction(page, config);
+  }
+  console.log(`OK ${config.slug} interaction surface`);
+
+  await assertTeoriaRevealFlow(page, config.label);
+  console.log(`OK ${config.slug} answer flow`);
+
+  await assertEngineeringSandboxLayout(context, `${config.slug}/`, config.label, {
+    navMode: "none",
+    controlSelector: "[data-primary-control]",
+    containerSelector: ".teoria-route-shell.story-practice-main",
+  });
+  console.log(`OK ${config.slug} practice shell`);
+
+  await assertViewportUsable(page, `${config.slug} route`);
+  const mobilePage = await context.newPage();
+  await mobilePage.setViewportSize({ width: 390, height: 844 });
+  await assertRoute(mobilePage, `${config.slug}/`, "#reference-footer");
+  await waitForTeoriaOptions(mobilePage);
+  await assertViewportUsable(mobilePage, `${config.slug} route`);
+  await mobilePage.close();
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean(`${config.slug} route`);
+  console.log(`OK ${config.slug} responsive shell`);
+  await page.close();
+}
+
+async function smokeTeoriaIntervalEarTraining(context) {
+  await smokeTeoriaExercise(context, {
+    slug: "teoria-interval-ear-training",
+    label: "teoria interval ear training route",
+    exerciseScript: "ie.js",
+    musikaScript: "musika_260103.js",
+    optionSelectors: ["#ov_note"],
+    exerciseSelector: "#ev_note",
+    interactionType: "canvas-change",
+    canvasSelector: "#staff_staff",
+    interactionSelector: "#mknp_ev_noteC",
+    interactionSelectors: ["#mknp_ev_noteC", "#mknp_ev_noteD"],
+  });
+}
+
+async function smokeTeoriaNoteEarTraining(context) {
+  await smokeTeoriaExercise(context, {
+    slug: "teoria-note-ear-training",
+    label: "teoria note ear training route",
+    exerciseScript: "ne_250201.js",
+    optionSelectors: ["#ov_note"],
+    exerciseSelector: "#ev_note",
+    interactionType: "canvas-change",
+    canvasSelector: "#staff_staff",
+    interactionSelector: "#mknp_ev_noteC",
+    interactionSelectors: ["#mknp_ev_noteC", "#mknp_ev_noteD"],
+  });
+}
+
+async function smokeTeoriaKeyAndNoteEarTraining(context) {
+  await smokeTeoriaExercise(context, {
+    slug: "teoria-key-and-note-ear-training",
+    label: "teoria key and note ear training route",
+    exerciseScript: "kne.js",
+    optionSelectors: ["#ov_note", "#ov_playRef"],
+    exerciseSelector: "#ev_note",
+    interactionType: "canvas-change",
+    canvasSelector: "#staff_staff",
+    interactionSelector: "#mknp_ev_noteC",
+    interactionSelectors: ["#mknp_ev_noteC", "#mknp_ev_noteD"],
+    requiredSelectors: ["#pp_extra0"],
+  });
+}
+
+async function smokeTeoriaRandomKeyAndNoteEarTraining(context) {
+  await smokeTeoriaExercise(context, {
+    slug: "teoria-random-key-and-note-ear-training",
+    label: "teoria random key and note ear training route",
+    exerciseScript: "kner.js",
+    optionSelectors: ["#ov_note", "#ov_playRef"],
+    exerciseSelector: "#ev_note",
+    interactionType: "canvas-change",
+    canvasSelector: "#staff_staff",
+    interactionSelector: "#mknp_ev_noteC",
+    interactionSelectors: ["#mknp_ev_noteC", "#mknp_ev_noteD"],
+    requiredSelectors: ["#pp_extra0"],
+  });
+}
+
+async function smokeTeoriaScaleConstruction(context) {
+  await smokeTeoriaExercise(context, {
+    slug: "teoria-scale-construction",
+    label: "teoria scale construction route",
+    exerciseScript: "sc_250101.js",
+    exerciseSelector: "#ev_note",
+    interactionType: "canvas-change",
+    canvasSelector: "#staff_ev_staff",
+    interactionSelector: "#mknp_ev_noteC",
+    interactionSelectors: ["#mknp_ev_noteC", "#mknp_ev_noteD"],
+  });
+}
+
+async function smokeTeoriaIntervalIdentificationAndInversion(context) {
+  await smokeTeoriaExercise(context, {
+    slug: "teoria-interval-identification-and-inversion",
+    label: "teoria interval identification and inversion route",
+    exerciseScript: "iv.js",
+    exerciseSelector: "#ev_int",
+    interactionType: "message-change",
+    interactionSelector: "#mkip_M3",
+  });
+}
+
+async function smokeAbletonLearningMusicPlayground(context) {
+  assert(
+    countFilesRecursive("ableton-learning-music-playground/lessons/sounds") === 31,
+    "ableton-learning-music-playground route expected 31 local audio files",
+  );
+  assert(
+    countFilesRecursive("ableton-learning-music-playground/fonts") === 9,
+    "ableton-learning-music-playground route expected 9 local font files",
+  );
+
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "ableton-learning-music-playground/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "ableton-learning-music-playground route", {
+    minimumChapters: 0,
+    navMode: "none",
+    expectedFamily: "ableton-practice",
+    expectedRoute: "ableton-learning-music-playground",
+    expectedVariant: "practice",
+  });
+  await assertLocalScriptSources(
+    page,
+    [
+      "./third-party/polyfills/polyfills.js",
+      "../shared/tone.min.js",
+      "./third-party/microevent/microevent.js",
+      "./widgets/build/widgets.min.js",
+      "./widgets/build/SimplePianoRoll.js",
+      "../shared/public-footer.js",
+    ],
+    "ableton-learning-music-playground route",
+  );
+  await page.waitForFunction(() => {
+    return document.querySelectorAll(".widget").length === 4 &&
+      document.querySelectorAll(".widget__transport-btn").length >= 4 &&
+      Boolean(document.querySelector("#_theplaygroundplaygroundbass .widget__choice"));
+  }, null, { timeout: 30000 });
+  await assertNoRemotePlayableMediaRequests(page, "ableton-learning-music-playground route");
+  console.log("OK ableton-learning-music-playground local assets");
+
+  const transportBefore = await page.evaluate(() => ({
+    widgetCount: document.querySelectorAll(".widget").length,
+    transportCount: document.querySelectorAll(".widget__transport-btn").length,
+    bassSelectedRoot: document.querySelector("#_theplaygroundplaygroundbass .widget__choice--selected")?.textContent?.trim() || "",
+  }));
+  assert(transportBefore.widgetCount === 4, "ableton-learning-music-playground route did not mount all four widgets");
+  assert(transportBefore.transportCount >= 4, "ableton-learning-music-playground route did not expose transport controls");
+
+  await page.locator("button.widget__transport-btn").first().click();
+  await page.waitForTimeout(700);
+  const playbackState = await page.evaluate(() => ({
+    toneState: window.Tone?.getContext?.().state || "",
+    widgetGlobals: [
+      "_theplaygroundplaygrounddrumssequencer",
+      "_theplaygroundplaygroundbass",
+      "_theplaygroundplaygroundpiano",
+      "_theplaygroundplaygroundsynth",
+    ].every((key) => Boolean(window[key])),
+  }));
+  assert(playbackState.toneState === "running", "ableton-learning-music-playground route did not start the local transport");
+  assert(playbackState.widgetGlobals, "ableton-learning-music-playground route did not hydrate all widget globals");
+  console.log("OK ableton-learning-music-playground transport");
+
+  const bassChoices = page.locator("#_theplaygroundplaygroundbass .widget__choice");
+  await bassChoices.nth(2).click();
+  await page.waitForTimeout(250);
+  const editState = await page.evaluate(() => ({
+    selectedRoot: document.querySelector("#_theplaygroundplaygroundbass .widget__choice--selected")?.textContent?.trim() || "",
+    selectedScale: document.querySelectorAll("#_theplaygroundplaygroundbass .widget__choice--selected").length,
+  }));
+  assert(editState.selectedRoot === "D", `ableton-learning-music-playground route expected D root after edit, got ${editState.selectedRoot || "none"}`);
+  assert(editState.selectedScale >= 2, "ableton-learning-music-playground route lost synchronized chooser state after edit");
+  await assertNoRemotePlayableMediaRequests(page, "ableton-learning-music-playground route");
+  console.log("OK ableton-learning-music-playground edit path");
+
+  await assertEngineeringSandboxLayout(context, "ableton-learning-music-playground/", "ableton-learning-music-playground route", {
+    navMode: "none",
+    controlSelector: "[data-primary-control]",
+    containerSelector: ".playground-route-shell.story-practice-main",
+  });
+  await assertPrimaryControlVisible(page, "ableton-learning-music-playground route");
+  console.log("OK ableton-learning-music-playground practice shell");
+
+  await assertViewportUsable(page, "ableton-learning-music-playground route");
+  await assertRouteViewportUsable(
+    context,
+    "ableton-learning-music-playground/",
+    "#reference-footer",
+    "button.widget__transport-btn",
+    "ableton-learning-music-playground route",
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("ableton-learning-music-playground route");
+  console.log("OK ableton-learning-music-playground responsive shell");
+  await page.close();
+}
+
+async function smokeAbletonLearningMusicLesson(context, config) {
+  const {
+    slug,
+    label,
+    widgetCount,
+    transportCount,
+    editKind,
+  } = config;
+
+  assert(
+    countFilesRecursive(`${slug}/lessons/sounds`) === 31,
+    `${label} expected 31 local audio files`,
+  );
+  assert(
+    countFilesRecursive(`${slug}/fonts`) === 9,
+    `${label} expected 9 local font files`,
+  );
+
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, `${slug}/`, "#reference-footer");
+  await assertEngineeringSandboxShell(page, label, {
+    minimumChapters: 0,
+    navMode: "none",
+    expectedFamily: "ableton-practice",
+    expectedRoute: slug,
+    expectedVariant: "practice",
+  });
+  await assertLocalScriptSources(
+    page,
+    [
+      "./third-party/polyfills/polyfills.js",
+      "../shared/tone.min.js",
+      "./third-party/microevent/microevent.js",
+      "./widgets/build/widgets.min.js",
+      "./widgets/build/SimplePianoRoll.js",
+      "../shared/public-footer.js",
+    ],
+    label,
+  );
+  await page.waitForFunction(({ widgetCount, transportCount }) => {
+    return document.querySelectorAll(".widget").length >= widgetCount &&
+      document.querySelectorAll("button.widget__transport-btn").length >= transportCount;
+  }, { widgetCount, transportCount }, { timeout: 30000 });
+  await assertNoRemotePlayableMediaRequests(page, label);
+  console.log(`OK ${label} local assets`);
+
+  await page.locator("button.widget__transport-btn").first().click();
+  await page.waitForTimeout(700);
+  const playbackState = await page.evaluate(() => ({
+    toneState: window.Tone?.getContext?.().state || "",
+    transportCount: document.querySelectorAll("button.widget__transport-btn").length,
+  }));
+  assert(playbackState.toneState === "running", `${label} did not start the local transport`);
+  assert(playbackState.transportCount >= 2, `${label} lost transport controls after playback start`);
+  console.log(`OK ${label} transport`);
+
+  if (editKind === "tempo") {
+    const tempoState = await page.evaluate(() => {
+      const slider = document.querySelector("input[type='range']");
+      if (!slider) {
+        return null;
+      }
+
+      const before = slider.value;
+      slider.value = "96";
+      slider.dispatchEvent(new Event("input", { bubbles: true }));
+      slider.dispatchEvent(new Event("change", { bubbles: true }));
+      return {
+        before,
+        after: slider.value,
+      };
+    });
+    assert(tempoState, `${label} did not expose a tempo slider`);
+    assert(tempoState.after === "96", `${label} did not accept the new tempo value`);
+  } else if (editKind === "root-choice") {
+    const choices = page.locator(".widget__choice");
+    await choices.nth(2).click();
+    await page.waitForTimeout(250);
+    const editState = await page.evaluate(() => ({
+      selectedRoot: document.querySelector(".widget__choice--selected")?.textContent?.trim() || "",
+      selectedCount: document.querySelectorAll(".widget__choice--selected").length,
+    }));
+    assert(editState.selectedRoot === "D", `${label} expected D root after edit, got ${editState.selectedRoot || "none"}`);
+    assert(editState.selectedCount >= 2, `${label} lost synchronized chooser state after edit`);
+  }
+  await assertNoRemotePlayableMediaRequests(page, label);
+  console.log(`OK ${label} edit path`);
+
+  await assertEngineeringSandboxLayout(context, `${slug}/`, label, {
+    navMode: "none",
+    controlSelector: "[data-primary-control]",
+    containerSelector: ".ableton-lesson-shell.story-practice-main",
+  });
+  await assertPrimaryControlVisible(page, label);
+  console.log(`OK ${label} practice shell`);
+
+  await assertViewportUsable(page, label);
+  await assertRouteViewportUsable(
+    context,
+    `${slug}/`,
+    "#reference-footer",
+    "button.widget__transport-btn",
+    label,
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean(label);
+  console.log(`OK ${label} responsive shell`);
+  await page.close();
+}
+
+async function smokeAbletonLearningMusicPlayWithBeats(context) {
+  await smokeAbletonLearningMusicLesson(context, {
+    slug: "ableton-learning-music-play-with-beats",
+    label: "ableton-learning-music-play-with-beats route",
+    widgetCount: 1,
+    transportCount: 2,
+    editKind: "tempo",
+  });
+}
+
+async function smokeAbletonLearningMusicPlayWithNotesAndScales(context) {
+  await smokeAbletonLearningMusicLesson(context, {
+    slug: "ableton-learning-music-play-with-notes-and-scales",
+    label: "ableton-learning-music-play-with-notes-and-scales route",
+    widgetCount: 2,
+    transportCount: 4,
+    editKind: "root-choice",
+  });
+}
+
+async function smokeAbletonLearningMusicPlayWithChords(context) {
+  await smokeAbletonLearningMusicLesson(context, {
+    slug: "ableton-learning-music-play-with-chords",
+    label: "ableton-learning-music-play-with-chords route",
+    widgetCount: 2,
+    transportCount: 4,
+    editKind: "root-choice",
+  });
+}
+
+async function smokeAbletonLearningMusicPlayWithBasslines(context) {
+  await smokeAbletonLearningMusicLesson(context, {
+    slug: "ableton-learning-music-play-with-basslines",
+    label: "ableton-learning-music-play-with-basslines route",
+    widgetCount: 2,
+    transportCount: 4,
+    editKind: "root-choice",
+  });
+}
+
+async function smokeAbletonLearningMusicPlayWithMelodies(context) {
+  await smokeAbletonLearningMusicLesson(context, {
+    slug: "ableton-learning-music-play-with-melodies",
+    label: "ableton-learning-music-play-with-melodies route",
+    widgetCount: 2,
+    transportCount: 4,
+    editKind: "root-choice",
+  });
+}
+
+async function smokeAbletonLearningMusicPlayWithSongStructures(context) {
+  assert(
+    countFilesRecursive("ableton-learning-music-play-with-song-structures/lessons/sounds") === 31,
+    "ableton-learning-music-play-with-song-structures route expected 31 local audio files",
+  );
+  assert(
+    countFilesRecursive("ableton-learning-music-play-with-song-structures/fonts") === 9,
+    "ableton-learning-music-play-with-song-structures route expected 9 local font files",
+  );
+
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "ableton-learning-music-play-with-song-structures/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "ableton-learning-music-play-with-song-structures route", {
+    minimumChapters: 0,
+    navMode: "none",
+    expectedFamily: "ableton-practice",
+    expectedRoute: "ableton-learning-music-play-with-song-structures",
+    expectedVariant: "practice",
+  });
+  await assertLocalScriptSources(
+    page,
+    [
+      "./third-party/polyfills/polyfills.js",
+      "../shared/tone.min.js",
+      "./third-party/microevent/microevent.js",
+      "./widgets/build/widgets.min.js",
+      "../shared/public-footer.js",
+    ],
+    "ableton-learning-music-play-with-song-structures route",
+  );
+  await page.waitForFunction(() => {
+    return Boolean(document.querySelector("[data-ableton-lesson='ableton-learning-music-play-with-song-structures']")) &&
+      /song forms/i.test(document.querySelector("main")?.textContent || "") &&
+      document.querySelectorAll(".widget").length === 0;
+  }, null, { timeout: 20000 });
+  await assertNoRemotePlayableMediaRequests(page, "ableton-learning-music-play-with-song-structures route");
+  console.log("OK ableton-learning-music-play-with-song-structures local shell");
+
+  await assertEngineeringSandboxLayout(context, "ableton-learning-music-play-with-song-structures/", "ableton-learning-music-play-with-song-structures route", {
+    navMode: "none",
+    controlSelector: "[data-primary-control]",
+    containerSelector: ".ableton-lesson-shell.story-practice-main",
+  });
+  await assertPrimaryControlVisible(page, "ableton-learning-music-play-with-song-structures route");
+  console.log("OK ableton-learning-music-play-with-song-structures practice shell");
+
+  await assertViewportUsable(page, "ableton-learning-music-play-with-song-structures route");
+  await assertRouteViewportUsable(
+    context,
+    "ableton-learning-music-play-with-song-structures/",
+    "#reference-footer",
+    "[data-ableton-lesson='ableton-learning-music-play-with-song-structures']",
+    "ableton-learning-music-play-with-song-structures route",
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("ableton-learning-music-play-with-song-structures route");
+  console.log("OK ableton-learning-music-play-with-song-structures responsive shell");
+  await page.close();
+}
+
+async function smokeAbletonLearningSynthLesson(context, config) {
+  const { slug, label, titleText, interactionKind } = config;
+
+  assert(
+    countFilesRecursive(`${slug}/fonts`) === 12,
+    `${label} expected 12 local font files`,
+  );
+  assert(
+    countFilesRecursive(`${slug}/content/assets/sounds`) === 4,
+    `${label} expected 4 shared local sound assets`,
+  );
+  assert(
+    countFilesRecursive(`${slug}/content/lessons/en/synthesis`) === 5,
+    `${label} expected 5 lesson-local WAV files`,
+  );
+  assert(
+    countFilesRecursive(`${slug}/content/assets/models`) === 4,
+    `${label} expected 4 local GLB model assets`,
+  );
+  assert(
+    countFilesRecursive(`${slug}/content/texts/en`) === 6,
+    `${label} expected 6 local text payload files`,
+  );
+  assert(
+    countFilesRecursive(`${slug}/presets`) === 2,
+    `${label} expected 2 preset catalog files`,
+  );
+  assert(
+    countFilesRecursive(`${slug}/rnbo/patches`) === 1,
+    `${label} expected 1 local RNBO patch`,
+  );
+
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, `${slug}/`, "#reference-footer");
+  await assertLocalScriptSources(
+    page,
+    [
+      "../shared/ableton-learning-synths-react.production.min.js",
+      "../shared/ableton-learning-synths-react-dom.production.min.js",
+      "../shared/ableton-learning-synths-musiclab.js",
+      "../shared/ableton-learning-synths-archive.js",
+      "../shared/public-footer.js",
+    ],
+    label,
+  );
+  await page.waitForFunction((expectedTitle) => {
+    const heading = document.querySelector("main[data-ableton-synth-lesson] h1");
+    return Boolean(heading) && heading.textContent?.trim() === expectedTitle;
+  }, titleText, { timeout: 30000 });
+  const archiveShellState = await page.evaluate(() => {
+    const bodyLinks = Array.from(document.querySelectorAll("main[data-ableton-synth-lesson] a[href]"));
+    return {
+      localizedLinks: bodyLinks.filter((node) => {
+        const href = node.getAttribute("href") || "";
+        return href.startsWith("../ableton-learning-synths-");
+      }).length,
+      hasRemoteLessonLink: bodyLinks.some((node) => /learningsynths\.ableton\.com/i.test(node.getAttribute("href") || "")),
+      hasFeedbackLink: bodyLinks.some((node) => /^mailto:learning@ableton\.com/i.test(node.getAttribute("href") || "")),
+    };
+  });
+  assert(archiveShellState.localizedLinks >= 2, `${label} did not localize the synth lesson cross-links`);
+  assert(!archiveShellState.hasRemoteLessonLink, `${label} left a remote Learning Synths body link in place`);
+  assert(!archiveShellState.hasFeedbackLink, `${label} left the upstream feedback link in the public body`);
+  await assertNoRemotePlayableMediaRequests(page, label);
+  console.log(`OK ${label} local archive shell`);
+
+  if (interactionKind === "xy") {
+    const xyState = await page.evaluate(async () => {
+      const control = document.querySelector(".components_xy-pad__control-container");
+      const key = Object.keys(control || {}).find((name) => name.startsWith("__reactInternalInstance$"));
+      let xyFiber = control?.[key];
+      for (let index = 0; xyFiber && index < 5; index += 1) {
+        xyFiber = xyFiber.return;
+      }
+      let lessonFiber = control?.[key];
+      for (let index = 0; lessonFiber && index < 7; index += 1) {
+        lessonFiber = lessonFiber.return;
+      }
+      const xyPad = xyFiber?.stateNode;
+      const lesson = lessonFiber?.stateNode;
+      if (!xyPad || !lesson) {
+        return null;
+      }
+
+      const beforeTransform = control.getAttribute("style") || "";
+      lesson.onXYChange({ type: 0, xPctEased: 0.5, yPctEased: 0.5, xPctRaw: 0.5, yPctRaw: 0.5 });
+      xyPad.setToPos(0.82, 0.18);
+      xyPad.notifyStateChange(1);
+      await new Promise((resolve) => window.setTimeout(resolve, 50));
+      const afterTransform = control.getAttribute("style") || "";
+      const duringState = { ...lesson.state };
+      lesson.onXYChange({ type: 2, xPctEased: 0.82, yPctEased: 0.18, xPctRaw: 0.82, yPctRaw: 0.18 });
+      return {
+        beforeTransform,
+        afterTransform,
+        duringState,
+        finalState: { ...lesson.state },
+      };
+    });
+    assert(xyState, `${label} did not expose the XY synth control`);
+    assert(xyState.beforeTransform !== xyState.afterTransform, `${label} did not update the XY position`);
+    assert(xyState.duringState.active === true, `${label} did not activate during note trigger`);
+    assert(xyState.finalState.active === false, `${label} did not release after note stop`);
+  } else if (interactionKind === "filter-xy") {
+    const filterState = await page.evaluate(async () => {
+      const control = document.querySelector(".components_xy-pad__control-container");
+      const curve = document.querySelector(".component_filter-curve__path");
+      const key = Object.keys(control || {}).find((name) => name.startsWith("__reactInternalInstance$"));
+      let fiber = control?.[key];
+      for (let index = 0; fiber && index < 7; index += 1) {
+        fiber = fiber.return;
+      }
+      const component = fiber?.stateNode;
+      if (!component || !curve) {
+        return null;
+      }
+
+      const beforeCurve = curve.getAttribute("d") || "";
+      component.onXYChange({ type: 0, xPctEased: 0.5, yPctEased: 0.5, xPctRaw: 0.5, yPctRaw: 0.5 });
+      component.onXYChange({ type: 1, xPctEased: 0.88, yPctEased: 0.22, xPctRaw: 0.88, yPctRaw: 0.22 });
+      component.forceUpdate();
+      await new Promise((resolve) => window.setTimeout(resolve, 50));
+      const afterCurve = curve.getAttribute("d") || "";
+      const duringState = { ...component.state };
+      component.onXYChange({ type: 2, xPctEased: 0.88, yPctEased: 0.22, xPctRaw: 0.88, yPctRaw: 0.22 });
+      return {
+        beforeCurve,
+        afterCurve,
+        duringState,
+        macroX: component.player.getMacroXValue(),
+        macroY: component.player.getMacroYValue(),
+      };
+    });
+    assert(filterState, `${label} did not expose the filter XY scene`);
+    assert(filterState.beforeCurve !== filterState.afterCurve, `${label} did not update the filter curve`);
+    assert(filterState.duringState.active === true, `${label} did not activate the filter scene during note trigger`);
+    assert(filterState.macroX > 0.8 && filterState.macroY > 0.7, `${label} did not update the filter macro values`);
+  } else if (interactionKind === "slider") {
+    const sliderState = await page.evaluate(async () => {
+      const control = document.querySelector(".components_control__slider_control");
+      const fill = document.querySelector(".components_control__slider_fill");
+      const key = Object.keys(control || {}).find((name) => name.startsWith("__reactInternalInstance$"));
+      let fiber = control?.[key];
+      for (let index = 0; fiber && index < 5; index += 1) {
+        fiber = fiber.return;
+      }
+      const component = fiber?.stateNode;
+      if (!component || !fill) {
+        return null;
+      }
+
+      const beforeFill = fill.getAttribute("style") || "";
+      component.onSliderChange({ type: 0, pctEased: 0, pctRaw: 0 });
+      component.onSliderChange({ type: 1, pctEased: 0.72, pctRaw: 0.72 });
+      await new Promise((resolve) => window.setTimeout(resolve, 60));
+      const afterFill = fill.getAttribute("style") || "";
+      const duringState = { ...component.state };
+      component.onSliderChange({ type: 2, pctEased: 0.72, pctRaw: 0.72 });
+      return {
+        beforeFill,
+        afterFill,
+        duringState,
+        finalState: { ...component.state },
+        macroX: component.player.getMacroXValue(),
+      };
+    });
+    assert(sliderState, `${label} did not expose the synth slider scene`);
+    assert(sliderState.beforeFill !== sliderState.afterFill, `${label} did not update the slider fill`);
+    assert(sliderState.duringState.active === true, `${label} did not enter the active note state`);
+    assert(sliderState.finalState.active === false, `${label} did not release after slider note stop`);
+    assert(sliderState.macroX > 0.4, `${label} did not update the synth macro value`);
+  } else if (interactionKind === "adsr") {
+    const adsrState = await page.evaluate(async () => {
+      const button = document.querySelector(".synth-adsr__press-hold-button");
+      const shape = document.querySelector(".adsr-envelope-shape");
+      const key = Object.keys(button || {}).find((name) => name.startsWith("__reactInternalInstance$"));
+      let fiber = button?.[key];
+      for (let index = 0; fiber && index < 5; index += 1) {
+        fiber = fiber.return;
+      }
+      const component = fiber?.stateNode;
+      if (!component || !shape) {
+        return null;
+      }
+
+      const beforeShape = shape.getAttribute("d") || "";
+      const beforeAttack = component.props.player.getParameterControlValue(component.props.attackParameter);
+      component.setADSRControlValues(0.8, 0.45, 0.25, 0.6);
+      component.forceUpdate();
+      await new Promise((resolve) => window.setTimeout(resolve, 60));
+      const afterShape = shape.getAttribute("d") || "";
+      const afterAttack = component.props.player.getParameterControlValue(component.props.attackParameter);
+      component.startNote();
+      await new Promise((resolve) => window.setTimeout(resolve, 40));
+      const heldNotes = component.props.player.getHeldNotes().length;
+      component.stopNote();
+      return {
+        beforeShape,
+        afterShape,
+        beforeAttack,
+        afterAttack,
+        heldNotes,
+      };
+    });
+    assert(adsrState, `${label} did not expose the ADSR scene`);
+    assert(adsrState.beforeShape !== adsrState.afterShape, `${label} did not redraw the ADSR envelope`);
+    assert(adsrState.beforeAttack !== adsrState.afterAttack, `${label} did not update the envelope parameters`);
+    assert(adsrState.heldNotes === 1, `${label} did not trigger a held synth note`);
+  } else if (interactionKind === "recipe") {
+    const slider = page.locator(".components_control__slider_control").first();
+    const fill = page.locator(".components_control__slider_fill").first();
+    const beforeFill = await fill.getAttribute("style");
+    await slider.focus();
+    await page.keyboard.press("ArrowRight");
+    await page.waitForTimeout(120);
+    const afterFill = await fill.getAttribute("style");
+    assert(beforeFill !== afterFill, `${label} did not update a recipe slider`);
+
+    const playButton = page.locator(".synth-playback_play-stop-button").first();
+    await playButton.click();
+    await page.waitForTimeout(120);
+    const buttonClass = await playButton.getAttribute("class");
+    assert(/--playing/.test(buttonClass || ""), `${label} did not enter the playing state`);
+  } else {
+    throw new Error(`Unknown Ableton Learning Synths interaction kind: ${interactionKind}`);
+  }
+  await assertNoRemotePlayableMediaRequests(page, label);
+  console.log(`OK ${label} interaction path`);
+
+  await assertViewportUsable(page, label);
+  await assertRouteViewportUsable(
+    context,
+    `${slug}/`,
+    "#reference-footer",
+    "main[data-ableton-synth-lesson] h1",
+    label,
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean(label);
+  console.log(`OK ${label} responsive shell`);
+  await page.close();
+}
+
+async function smokeAbletonLearningSynthsGetStarted(context) {
+  await smokeAbletonLearningSynthLesson(context, {
+    slug: "ableton-learning-synths-get-started",
+    label: "ableton-learning-synths-get-started route",
+    titleText: "Get started making sounds",
+    interactionKind: "xy",
+  });
+}
+
+async function smokeAbletonLearningSynthsHowSynthsMakeSound(context) {
+  await smokeAbletonLearningSynthLesson(context, {
+    slug: "ableton-learning-synths-how-synths-make-sound",
+    label: "ableton-learning-synths-how-synths-make-sound route",
+    titleText: "How synths make sound",
+    interactionKind: "slider",
+  });
+}
+
+async function smokeAbletonLearningSynthsFilterResonance(context) {
+  await smokeAbletonLearningSynthLesson(context, {
+    slug: "ableton-learning-synths-filter-resonance",
+    label: "ableton-learning-synths-filter-resonance route",
+    titleText: "Filter resonance",
+    interactionKind: "filter-xy",
+  });
+}
+
+async function smokeAbletonLearningSynthsModulatingAmplitudeWithEnvelopes(context) {
+  await smokeAbletonLearningSynthLesson(context, {
+    slug: "ableton-learning-synths-modulating-amplitude-with-envelopes",
+    label: "ableton-learning-synths-modulating-amplitude-with-envelopes route",
+    titleText: "Modulating amplitude with envelopes",
+    interactionKind: "adsr",
+  });
+}
+
+async function smokeAbletonLearningSynthsMatchingEnvelopes(context) {
+  await smokeAbletonLearningSynthLesson(context, {
+    slug: "ableton-learning-synths-matching-envelopes",
+    label: "ableton-learning-synths-matching-envelopes route",
+    titleText: "Matching envelopes",
+    interactionKind: "adsr",
+  });
+}
+
+async function smokeAbletonLearningSynthsRecipes(context) {
+  await smokeAbletonLearningSynthLesson(context, {
+    slug: "ableton-learning-synths-recipes",
+    label: "ableton-learning-synths-recipes route",
+    titleText: "Get to know this synth",
+    interactionKind: "recipe",
+  });
+}
+
+async function smokeChromeMusicLabSongMaker(context) {
+  assert(
+    countFilesRecursive("chrome-music-lab-song-maker/client/audio") === 110,
+    "chrome-music-lab-song-maker route expected 110 local audio files",
+  );
+  assert(
+    countFilesRecursive("chrome-music-lab-song-maker/client/images") === 20,
+    "chrome-music-lab-song-maker route expected 20 local image files",
+  );
+  assert(
+    countFilesRecursive("chrome-music-lab-song-maker/client/fonts") === 2,
+    "chrome-music-lab-song-maker route expected 2 local font files",
+  );
+
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "chrome-music-lab-song-maker/", "#reference-footer");
+  await assertLocalScriptSources(
+    page,
+    ["build/Main.js", "../../shared/public-footer.js"],
+    "chrome-music-lab-song-maker route",
+  );
+  await page.waitForFunction(() => {
+    return Boolean(document.querySelector("#grid-container")) &&
+      Boolean(document.querySelector("#instrument-canvas")) &&
+      Boolean(document.querySelector("#play-button")) &&
+      Boolean(document.querySelector("#save-button"));
+  }, null, { timeout: 30000 });
+  await page.waitForTimeout(5000);
+  await assertNoRemotePlayableMediaRequests(page, "chrome-music-lab-song-maker route");
+  console.log("OK chrome-music-lab-song-maker local assets");
+
+  const instrumentCanvas = page.locator("#instrument-canvas");
+  const canvasBefore = await instrumentCanvas.evaluate((node) => node.toDataURL());
+  const canvasBox = await instrumentCanvas.boundingBox();
+  assert(canvasBox, "chrome-music-lab-song-maker route did not expose the instrument canvas");
+  await page.mouse.click(canvasBox.x + canvasBox.width * 0.2, canvasBox.y + canvasBox.height * 0.2);
+  await page.waitForTimeout(300);
+  const canvasAfter = await instrumentCanvas.evaluate((node) => node.toDataURL());
+  assert(canvasAfter !== canvasBefore, "chrome-music-lab-song-maker route did not update the grid after painting a note");
+  console.log("OK chrome-music-lab-song-maker note painting");
+
+  await page.click("#play-button");
+  await page.waitForTimeout(700);
+  const playbackState = await page.evaluate(() => ({
+    playText: document.querySelector("#play-button")?.textContent?.trim() || "",
+    bottomPresent: Boolean(document.querySelector("#bottom")),
+  }));
+  assert(playbackState.playText === "Stop", "chrome-music-lab-song-maker route did not toggle into playback");
+  assert(playbackState.bottomPresent, "chrome-music-lab-song-maker route lost the playback control shell");
+  console.log("OK chrome-music-lab-song-maker playback");
+
+  await page.click("#instrument-toggle-button");
+  await page.waitForTimeout(250);
+  await page.evaluate(() => document.querySelector("#meter-button")?.click());
+  await page.waitForTimeout(250);
+  const controlState = await page.evaluate(() => ({
+    instrumentText: document.querySelector("#instrument-toggle-button")?.textContent?.trim() || "",
+    tempoSliderClass: document.querySelector("#tempo-slider")?.className || "",
+    meterClass: document.querySelector("#meter-button")?.className || "",
+    saveText: document.querySelector("#save-button")?.textContent?.trim() || "",
+    saveDisabled: Boolean(document.querySelector("#save-button")?.disabled),
+  }));
+  assert(controlState.instrumentText === "Piano", `chrome-music-lab-song-maker route expected Piano after instrument toggle, got ${controlState.instrumentText || "none"}`);
+  assert(/show/.test(controlState.tempoSliderClass), "chrome-music-lab-song-maker route did not reveal the tempo slider");
+  assert(/expand/.test(controlState.meterClass), "chrome-music-lab-song-maker route did not expand the tempo control");
+  assert(controlState.saveText === "Save unavailable" && controlState.saveDisabled, "chrome-music-lab-song-maker route did not keep save disabled in the local archive build");
+  await assertNoRemotePlayableMediaRequests(page, "chrome-music-lab-song-maker route");
+  console.log("OK chrome-music-lab-song-maker controls");
+
+  await assertViewportUsable(page, "chrome-music-lab-song-maker route");
+  await assertRouteViewportUsable(
+    context,
+    "chrome-music-lab-song-maker/",
+    "#reference-footer",
+    "#play-button",
+    "chrome-music-lab-song-maker route",
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("chrome-music-lab-song-maker route");
+  console.log("OK chrome-music-lab-song-maker responsive shell");
+  await page.close();
+}
+
+async function openMusicmapGenreFromSearch(page, searchTerm, resultIndex) {
+  await page.click("#search-toggle-button");
+  await page.waitForSelector("#search-field", { state: "visible", timeout: 15000 });
+  await page.locator("#search-field").fill("");
+  await page.locator("#search-field").type(searchTerm, { delay: 40 });
+  await page.waitForFunction(() => !document.querySelector("#search-button")?.disabled, null, { timeout: 10000 });
+  await page.click("#search-button", { force: true });
+  await page.waitForFunction(() => {
+    return /matches found/i.test(document.querySelector("#search-results-title")?.textContent || "") &&
+      document.querySelectorAll("#search-results-paragraphs a").length > 1;
+  }, null, { timeout: 25000 });
+  await page.waitForTimeout(2000);
+  await page.locator("#search-results-paragraphs a").nth(resultIndex).click({ force: true });
+  await page.waitForFunction(() => {
+    return (document.querySelector("#right-side-pane-genre-name")?.textContent || "").trim().length > 0 &&
+      document.querySelectorAll("#right-side-pane-songlist a").length > 0;
+  }, null, { timeout: 20000 });
+}
+
+async function smokeMusicmap(context) {
+  assert(
+    countFilesRecursive("musicmap/assets") === 5,
+    "musicmap route expected 5 vendored static assets under musicmap/assets",
+  );
+
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  const remoteRequests = createRemoteRequestMonitor(page);
+
+  await assertRoute(page, "musicmap/", "#reference-footer");
+  await assertLocalScriptSources(
+    page,
+    ["./musicmap-embed-gate.js", "./main.bundle.js", "../shared/public-footer.js"],
+    "musicmap route",
+  );
+  await page.waitForFunction(() => {
+    return Boolean(document.querySelector("#musicmap")) &&
+      document.querySelectorAll("#genres text").length > 200 &&
+      Boolean(document.querySelector("#search-toggle-button")) &&
+      Boolean(document.querySelector("#zoom-in")) &&
+      Boolean(document.querySelector("#zoom-out"));
+  }, null, { timeout: 30000 });
+  assert(
+    fs.existsSync(path.join(rootDir, "musicmap", "master-genrelist.json")),
+    "musicmap route is missing the vendored master-genrelist.json payload",
+  );
+  await assertOnlyAllowedRemoteRequests(remoteRequests.snapshot(), [], "musicmap route before playback");
+  console.log("OK musicmap local graph shell");
+
+  await openMusicmapGenreFromSearch(page, "shoegaze", 1);
+  const genreState = await page.evaluate(() => ({
+    resultsTitle: (document.querySelector("#search-results-title")?.textContent || "").trim(),
+    genreName: (document.querySelector("#right-side-pane-genre-name")?.textContent || "").trim(),
+    songCount: document.querySelectorAll("#right-side-pane-songlist a").length,
+    youtubeHref: document.querySelector("#youtube-playlist-link")?.getAttribute("href") || "",
+    spotifyHref: document.querySelector("#spotify-playlist-link")?.getAttribute("href") || "",
+  }));
+  assert(/matches found/i.test(genreState.resultsTitle), "musicmap route did not expose search results");
+  assert(genreState.genreName === "DREAM POP & SHOEGAZE", `musicmap route opened the wrong genre pane: ${genreState.genreName || "none"}`);
+  assert(genreState.songCount > 0, "musicmap route did not populate the genre song list");
+  assert(/^https:\/\/www\.youtube\.com\/playlist\?list=/.test(genreState.youtubeHref), "musicmap route did not wire the YouTube playlist link");
+  assert(/^https:\/\/open\.spotify\.com\/playlist\//.test(genreState.spotifyHref), "musicmap route did not wire the Spotify playlist link");
+  console.log("OK musicmap search and genre pane");
+
+  const zoomBefore = await page.evaluate(() => {
+    const zoom = document.querySelector("#musicmap")?.__zoom;
+    return zoom ? { x: zoom.x, y: zoom.y, k: zoom.k } : null;
+  });
+  await page.click("#right-side-pane-go-to-link", { force: true });
+  await page.waitForFunction((previousScale) => {
+    const zoom = document.querySelector("#musicmap")?.__zoom;
+    return Boolean(zoom) && zoom.k > previousScale;
+  }, zoomBefore?.k || 1, { timeout: 10000 });
+  const zoomAfter = await page.evaluate(() => {
+    const zoom = document.querySelector("#musicmap")?.__zoom;
+    return zoom ? { x: zoom.x, y: zoom.y, k: zoom.k } : null;
+  });
+  assert((zoomAfter?.k || 1) > (zoomBefore?.k || 1), "musicmap route did not zoom into the selected genre");
+  console.log("OK musicmap zoom and pan path");
+
+  const remoteBeforeYouTubeEmbed = remoteRequests.snapshot().length;
+  await page.click("#youtube-playlist-link", { force: true });
+  await page.waitForFunction(() => {
+    return /youtube-nocookie\.com\/embed\/videoseries/.test(
+      document.querySelector("#youtube-player-iframe iframe")?.getAttribute("src") || "",
+    );
+  }, null, { timeout: 10000 });
+  const embedState = await page.evaluate(() => ({
+    iframeSrc: document.querySelector("#youtube-player-iframe iframe")?.getAttribute("src") || "",
+    iframeCount: document.querySelectorAll("#youtube-player-iframe iframe").length,
+  }));
+  assert(embedState.iframeCount === 1, "musicmap route did not create a single deferred embed frame");
+  assert(
+    /^https:\/\/www\.youtube-nocookie\.com\/embed\/videoseries/.test(embedState.iframeSrc),
+    `musicmap route created an unexpected embed: ${embedState.iframeSrc || "none"}`,
+  );
+  assertOnlyAllowedRemoteRequests(
+    remoteRequests.diff(remoteBeforeYouTubeEmbed),
+    ["youtube.com", "youtube-nocookie.com", "ytimg.com", "googlevideo.com"],
+    "musicmap route after deferred YouTube embed",
+  );
+  console.log("OK musicmap deferred YouTube playback surface");
+
+  await page.evaluate(() => {
+    const embedContainer = document.querySelector("#youtube-player-iframe");
+    if (embedContainer) {
+      embedContainer.innerHTML = "";
+    }
+  });
+  await page.waitForTimeout(1000);
+  const remoteBeforeSpotifyEmbed = remoteRequests.snapshot().length;
+  await page.click("#spotify-playlist-link", { force: true });
+  await page.waitForFunction(() => {
+    return /open\.spotify\.com\/embed\/playlist/.test(
+      document.querySelector("#youtube-player-iframe iframe")?.getAttribute("src") || "",
+    );
+  }, null, { timeout: 10000 });
+  const spotifyEmbedState = await page.evaluate(() => ({
+    iframeSrc: document.querySelector("#youtube-player-iframe iframe")?.getAttribute("src") || "",
+    iframeCount: document.querySelectorAll("#youtube-player-iframe iframe").length,
+  }));
+  assert(spotifyEmbedState.iframeCount === 1, "musicmap route did not replace the embed host with a single Spotify frame");
+  assert(
+    /^https:\/\/open\.spotify\.com\/embed\/playlist/.test(spotifyEmbedState.iframeSrc),
+    `musicmap route created an unexpected Spotify embed: ${spotifyEmbedState.iframeSrc || "none"}`,
+  );
+  assertOnlyAllowedRemoteRequests(
+    remoteRequests.diff(remoteBeforeSpotifyEmbed),
+    ["open.spotify.com", "embed-cdn.spotifycdn.com"],
+    "musicmap route after deferred Spotify embed",
+  );
+  console.log("OK musicmap deferred Spotify playback surface");
+
+  await assertViewportUsable(page, "musicmap route");
+  await assertRouteViewportUsable(
+    context,
+    "musicmap/",
+    "#reference-footer",
+    "#search-toggle-button",
+    "musicmap route",
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("musicmap route");
+  console.log("OK musicmap responsive shell");
+  await page.close();
+}
+
+async function smokeWayfinding(context) {
+  const page = await context.newPage();
+  await assertRoute(page, "trust/", "#top-bar");
+  const ordinaryLinks = await page.evaluate(() => ({
+    atlas: document.querySelector(".top-bar__back")?.href || "",
+    docs: document.querySelector(".top-bar__docs")?.href || "",
+  }));
+  assert(new URL(ordinaryLinks.atlas).pathname === `${mountPath}index.html`, `trust exposed an unexpected Atlas exit: ${ordinaryLinks.atlas}`);
+  assert(new URL(ordinaryLinks.docs).pathname === `${mountPath}docs/trust/`, `trust exposed an unexpected Docs exit: ${ordinaryLinks.docs}`);
+  await assertViewportUsable(page, "trust wayfinding");
+
+  await assertRoute(page, "formula-1-racing/", "[data-story-wayfinding='docs']");
+  const sandboxLinks = await page.evaluate(() => ({
+    atlas: document.querySelector("[data-story-wayfinding='atlas']")?.href || "",
+    docs: document.querySelector("[data-story-wayfinding='docs']")?.href || "",
+    topBar: Boolean(document.querySelector("#top-bar")),
+  }));
+  assert(!sandboxLinks.topBar, "formula-1-racing unexpectedly received fixed top-bar chrome");
+  assert(new URL(sandboxLinks.atlas).pathname === mountPath, `formula-1-racing exposed an unexpected Atlas exit: ${sandboxLinks.atlas}`);
+  assert(new URL(sandboxLinks.docs).pathname === `${mountPath}docs/formula-1-racing/`, `formula-1-racing exposed an unexpected Docs exit: ${sandboxLinks.docs}`);
+  await assertViewportUsable(page, "formula-1-racing wayfinding");
+
+  await assertRoute(page, "anxiety/sharing/", "#top-bar");
+  const nestedDocs = await page.locator(".top-bar__docs").getAttribute("href");
+  assert(new URL(nestedDocs, page.url()).pathname === `${mountPath}docs/anxiety/`, `nested route exposed an unexpected Docs exit: ${nestedDocs}`);
+
+  await page.addInitScript(() => localStorage.setItem("theme", "dark"));
+  await assertRoute(page, "docs/trust/", ".back-link");
+  const docsState = await page.evaluate(() => ({
+    label: document.querySelector(".back-link")?.textContent?.trim() || "",
+    atlas: document.querySelector(".back-link")?.href || "",
+    route: document.querySelector(".action-link")?.href || "",
+    theme: document.documentElement.getAttribute("saved-theme") || "",
+    canonical: document.querySelector('link[rel="canonical"]')?.href || "",
+    ogUrl: document.querySelector('meta[property="og:url"]')?.content || "",
+    robots: document.querySelector('meta[name="robots"]')?.content || "",
+    description: document.querySelector('meta[name="description"]')?.content || "",
+    ogTitle: document.querySelector('meta[property="og:title"]')?.content || "",
+    ogDescription: document.querySelector('meta[property="og:description"]')?.content || "",
+    ogType: document.querySelector('meta[property="og:type"]')?.content || "",
+    title: document.title,
+  }));
+  const docsUrl = "https://kohnnn.github.io/interactive-explanation/docs/trust/";
+  assert(docsState.label === "Back to Atlas", `docs exposed an unexpected Atlas label: ${docsState.label}`);
+  assert(new URL(docsState.atlas).pathname === mountPath, `docs exposed an unexpected Atlas exit: ${docsState.atlas}`);
+  assert(new URL(docsState.route).pathname === `${mountPath}trust/`, `docs exposed an unexpected route exit: ${docsState.route}`);
+  assert(docsState.theme === "dark", `docs did not apply the stored theme before rendering: ${docsState.theme}`);
+  assert(docsState.canonical === docsUrl && docsState.ogUrl === docsUrl, "docs production URL metadata did not match");
+  assert(docsState.robots === "noindex,follow", `docs exposed an unexpected robots policy: ${docsState.robots}`);
+  assert(docsState.ogTitle === docsState.title, "docs social title did not match its page title");
+  assert(docsState.ogDescription === docsState.description, "docs social description did not match its page description");
+  assert(docsState.ogType === "website", `docs exposed an unexpected social type: ${docsState.ogType}`);
+  await page.close();
+}
+
+async function smokeAtlas(context) {
+  const page = await context.newPage();
+  await assertRoute(page, "", "[data-page-list]");
+  await page.waitForFunction(() => document.querySelectorAll("[data-page-list] [data-intent]").length > 0, null, { timeout: 15000 });
+  const guidedPathCount = routeManifest.filter((route) => route.intent === "guided-path").length;
+  const initialState = await page.evaluate(() => ({
+    cards: document.querySelectorAll("[data-page-list] [data-intent]").length,
+    controls: document.querySelectorAll("[data-atlas-intent]").length,
+    guidedPaths: document.querySelectorAll("[data-guided-path-list] [data-intent='guided-path']").length,
+    guidedPathsInInventory: document.querySelectorAll("[data-page-list] [data-intent='guided-path']").length,
+    clearHidden: document.querySelector("[data-clear-filters]")?.hidden,
+    topicOptions: document.querySelectorAll("[data-topic-select] option").length,
+    routeHref: document.querySelector("[data-page-list] [data-slug='trust'] .action-link")?.getAttribute("href"),
+    docsHref: document.querySelector("[data-page-list] [data-slug='trust'] .action-link.secondary")?.getAttribute("href"),
+    url: window.location.search,
+  }));
+  assert(initialState.controls === 6, `atlas expected All plus five intent buttons, found ${initialState.controls}`);
+  assert(initialState.cards === routeManifest.length, `atlas expected ${routeManifest.length} initial cards, found ${initialState.cards}`);
+  assert(initialState.guidedPaths === guidedPathCount, `atlas expected ${guidedPathCount} promoted guided paths, found ${initialState.guidedPaths}`);
+  assert(initialState.guidedPathsInInventory === guidedPathCount, "atlas promotion removed guided paths from the complete inventory");
+  assert(initialState.topicOptions > 1, "atlas topic selector did not load manifest topics");
+  assert(initialState.routeHref === "./trust/", `atlas exposed unexpected route href: ${initialState.routeHref}`);
+  assert(initialState.docsHref === "./docs/trust/", `atlas exposed unexpected docs href: ${initialState.docsHref}`);
+  assert(initialState.clearHidden, "atlas clear filters control was visible without active filters");
+  assert(initialState.url === "", `atlas exposed default URL state: ${initialState.url}`);
+
+  await page.locator("[data-atlas-intent='guided-path']").focus();
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => {
+    const cards = Array.from(document.querySelectorAll("[data-page-list] [data-intent]"));
+    return cards.length > 0 && cards.every((card) => card.dataset.intent === "guided-path");
+  }, null, { timeout: 5000 });
+  assert(new URLSearchParams(await page.evaluate(() => window.location.search)).get("intent") === "guided-path", "atlas did not sync keyboard intent state to the URL");
+
+  await page.selectOption("[data-topic-select]", "music");
+  await page.waitForFunction(() => {
+    const cards = Array.from(document.querySelectorAll("[data-page-list] [data-topics]"));
+    return cards.length > 0 && cards.every((card) => card.dataset.topics.split(" ").includes("music"));
+  }, null, { timeout: 5000 });
+  const topicState = await page.evaluate(() => ({
+    summary: document.querySelector("[data-page-results]")?.textContent || "",
+    topic: new URLSearchParams(window.location.search).get("topic"),
+    clearVisible: !document.querySelector("[data-clear-filters]")?.hidden,
+  }));
+  assert(topicState.topic === "music", "atlas did not sync topic state to the URL");
+  assert(topicState.summary.includes("Topic: Music."), `atlas summary omitted the active topic: ${topicState.summary}`);
+  assert(topicState.clearVisible, "atlas clear filters control did not become visible after filtering");
+
+  await page.goBack({ waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => document.querySelector("[data-topic-select]")?.value === "all");
+  assert(await page.locator("[data-atlas-intent='guided-path']").getAttribute("aria-pressed") === "true", "atlas Back did not restore the prior intent state");
+  await page.goForward({ waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => document.querySelector("[data-topic-select]")?.value === "music");
+  assert(await page.locator("[data-atlas-intent='guided-path']").getAttribute("aria-pressed") === "true", "atlas Forward did not restore combined filters");
+
+  await page.locator("[data-clear-filters]").click();
+  await page.waitForFunction((total) => document.querySelectorAll("[data-page-list] [data-intent]").length === total, routeManifest.length, { timeout: 5000 });
+  const resetState = await page.evaluate(() => ({
+    clearHidden: document.querySelector("[data-clear-filters]")?.hidden,
+    url: window.location.search,
+  }));
+  assert(resetState.clearHidden, "atlas clear filters control remained visible after reset");
+  assert(resetState.url === "", `atlas retained URL state after reset: ${resetState.url}`);
+
+  await page.goto(new URL("?intent=explainer&topic=machine-learning&sort=title", baseUrl).href, { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => {
+    const cards = Array.from(document.querySelectorAll("[data-page-list] [data-intent]"));
+    return document.querySelector("[data-topic-select]")?.value === "machine-learning" && cards.length > 0 && cards.every((card) => card.dataset.intent === "explainer" && card.dataset.topics.split(" ").includes("machine-learning"));
+  }, null, { timeout: 15000 });
+  assert(await page.locator("[data-sort-select]").inputValue() === "title", "atlas did not restore sort state from the URL");
+  await assertViewportUsable(page, "atlas desktop");
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert(await page.locator("[data-guided-path-list]").isVisible(), "atlas guided paths were hidden on mobile");
+  assert(await page.locator("[data-topic-select]").isVisible(), "atlas topic selector was hidden on mobile");
+  await assertViewportUsable(page, "atlas mobile");
+  await page.close();
+}
+
+async function smokeMusicInteractiveHub(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+
+  await assertRoute(page, "music-interactive-hub/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelectorAll("[data-music-card]").length === 21 &&
+      document.querySelectorAll("[data-recommended-path] li").length === 5;
+  }, null, { timeout: 15000 });
+
+  const hubState = await page.evaluate(() => ({
+    cardCount: document.querySelectorAll("[data-music-card]").length,
+    docsLinks: document.querySelectorAll("[data-music-card] a[data-link-kind='docs']").length,
+    routeLinks: document.querySelectorAll("[data-music-card] a[data-link-kind='route']").length,
+    clusterCounts: Array.from(document.querySelectorAll("[data-cluster-count]")).map((node) => node.textContent?.trim() || ""),
+    localOnlyLinks: Array.from(document.querySelectorAll("main[data-music-hub] a[href]")).every((node) => {
+      const href = node.getAttribute("href") || "";
+      return href.startsWith("../") || href.startsWith("./#") || href === "../";
+    }),
+    recommendedPathVisible: Boolean(document.querySelector("[data-recommended-path]")),
+    recommendedPathCount: document.querySelectorAll("[data-recommended-path] li").length,
+    recommendedPathBadge: document.querySelector("[data-path-count]")?.textContent?.trim() || "",
+  }));
+  assert(hubState.cardCount === 21, `music-interactive-hub route expected 21 route cards, found ${hubState.cardCount}`);
+  assert(hubState.routeLinks === 21, "music-interactive-hub route did not expose one local route link per card");
+  assert(hubState.docsLinks === 21, "music-interactive-hub route did not expose one local docs link per card");
+  assert(
+    hubState.clusterCounts.join("|") === "6 routes|8 routes|6 routes|1 route",
+    `music-interactive-hub route exposed unexpected cluster counts: ${hubState.clusterCounts.join(", ")}`,
+  );
+  assert(hubState.localOnlyLinks, "music-interactive-hub route exposed a non-local body link");
+  assert(hubState.recommendedPathVisible, "music-interactive-hub route did not render the recommended progression");
+  assert(hubState.recommendedPathCount === 5, `music-interactive-hub route expected 5 starter stops, found ${hubState.recommendedPathCount}`);
+  assert(hubState.recommendedPathBadge === "5 stops", `music-interactive-hub route exposed unexpected path badge: ${hubState.recommendedPathBadge}`);
+  console.log("OK music-interactive-hub card clusters");
+
+  await assertLearningPathControls(
+    context,
+    "music-interactive-hub/",
+    "music-interactive-hub",
+    5,
+    3,
+  );
+  console.log("OK music-interactive-hub progress and sharing");
+
+  await assertViewportUsable(page, "music-interactive-hub route");
+  await assertRouteViewportUsable(
+    context,
+    "music-interactive-hub/",
+    "#reference-footer",
+    "[data-recommended-path]",
+    "music-interactive-hub route",
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("music-interactive-hub route");
+  console.log("OK music-interactive-hub responsive shell");
+  await page.close();
+}
+
+async function smokeMemoryAllocation(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "memory-allocation/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "memory-allocation route", {
+    minimumChapters: 8,
+    navMode: "generated",
+    expectedFamily: "samwho-essay",
+    expectedRoute: "memory-allocation",
+  });
+  await assertLocalScriptSources(
+    page,
+    ["./js/gsap/gsap.min.js", "./js/gsap/PixiPlugin.min.js", "./js/memory-allocation.js"],
+    "memory-allocation route",
+  );
+  await page.waitForFunction(() => {
+    return document.querySelectorAll(".memory canvas").length >= 10 &&
+      Boolean(document.querySelector("#hexadecimal-slider")) &&
+      Boolean(document.querySelector("#segmented-1 input[type='range']"));
+  }, null, { timeout: 30000 });
+  const hydrationState = await page.evaluate(() => ({
+    canvases: document.querySelectorAll(".memory canvas").length,
+    hasHexSlider: Boolean(document.querySelector("#hexadecimal-slider")),
+    hasSegmentedSlider: Boolean(document.querySelector("#segmented-1 input[type='range']")),
+  }));
+  assert(hydrationState.canvases >= 10, "memory-allocation did not hydrate the expected canvas scenes");
+  assert(hydrationState.hasHexSlider, "memory-allocation did not render the hexadecimal slider");
+  assert(hydrationState.hasSegmentedSlider, "memory-allocation did not hydrate the segmented allocator scene");
+
+  const assetState = await page.evaluate(() => {
+    return performance.getEntriesByType("resource").map((entry) => entry.name);
+  });
+  for (const assetPath of [
+    "/memory-allocation/js/allocators/stack.js",
+    "/memory-allocation/js/allocators/freelist.js",
+    "/memory-allocation/js/allocators/segmented-freelist.js",
+    "/memory-allocation/js/allocators/inline.js",
+  ]) {
+    assert(
+      assetState.some((entry) => entry.includes(assetPath)),
+      `memory-allocation did not load ${assetPath} from local assets`,
+    );
+  }
+  console.log("OK memory-allocation local assets");
+
+  const allocatorBefore = await page.evaluate(() => {
+    const canvas = document.querySelector("#segmented-1 canvas");
+    return canvas ? canvas.toDataURL() : "";
+  });
+  assert(allocatorBefore, "memory-allocation did not expose the segmented allocator canvas");
+  await setRangeValue(page, "#segmented-1 input[type='range']", 0.75);
+  await page.waitForFunction((previous) => {
+    const canvas = document.querySelector("#segmented-1 canvas");
+    return canvas && canvas.toDataURL() !== previous;
+  }, allocatorBefore, { timeout: 5000 });
+  console.log("OK memory-allocation allocator timeline");
+
+  const hexBefore = await page.evaluate(() => ({
+    decimal: document.querySelector("#decimal")?.textContent || "",
+    hexadecimal: document.querySelector("#hexadecimal")?.textContent || "",
+  }));
+  await setRangeValue(page, "#hexadecimal-slider", 26);
+  await page.waitForFunction((previous) => {
+    const decimal = document.querySelector("#decimal")?.textContent || "";
+    const hexadecimal = document.querySelector("#hexadecimal")?.textContent || "";
+    return decimal !== previous.decimal &&
+      hexadecimal !== previous.hexadecimal &&
+      decimal.trim() === "26" &&
+      hexadecimal.trim() === "0x1a";
+  }, hexBefore, { timeout: 5000 });
+  console.log("OK memory-allocation hexadecimal slider");
+
+  await assertViewportUsable(page, "memory-allocation route");
+  await assertRouteViewportUsable(
+    context,
+    "memory-allocation/",
+    "#reference-footer",
+    ".memory canvas",
+    "memory-allocation route",
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("memory-allocation route");
+  await assertEngineeringSandboxLayout(context, "memory-allocation/", "memory-allocation route", { navMode: "generated" });
+  console.log("OK memory-allocation responsive shell");
+  await page.close();
+}
+
+async function smokeLoadBalancing(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "load-balancing/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "load-balancing route", {
+    minimumChapters: 7,
+    navMode: "generated",
+    expectedFamily: "samwho-essay",
+    expectedRoute: "load-balancing",
+  });
+  await assertLocalScriptSources(page, ["./js/load-balancers.js"], "load-balancing route");
+  await page.waitForFunction(() => {
+    const playground = window.__loadBalancingSimulationById?.fin;
+    const graph = document.querySelector("#graph-medians .js-plotly-plot, #graph-medians .plotly, #graph-medians svg");
+    return Boolean(playground) &&
+      document.querySelector('[id="1"] canvas') &&
+      document.querySelector("#fin canvas") &&
+      graph &&
+      document.querySelector("#fin select") &&
+      document.querySelectorAll("#fin input[type='range']").length >= 5;
+  }, null, { timeout: 30000 });
+
+  const assetState = await page.evaluate(() => {
+    return performance.getEntriesByType("resource").map((entry) => entry.name);
+  });
+  for (const assetPath of [
+    "/load-balancing/js/pixi.mjs",
+    "/load-balancing/js/plotly.js",
+  ]) {
+    assert(
+      assetState.some((entry) => entry.includes(assetPath)),
+      `load-balancing did not load ${assetPath} from local assets`,
+    );
+  }
+  console.log("OK load-balancing local assets");
+
+  const initialState = await page.evaluate(() => {
+    const playground = window.__loadBalancingSimulationById?.fin;
+    return {
+      algorithm: playground?.loadBalancer?.algorithm?.constructor?.name || "",
+      servers: playground?.loadBalancer?.servers?.length || 0,
+      rps: playground?.loadBalancer?.rps || 0,
+    };
+  });
+  assert(initialState.servers >= 1, "load-balancing did not expose the final playground simulation");
+
+  await setSelectControlByLabel(page, "#fin > div", "Algorithm", "random");
+  await setRangeControlByLabel(page, "#fin > div", "Num Servers", 4);
+  await setRangeControlByLabel(page, "#fin > div", "RPS", 7);
+  await page.waitForFunction((previous) => {
+    const playground = window.__loadBalancingSimulationById?.fin;
+    return playground &&
+      playground.loadBalancer.algorithm.constructor.name !== previous.algorithm &&
+      playground.loadBalancer.algorithm.constructor.name === "RandomAlgorithm" &&
+      playground.loadBalancer.servers.length === 4 &&
+      playground.loadBalancer.rps === 7;
+  }, initialState, { timeout: 5000 });
+  console.log("OK load-balancing playground controls");
+
+  await assertViewportUsable(page, "load-balancing route");
+  await assertRouteViewportUsable(
+    context,
+    "load-balancing/",
+    "#reference-footer",
+    '[id="1"] canvas',
+    "load-balancing route",
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("load-balancing route");
+  await assertEngineeringSandboxLayout(context, "load-balancing/", "load-balancing route", { navMode: "generated" });
+  console.log("OK load-balancing responsive shell");
+  await page.close();
+}
+
+async function smokeHysteresisSlack(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "hysteresis-slack/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "hysteresis-slack route", {
+    minimumChapters: 3,
+    navMode: "generated",
+    expectedFamily: "systems-essay",
+    expectedRoute: "hysteresis-slack",
+  });
+  await assertLocalScriptSources(page, ["./build/bundle.js"], "hysteresis-slack route");
+  await page.waitForFunction(() => {
+    return document.querySelectorAll("#slider2 circle").length >= 2 &&
+      (document.querySelector("#chart2")?.innerHTML || "").length > 100 &&
+      document.querySelectorAll("#timeline path").length >= 3;
+  }, null, { timeout: 15000 });
+
+  const assetState = await page.evaluate(() => {
+    return performance.getEntriesByType("resource").map((entry) => entry.name);
+  });
+  for (const assetPath of [
+    "/hysteresis-slack/bootstrap.css",
+    "/hysteresis-slack/build/bundle.js",
+    "/hysteresis-slack/images/hyloop.gif",
+  ]) {
+    assert(
+      assetState.some((entry) => entry.includes(assetPath)),
+      `hysteresis-slack did not load ${assetPath} from local assets`,
+    );
+  }
+  console.log("OK hysteresis-slack local assets");
+
+  const chartBefore = await page.locator("#chart2").evaluate((element) => element.innerHTML);
+  await dragKnob(page, "#slider2 circle", 50, 0, "hysteresis-slack route");
+  await page.waitForFunction((previous) => {
+    return (document.querySelector("#chart2")?.innerHTML || "") !== previous;
+  }, chartBefore, { timeout: 5000 });
+  console.log("OK hysteresis-slack slack slider");
+
+  await assertViewportUsable(page, "hysteresis-slack route");
+  await assertRouteViewportUsable(
+    context,
+    "hysteresis-slack/",
+    "#reference-footer",
+    "#slider2 circle",
+    "hysteresis-slack route",
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("hysteresis-slack route");
+  await assertEngineeringSandboxLayout(context, "hysteresis-slack/", "hysteresis-slack route", { navMode: "generated" });
+  console.log("OK hysteresis-slack responsive shell");
+  await page.close();
+}
+
+async function smokeRigidBodyCollisions(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "rigid-body-collisions/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "rigid-body-collisions route", {
+    minimumChapters: 4,
+    navMode: "generated",
+    expectedFamily: "systems-essay",
+    expectedRoute: "rigid-body-collisions",
+  });
+  await assertLocalScriptSources(page, ["./_nuxt/D4VqJVMa.js"], "rigid-body-collisions route");
+  await page.waitForFunction(() => {
+    return document.querySelector("canvas#c") &&
+      document.querySelectorAll("input[type='range']").length >= 4 &&
+      document.querySelectorAll("button").length >= 4 &&
+      Array.from(document.querySelectorAll("h1")).every((node) => (node.textContent || "").trim() !== "404") &&
+      !/404 - Page not found:/i.test(document.title);
+  }, null, { timeout: 30000 });
+
+  const assetState = await page.evaluate(() => {
+    return performance.getEntriesByType("resource").map((entry) => entry.name);
+  });
+  assert(
+    assetState.some((entry) => /\/rigid-body-collisions\/_nuxt\/[^/]+\.css(?:$|\?)/.test(entry)),
+    "rigid-body-collisions did not load any local Nuxt CSS asset",
+  );
+  console.log("OK rigid-body-collisions local assets");
+
+  const firstRange = page.locator("input[type='range']").first();
+  const rangeBefore = await firstRange.inputValue();
+  await firstRange.evaluate((element, value) => {
+    element.value = String(value);
+    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(new Event("change", { bubbles: true }));
+  }, 10);
+  await page.waitForFunction((previous) => {
+    const firstRange = document.querySelector("input[type='range']");
+    return firstRange &&
+      firstRange.value !== previous &&
+      document.querySelector("canvas#c") &&
+      Array.from(document.querySelectorAll("h1")).every((node) => (node.textContent || "").trim() !== "404");
+  }, rangeBefore, { timeout: 5000 });
+  console.log("OK rigid-body-collisions control surface");
+
+  await assertViewportUsable(page, "rigid-body-collisions route");
+  await assertRouteViewportUsable(
+    context,
+    "rigid-body-collisions/",
+    "#reference-footer",
+    "canvas#c",
+    "rigid-body-collisions route",
+    390,
+    844,
+  );
+  await page.waitForTimeout(250);
+  assertPageRuntimeClean("rigid-body-collisions route");
+  await assertEngineeringSandboxLayout(context, "rigid-body-collisions/", "rigid-body-collisions route", {
+    navMode: "generated",
+    readySelector: ".story-hero",
+  });
+  console.log("OK rigid-body-collisions responsive shell");
+  await page.close();
+}
+
+async function smokeBlockchain101CombinedFlow(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "blockchain-101-combined-flow/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "blockchain-101-combined-flow route", {
+    minimumChapters: 0,
+    navMode: "none",
+    minimumNativeLinks: 0,
+    expectedFamily: "anders-lab",
+    expectedRoute: "blockchain-101-combined-flow",
+    expectedVariant: "lab",
+  });
+  await page.waitForFunction(() => {
+    return document.querySelector("#chapter-hash") &&
+      document.querySelector("#chapter-signatures") &&
+      document.querySelector("#chapter-zkp") &&
+      document.querySelectorAll(".chapter-card").length === 3;
+  }, null, { timeout: 15000 });
+
+  const hrefs = await page.evaluate(() => {
+    return Array.from(document.querySelectorAll("a[href]")).map((node) => node.getAttribute("href") || "");
+  });
+  for (const expectedHref of [
+    "../blockchain/",
+    "../blockchain/distributed.html",
+    "../public-private-keys/",
+    "../public-private-keys/signatures/",
+    "../public-private-keys/transaction/",
+    "../zero-knowledge-proof-demo/",
+  ]) {
+    assert(
+      hrefs.includes(expectedHref),
+      `blockchain-101-combined-flow is missing local link ${expectedHref}`,
+    );
+  }
+  console.log("OK blockchain-101-combined-flow local chapter links");
+
+  await page.locator("[data-learning-start]").click();
+  await page.waitForTimeout(250);
+  const hashAnchorVisible = await page.locator("#chapter-hash").isVisible();
+  assert(hashAnchorVisible, "blockchain-101-combined-flow chapter anchor navigation failed");
+  console.log("OK blockchain-101-combined-flow chapter anchor");
+
+  await assertLearningPathControls(
+    context,
+    "blockchain-101-combined-flow/",
+    "blockchain-101-combined-flow",
+    3,
+    2,
+  );
+  console.log("OK blockchain-101-combined-flow progress and sharing");
+
+  await assertEngineeringSandboxLayout(context, "blockchain-101-combined-flow/", "blockchain-101-combined-flow route", {
+    navMode: "none",
+    controlSelector: "#chapter-hash",
+    containerSelector: ".site-page",
+  });
+  await assertViewportUsable(page, "blockchain-101-combined-flow route");
+  await assertRouteViewportUsable(
+    context,
+    "blockchain-101-combined-flow/",
+    "#reference-footer",
+    "#chapter-hash",
+    "blockchain-101-combined-flow route",
+    390,
+    844,
+  );
+  assertPageRuntimeClean("blockchain-101-combined-flow route");
+  console.log("OK blockchain-101-combined-flow responsive shell");
+  await page.close();
+}
+
+async function smokePrimaryInteractiveHub(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await assertRoute(page, "primary-interactive-hub/", "#reference-footer");
+  await page.waitForFunction(() => {
+    return document.querySelector("#systems-cluster") &&
+      document.querySelector("#stories-cluster") &&
+      document.querySelector("#playgrounds-cluster") &&
+      document.querySelectorAll(".route-card").length >= 12;
+  }, null, { timeout: 15000 });
+
+  const hubState = await page.evaluate(() => {
+    const hrefs = Array.from(document.querySelectorAll(".route-card a[href]"))
+      .map((node) => node.getAttribute("href") || "");
+     return {
+       hrefs,
+       countText: document.querySelector("[data-hub-count]")?.textContent || "",
+       hasProgressContract: Boolean(
+         document.body.dataset.learningProgressSlug ||
+         document.querySelector("[data-learning-start], [data-learning-resume], [data-learning-step]"),
+       ),
+     };
+   });
+  for (const expectedHref of [
+    "../trust/",
+    "../docs/trust/",
+    "../anxiety/",
+    "../coming-out-simulator-2014/",
+    "../loopy/",
+    "../simulating/",
+    "../sim/",
+  ]) {
+    assert(
+      hubState.hrefs.includes(expectedHref),
+      `primary-interactive-hub is missing local link ${expectedHref}`,
+    );
+  }
+  assert(/12 local routes/i.test(hubState.countText), "primary-interactive-hub count summary did not render");
+  assert(!hubState.hasProgressContract, "primary-interactive-hub incorrectly exposed a strict progress contract");
+  console.log("OK primary-interactive-hub local route grid");
+
+  await page.locator("a[href='./#stories-cluster']").click();
+  await page.waitForTimeout(250);
+  const storiesVisible = await page.locator("#stories-cluster").isVisible();
+  assert(storiesVisible, "primary-interactive-hub cluster anchor navigation failed");
+  console.log("OK primary-interactive-hub cluster anchor");
+
+  await assertViewportUsable(page, "primary-interactive-hub route");
+  await assertRouteViewportUsable(
+    context,
+    "primary-interactive-hub/",
+    "#reference-footer",
+    "#systems-cluster",
+    "primary-interactive-hub route",
+    390,
+    844,
+  );
+  assertPageRuntimeClean("primary-interactive-hub route");
+  console.log("OK primary-interactive-hub responsive shell");
+  await page.close();
+}
+
 async function smokeLinearRegression(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "linear-regression/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "linear-regression route", {
+    minimumChapters: 5,
+    navMode: "generated",
+    expectedFamily: "mlu-pilot",
+    expectedRoute: "linear-regression",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("#scatter-chart svg") &&
       document.querySelector("#input-container input[type='range']") &&
@@ -1961,6 +7041,7 @@ async function smokeLinearRegression(context) {
   assert(/0\.234/.test(gdAfter.text), "linear-regression 25-step run did not reach the expected bias readout");
   assert(/0\.801/.test(gdAfter.text), "linear-regression 25-step run did not update the displayed error");
   await page.waitForTimeout(250);
+  await assertEngineeringSandboxLayout(context, "linear-regression/", "linear-regression route", { navMode: "generated" });
   assertPageRuntimeClean("linear-regression route");
   console.log("OK linear-regression gradient descent");
   await page.close();
@@ -1970,6 +7051,12 @@ async function smokeLogisticRegression(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "logistic-regression/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "logistic-regression route", {
+    minimumChapters: 5,
+    navMode: "generated",
+    expectedFamily: "mlu-pilot",
+    expectedRoute: "logistic-regression",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("#tempSlider") &&
       document.querySelector("#boundarySlider") &&
@@ -2046,6 +7133,7 @@ async function smokeLogisticRegression(context) {
       /13\.64/.test(text);
   }, gdBefore, { timeout: 10000 });
   await page.waitForTimeout(250);
+  await assertEngineeringSandboxLayout(context, "logistic-regression/", "logistic-regression route", { navMode: "generated" });
   assertPageRuntimeClean("logistic-regression route");
   console.log("OK logistic-regression gradient descent");
   await page.close();
@@ -2055,6 +7143,12 @@ async function smokePrecisionRecall(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "precision-recall/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "precision-recall route", {
+    minimumChapters: 4,
+    navMode: "generated",
+    expectedFamily: "mlu-pilot",
+    expectedRoute: "precision-recall",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("#heatmap-container") &&
       document.querySelector("#f1-container") &&
@@ -2114,6 +7208,7 @@ async function smokePrecisionRecall(context) {
       (document.querySelector("#dragme")?.textContent || "").includes("Drag The Line!");
   }, null, { timeout: 5000 });
   await page.waitForTimeout(250);
+  await assertEngineeringSandboxLayout(context, "precision-recall/", "precision-recall route", { navMode: "generated" });
   assertPageRuntimeClean("precision-recall route");
   console.log("OK precision-recall threshold tradeoff");
   await page.close();
@@ -2123,6 +7218,12 @@ async function smokeRocAuc(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "roc-auc/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "roc-auc route", {
+    minimumChapters: 5,
+    navMode: "generated",
+    expectedFamily: "mlu-pilot",
+    expectedRoute: "roc-auc",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("#roc-scatter-chart svg") &&
       document.querySelector("#roc-chart") &&
@@ -2137,13 +7238,13 @@ async function smokeRocAuc(context) {
     scatterCircles: document.querySelectorAll("#roc-scatter-chart circle").length,
   }));
 
-  await page.evaluate(() => window.scrollTo(0, 3200));
+  await page.evaluate(() => window.scrollTo(0, 4200));
   await page.waitForFunction((previous) => {
     const highlightText = (document.querySelector("#highlight-text")?.textContent || "").replace(/\s+/g, " ").trim();
     const scatterCircles = document.querySelectorAll("#roc-scatter-chart circle").length;
     return highlightText !== previous.highlightText &&
-      /TPR:\s*0\.85/.test(highlightText) &&
-      /FPR:\s*0\.45/.test(highlightText) &&
+      /TPR:\s*0\./.test(highlightText) &&
+      /FPR:\s*0\./.test(highlightText) &&
       scatterCircles > previous.scatterCircles;
   }, topState, { timeout: 10000 });
   console.log("OK roc-auc threshold sweep");
@@ -2157,6 +7258,7 @@ async function smokeRocAuc(context) {
       document.querySelectorAll("#auc-chart path").length >= 3;
   }, null, { timeout: 10000 });
   await page.waitForTimeout(250);
+  await assertEngineeringSandboxLayout(context, "roc-auc/", "roc-auc route", { navMode: "generated" });
   assertPageRuntimeClean("roc-auc route");
   console.log("OK roc-auc auc scene");
   await page.close();
@@ -2166,6 +7268,7 @@ async function smokeBiasVariance(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "bias-variance/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "bias-variance route", { minimumChapters: 6, navMode: "generated" });
   await page.waitForFunction(() => {
     return document.querySelector("#scroll-viz svg") &&
       document.querySelector("#errorBarSvg") &&
@@ -2249,6 +7352,8 @@ async function smokeBiasVariance(context) {
       document.querySelectorAll("#dd-container path").length >= 5;
   }, null, { timeout: 5000 });
   await page.waitForTimeout(250);
+  await assertViewportUsable(page, "bias-variance route");
+  await assertEngineeringSandboxLayout(context, "bias-variance/", "bias-variance route", { navMode: "generated" });
   assertPageRuntimeClean("bias-variance route");
   console.log("OK bias-variance double descent scene");
   await page.close();
@@ -2258,6 +7363,11 @@ async function smokeTrainTestValidation(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "train-test-validation/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "train-test-validation route", {
+    minimumChapters: 6,
+    navMode: "native",
+    nativeSelector: "#toc a[href^='#']",
+  });
   await page.waitForFunction(() => {
     return document.querySelector("#chart svg") &&
       document.querySelector("#line-decision-boundary") &&
@@ -2271,19 +7381,18 @@ async function smokeTrainTestValidation(context) {
   await page.waitForTimeout(1000);
   const modelBefore = await page.evaluate(() => ({
     active: document.querySelector(".button.active")?.textContent?.trim() || "",
-    boundary: document.querySelector("#line-decision-boundary")?.getAttribute("x1") || "",
+    trainTransform: document.querySelector("#chart .bubble-animal[group='train']")?.getAttribute("transform") || "",
   }));
   await page.locator("button").filter({ hasText: /^Both$/ }).click();
   await page.waitForFunction((previous) => {
     const active = document.querySelector(".button.active")?.textContent?.trim() || "";
-    const boundary = document.querySelector("#line-decision-boundary")?.getAttribute("x1") || "";
-    return active === "Both" && boundary !== previous.boundary;
+    const trainTransform = document.querySelector("#chart .bubble-animal[group='train']")?.getAttribute("transform") || "";
+    return active === "Both" && trainTransform !== previous.trainTransform;
   }, modelBefore, { timeout: 5000 });
   console.log("OK train-test-validation feature switch");
 
   const dragBefore = await page.evaluate(() => ({
     transform: document.querySelector("#chart .bubble-animal[group='train']")?.getAttribute("transform") || "",
-    boundary: document.querySelector("#line-decision-boundary")?.getAttribute("x1") || "",
   }));
   const trainBubble = page.locator("#chart .bubble-animal[group='train']").first();
   const box = await trainBubble.boundingBox();
@@ -2294,8 +7403,7 @@ async function smokeTrainTestValidation(context) {
   await page.mouse.up();
   await page.waitForFunction((previous) => {
     const transform = document.querySelector("#chart .bubble-animal[group='train']")?.getAttribute("transform") || "";
-    const boundary = document.querySelector("#line-decision-boundary")?.getAttribute("x1") || "";
-    return transform !== previous.transform && boundary !== previous.boundary;
+    return transform !== previous.transform;
   }, dragBefore, { timeout: 5000 });
   console.log("OK train-test-validation draggable training scene");
 
@@ -2312,6 +7420,8 @@ async function smokeTrainTestValidation(context) {
     return /test/.test(text) && /validation/.test(text) && /\d+\.\d%/.test(text);
   }, null, { timeout: 5000 });
   await page.waitForTimeout(250);
+  await assertViewportUsable(page, "train-test-validation route");
+  await assertEngineeringSandboxLayout(context, "train-test-validation/", "train-test-validation route", { navMode: "native" });
   assertPageRuntimeClean("train-test-validation route");
   console.log("OK train-test-validation test table");
   await page.close();
@@ -2321,6 +7431,7 @@ async function smokeDoubleDescent(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "double-descent/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "double-descent route", { minimumChapters: 5, navMode: "generated" });
   await page.waitForFunction(() => {
     return document.querySelector("#doubledescent-container svg") &&
       document.querySelector("#scatter-container svg") &&
@@ -2400,6 +7511,7 @@ async function smokeDoubleDescent(context) {
   console.log("OK double-descent gap media");
 
   await assertViewportUsable(page, "double-descent route");
+  await assertEngineeringSandboxLayout(context, "double-descent/", "double-descent route", { navMode: "generated" });
   await assertRouteViewportUsable(
     context,
     "double-descent/",
@@ -2419,6 +7531,7 @@ async function smokeDoubleDescent2(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "double-descent2/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "double-descent2 route", { minimumChapters: 6, navMode: "generated" });
   await page.waitForFunction(() => {
     return document.querySelectorAll(".katex").length > 20 &&
       document.querySelector("#chart1 svg") &&
@@ -2463,6 +7576,7 @@ async function smokeDoubleDescent2(context) {
   console.log("OK double-descent2 interpolation and spline scenes");
 
   await assertViewportUsable(page, "double-descent2 route");
+  await assertEngineeringSandboxLayout(context, "double-descent2/", "double-descent2 route", { navMode: "generated" });
   await assertRouteViewportUsable(
     context,
     "double-descent2/",
@@ -2478,505 +7592,403 @@ async function smokeDoubleDescent2(context) {
   await page.close();
 }
 
-async function smokeInteractiveMechanicalWatch(context) {
+async function smokeBallot(context) {
   const page = await context.newPage();
-  const assertPageRuntimeClean = createRuntimeMonitor(page);
-  const label = "interactive-mechanical-watch route";
-  const canvasSelector = "[data-exploded-canvas] canvas.exploded-watch__webgl";
-
-  await assertRoute(page, "interactive-mechanical-watch/", "#reference-footer");
-  await assertLocalScriptSources(
-    page,
-    [
-      "../shared/mechanical-watch/js/base.js",
-      "../shared/mechanical-watch/js/watch.js",
-      "./js/legacy-watch-accessibility.js",
-      "./js/exploded-view.js",
-      "./js/exploded-view-three.js",
-    ],
-    "interactive-mechanical-watch",
-  );
-  const shellState = await page.evaluate(() => ({
-    route: document.body.dataset.storyRoute || "",
-    family: document.body.dataset.storyFamily || "",
-    chapterCount: document.querySelectorAll("[data-story-chapter]").length,
-    railCount: document.querySelectorAll(".story-rail__link").length,
-    playHref: document.querySelector(".story-hero [data-story-callout=play] .story-button")?.getAttribute("href") || "",
-  }));
-  assert(shellState.route === "interactive-mechanical-watch", label + " exposed route " + (shellState.route || "none"));
-  assert(shellState.family === "engineering-longform", label + " exposed family " + (shellState.family || "none"));
-  assert(shellState.chapterCount >= 10, label + " exposed only " + shellState.chapterCount + " chapters");
-  assert(shellState.railCount === shellState.chapterCount, label + " rail count did not match chapter count");
-  assert(shellState.playHref === "#hero", label + " exposed unexpected play-first href " + shellState.playHref);
-  await assertViewportUsable(page, label);
-  await page.waitForSelector("#hero canvas", { timeout: 30000 });
-  await page.waitForSelector(canvasSelector, { timeout: 30000 });
-  await page.waitForFunction(() => document.body.dataset.watchAccessibility === "ready", null, { timeout: 5000 });
-
-  const chapterState = await page.evaluate(() => {
-    const ids = Array.from(document.querySelectorAll("[data-story-chapter]")).map((section) => section.id);
-    const labels = Object.fromEntries(Array.from(document.querySelectorAll(".story-rail__link")).map((link) => [
-      link.dataset.storyTarget,
-      {
-        text: link.textContent?.trim() || "",
-        title: link.title,
-        ariaLabel: link.getAttribute("aria-label"),
-      },
-    ]));
-    return { ids, labels };
-  });
-  assert(
-    chapterState.ids.indexOf("from-pixels-to-resin") < chapterState.ids.indexOf("further-watching-and-reading"),
-    `${label} should place the resin synthesis before references`,
-  );
-  assert(chapterState.labels["from-pixels-to-resin"]?.text === "Resin prototype", `${label} did not expose the compact resin label`);
-  assert(chapterState.labels["from-pixels-to-resin"]?.title === "From Pixels to Resin", `${label} compact resin label lost its full title`);
-  assert(chapterState.labels["from-pixels-to-resin"]?.ariaLabel === "From Pixels to Resin", `${label} compact resin label lost its accessible name`);
-
-  const mobilePage = await context.newPage();
-  await mobilePage.setViewportSize({ width: 390, height: 844 });
-  await assertRoute(mobilePage, "interactive-mechanical-watch/", ".story-mobile-bar__toggle");
-  const mobilePlacement = await mobilePage.evaluate(() => {
-    const bar = document.querySelector(".story-mobile-bar");
-    const article = document.querySelector(".article");
-    return Boolean(bar && article && (bar.compareDocumentPosition(article) & Node.DOCUMENT_POSITION_FOLLOWING));
-  });
-  assert(mobilePlacement, label + " did not place mobile navigation before the article");
-  await mobilePage.locator(".story-mobile-bar__toggle").click();
-  await mobilePage.waitForFunction(() => document.querySelector(".story-mobile-sheet")?.open, null, { timeout: 5000 });
-  await mobilePage.keyboard.press("Escape");
-  await mobilePage.waitForFunction(() => !document.querySelector(".story-mobile-sheet")?.open, null, { timeout: 5000 });
-  assert(await mobilePage.locator(".story-mobile-bar__toggle").evaluate((toggle) => document.activeElement === toggle), label + " did not restore Browse focus after Escape");
-  await mobilePage.locator(".story-mobile-bar__toggle").click();
-  const mobileChapter = mobilePage.locator(".story-mobile-sheet__link").nth(1);
-  const mobileTarget = await mobileChapter.getAttribute("data-story-target");
-  assert(mobileTarget, label + " mobile chapter did not expose a target");
-  await mobileChapter.click();
-  await mobilePage.waitForFunction((target) => document.activeElement === document.getElementById(target), mobileTarget, { timeout: 15000 });
-  await assertViewportUsable(mobilePage, label + " mobile");
-  await mobilePage.close();
-
-  const legacyCanvas = page.locator("#hero canvas").first();
-  await legacyCanvas.scrollIntoViewIfNeeded();
-  const legacyCanvasBefore = await legacyCanvas.evaluate((canvas) => canvas.toDataURL());
-  await legacyCanvas.focus();
-  await legacyCanvas.press("ArrowRight");
-  await page.waitForFunction((previous) => document.querySelector("#hero canvas")?.toDataURL() !== previous, legacyCanvasBefore, { timeout: 5000 });
-  assert(await legacyCanvas.getAttribute("tabindex") === "0", `${label} legacy canvas should be keyboard focusable`);
-
-  const verticalCanvas = page.locator("#hero_movement canvas").first();
-  await verticalCanvas.scrollIntoViewIfNeeded();
-  const verticalCanvasBefore = await verticalCanvas.evaluate((canvas) => canvas.toDataURL());
-  await verticalCanvas.focus();
-  await verticalCanvas.press("ArrowUp");
-  await page.waitForFunction((previous) => document.querySelector("#hero_movement canvas")?.toDataURL() !== previous, verticalCanvasBefore, { timeout: 5000 });
-  assert(await verticalCanvas.getAttribute("aria-keyshortcuts") === "ArrowUp ArrowDown Escape", `${label} y-only canvas advertised ineffective horizontal keys`);
-
-  const multiSliderLabels = await page.locator("#torsion_spring3_sl0 .slider_knob, #torsion_spring3_sl1 .slider_knob, #torsion_spring3_sl2 .slider_knob").evaluateAll((knobs) => knobs.map((knob) => knob.getAttribute("aria-label")));
-  assert(new Set(multiSliderLabels).size === 3 && multiSliderLabels.every(Boolean), `${label} multi-slider controls should expose unique accessible names`);
-
-  const legacySlider = page.locator("#hero_sl0 .slider_knob").first();
-  await legacySlider.scrollIntoViewIfNeeded();
-  const legacySliderBefore = await legacySlider.getAttribute("aria-valuenow");
-  await legacySlider.focus();
-  await legacySlider.press("ArrowRight");
-  assert(await legacySlider.getAttribute("role") === "slider", `${label} legacy slider should expose slider semantics`);
-  assert(await legacySlider.getAttribute("aria-valuenow") !== legacySliderBefore, `${label} legacy slider keyboard action did not update its value`);
-
-  const legacySegment = page.locator("#gear_train3_seg0 [role='radio']").first();
-  await legacySegment.scrollIntoViewIfNeeded();
-  await legacySegment.focus();
-  await legacySegment.press("ArrowRight");
-  assert(await legacySegment.getAttribute("aria-checked") === "false", `${label} legacy segmented control keyboard action did not update its state`);
-  assert(await page.locator("#gear_train3_seg0 [role='radio']").nth(1).getAttribute("aria-checked") === "true", `${label} legacy segmented control did not select the next option`);
-
-  const legacyPlay = page.locator("#hero .play_pause_button").first();
-  const playStateBefore = await legacyPlay.getAttribute("aria-pressed");
-  await legacyPlay.focus();
-  await legacyPlay.press("Space");
-  assert(await legacyPlay.getAttribute("role") === "button", `${label} legacy play control should expose button semantics`);
-  assert(await legacyPlay.getAttribute("aria-pressed") !== playStateBefore, `${label} legacy play control keyboard action did not toggle state`);
-  console.log("OK interactive-mechanical-watch legacy keyboard controls");
-
-  const explodedState = await page.evaluate(() => {
-    const root = document.querySelector("[data-exploded-watch]");
-    const mount = root?.querySelector("[data-exploded-canvas]");
-    const canvas = mount?.querySelector("canvas.exploded-watch__webgl");
+  await page.goto(new URL("ballot/play/ballot1.html", baseUrl).href, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector("#model-object-select", { timeout: 15000 });
+  const frameState = await page.evaluate(() => {
+    const selected = Number(document.querySelector("#model-object-select")?.value || 0);
     return {
-      ready: root?.dataset.threeReady || "",
-      renderMode: mount?.dataset.renderMode || "",
-      componentCount: Number(canvas?.dataset.componentCount || 0),
-      ariaHidden: canvas?.getAttribute("aria-hidden") || "",
-      svgCount: mount?.querySelectorAll("svg").length || 0,
+      canvasTabIndex: document.querySelector("canvas")?.tabIndex,
+      x: model.draggables[selected].x,
+      y: model.draggables[selected].y,
     };
   });
-  assert(explodedState.ready === "true", `${label} did not report a ready Three.js renderer`);
-  assert(explodedState.renderMode === "three", `${label} exposed render mode ${explodedState.renderMode || "none"}`);
-  assert(explodedState.componentCount === 27, `${label} expected 27 Three.js components, got ${explodedState.componentCount}`);
-  assert(explodedState.ariaHidden === "true", `${label} pointer canvas should remain hidden from assistive technology`);
-  assert(explodedState.svgCount === 0, `${label} should replace the SVG after Three.js initialization`);
-
-  const partsRole = await page.locator("[data-exploded-parts]").getAttribute("role");
-  assert(partsRole === "group", `${label} parts selector should use button-group semantics, got ${partsRole || "none"}`);
-
-  const initialDepthValueText = await page.locator("[data-exploded-depth]").getAttribute("aria-valuetext");
-  assert(initialDepthValueText === "74 percent exploded", `${label} expected initial depth aria-valuetext, got ${initialDepthValueText || "none"}`);
-
-  const initialPartPressed = await page.locator("[data-exploded-parts] .is-selected").getAttribute("aria-pressed");
-  assert(initialPartPressed === "true", `${label} selected part should expose aria-pressed=true`);
-
-  const webglCanvas = page.locator(canvasSelector);
-  await webglCanvas.scrollIntoViewIfNeeded();
-  const renderCountBeforeDepth = Number(await webglCanvas.getAttribute("data-render-count") || 0);
-  await page.locator("[data-exploded-parts]").evaluate((parts) => {
-    parts.scrollTop = 48;
-    parts.firstElementChild.dataset.depthIdentity = "preserved";
-  });
-  await setRangeValue(page, "[data-exploded-depth]", 24);
-  await page.waitForFunction((previousCount) => {
-    return Number(document.querySelector("[data-exploded-canvas] canvas")?.dataset.renderCount || 0) > previousCount;
-  }, renderCountBeforeDepth, { timeout: 5000 });
-  const updatedDepthState = await page.evaluate(() => ({
-    valueText: document.querySelector("[data-exploded-depth]")?.getAttribute("aria-valuetext") || "",
-    identity: document.querySelector("[data-exploded-parts]")?.firstElementChild?.dataset.depthIdentity || "",
-    scrollTop: document.querySelector("[data-exploded-parts]")?.scrollTop || 0,
-  }));
-  assert(updatedDepthState.valueText === "24 percent exploded", `${label} expected updated depth aria-valuetext, got ${updatedDepthState.valueText || "none"}`);
-  assert(updatedDepthState.identity === "preserved", `${label} rebuilt the component list during a depth-only change`);
-  assert(updatedDepthState.scrollTop > 0, `${label} reset component-list scroll during a depth-only change`);
-  console.log("OK interactive-mechanical-watch explosion depth control");
-
-  const detailBeforeClick = await page.locator("[data-exploded-detail] h3").textContent();
-  await page.locator("[data-exploded-parts] [data-component-id]").first().click();
-  await page.waitForFunction((previousText) => {
-    return (document.querySelector("[data-exploded-detail] h3")?.textContent || "").trim() !== (previousText || "").trim();
-  }, detailBeforeClick, { timeout: 5000 });
-  const selectedPartPressed = await page.locator("[data-exploded-parts] .is-selected").getAttribute("aria-pressed");
-  assert(selectedPartPressed === "true", `${label} clicked part should expose aria-pressed=true`);
-  const caseLessonHref = await page.locator("[data-exploded-detail] .exploded-watch__lesson-link").getAttribute("href");
-  assert(caseLessonHref === "#mainplate", `${label} case detail should link back to assembly, got ${caseLessonHref || "none"}`);
-  await page.locator("[data-exploded-parts] [data-component-id='barrel']").click();
-  const barrelLessonHref = await page.locator("[data-exploded-detail] .exploded-watch__lesson-link").getAttribute("href");
-  assert(barrelLessonHref === "#power", `${label} barrel detail should link back to power, got ${barrelLessonHref || "none"}`);
-  console.log("OK interactive-mechanical-watch part button selection");
-
-  const detailBeforeKeyboard = await page.locator("[data-exploded-detail] h3").textContent();
-  await page.locator("[data-exploded-parts] [data-component-id]").nth(12).focus();
-  await page.keyboard.press("Enter");
-  await page.waitForFunction((previousText) => {
-    return (document.querySelector("[data-exploded-detail] h3")?.textContent || "").trim() !== (previousText || "").trim();
-  }, detailBeforeKeyboard, { timeout: 5000 });
-  const keyboardState = await page.evaluate(() => ({
-    componentId: document.activeElement?.getAttribute("data-component-id") || "",
-    pressed: document.activeElement?.getAttribute("aria-pressed") || "",
-  }));
-  assert(keyboardState.pressed === "true", `${label} keyboard-selected part should expose aria-pressed=true`);
-  assert(keyboardState.componentId === "crown-stem", `${label} should restore focus to the selected part button, got ${keyboardState.componentId || "none"}`);
-  console.log("OK interactive-mechanical-watch keyboard component selection");
-
-  const canvasBox = await webglCanvas.boundingBox();
-  assert(canvasBox, `${label} did not expose the Three.js canvas bounds`);
-  const selectedBeforeRaycast = await page.locator("[data-exploded-parts] .is-selected").getAttribute("data-component-id");
-  let selectedAfterRaycast = selectedBeforeRaycast;
-  const raycastPoints = [[0.5, 0.5], [0.4, 0.45], [0.6, 0.45], [0.35, 0.6], [0.65, 0.6]];
-  for (const [x, y] of raycastPoints) {
-    await page.mouse.click(canvasBox.x + canvasBox.width * x, canvasBox.y + canvasBox.height * y);
-    selectedAfterRaycast = await page.locator("[data-exploded-parts] .is-selected").getAttribute("data-component-id");
-    if (selectedAfterRaycast !== selectedBeforeRaycast) break;
-  }
-  assert(selectedAfterRaycast !== selectedBeforeRaycast, `${label} raycast selection did not update the active component`);
-  console.log("OK interactive-mechanical-watch raycast selection");
-
-  const renderCountBeforeOrbit = Number(await webglCanvas.getAttribute("data-render-count") || 0);
-  await page.mouse.move(canvasBox.x + canvasBox.width * 0.58, canvasBox.y + canvasBox.height * 0.5);
-  await page.mouse.down();
-  await page.mouse.move(canvasBox.x + canvasBox.width * 0.72, canvasBox.y + canvasBox.height * 0.58, { steps: 12 });
-  await page.mouse.up();
-  await page.waitForFunction((previousCount) => {
-    return Number(document.querySelector("[data-exploded-canvas] canvas")?.dataset.renderCount || 0) > previousCount;
-  }, renderCountBeforeOrbit, { timeout: 5000 });
-  const renderCountBeforeZoom = Number(await webglCanvas.getAttribute("data-render-count") || 0);
-  await page.mouse.move(canvasBox.x + canvasBox.width / 2, canvasBox.y + canvasBox.height / 2);
-  await page.mouse.wheel(0, -360);
-  await page.waitForFunction((previousCount) => {
-    return Number(document.querySelector("[data-exploded-canvas] canvas")?.dataset.renderCount || 0) > previousCount;
-  }, renderCountBeforeZoom, { timeout: 5000 });
-  console.log("OK interactive-mechanical-watch orbit and zoom controls");
-
-  const fallbackPage = await context.newPage();
-  await fallbackPage.route("**/models/watch_vertices.dat", (route) => route.fulfill({ status: 503, body: "" }));
-  await fallbackPage.goto(new URL("interactive-mechanical-watch/?smoke-fallback=1", baseUrl).href, { waitUntil: "domcontentloaded" });
-  await fallbackPage.waitForSelector("[data-exploded-canvas] svg", { timeout: 30000 });
-  await fallbackPage.waitForFunction(() => document.querySelector("[data-exploded-watch]")?.dataset.threeError, null, { timeout: 30000 });
-  const fallbackState = await fallbackPage.evaluate(() => {
-    const root = document.querySelector("[data-exploded-watch]");
-    const image = root?.querySelector("[data-exploded-canvas] svg image");
-    const imageHref = image?.getAttribute("href") || image?.getAttribute("xlink:href") || "";
+  assert(frameState.canvasTabIndex === -1, "Ballot canvas remained a tab stop");
+  await page.getByRole("button", { name: "Move selected object Right" }).press("Enter");
+  const movedState = await page.evaluate(() => {
+    const selected = Number(document.querySelector("#model-object-select")?.value || 0);
     return {
-      canvasCount: root?.querySelectorAll("[data-exploded-canvas] canvas").length || 0,
-      componentCount: root?.querySelectorAll("[data-exploded-canvas] [data-component-id]").length || 0,
-      diagramRole: root?.querySelector("[data-exploded-canvas] svg")?.getAttribute("role") || "",
-      imageHref,
-      resolvedImageHref: image ? new URL(imageHref, document.location.href).href : "",
+      text: document.querySelector(".model-keyboard-state")?.textContent || "",
+      x: model.draggables[selected].x,
+      y: model.draggables[selected].y,
     };
   });
-  assert(fallbackState.canvasCount === 0, `${label} fallback should retain the SVG without a canvas`);
-  assert(fallbackState.componentCount === 27, `${label} fallback expected 27 SVG components, got ${fallbackState.componentCount}`);
-  assert(fallbackState.diagramRole === "group", `${label} fallback SVG should use group semantics`);
-  const expectedImageUrl = new URL("interactive-mechanical-watch/images/generated/components/exploded-sheet.png", baseUrl).href;
-  assert(
-    fallbackState.resolvedImageHref === expectedImageUrl,
-    `${label} fallback resolved exploded sheet to ${fallbackState.resolvedImageHref || "none"}; expected ${expectedImageUrl} from href ${fallbackState.imageHref || "none"}`,
-  );
-  const imageResponse = await fallbackPage.request.get(fallbackState.resolvedImageHref);
-  assert(imageResponse.status() === 200, `${label} fallback exploded sheet returned HTTP ${imageResponse.status()}`);
-  const firstTransform = await fallbackPage.locator("[data-exploded-canvas] [data-component-id]").first().getAttribute("transform");
-  await setRangeValue(fallbackPage, "[data-exploded-depth]", 24);
-  await fallbackPage.waitForFunction((previousTransform) => {
-    return document.querySelector("[data-exploded-canvas] [data-component-id]")?.getAttribute("transform") !== previousTransform;
-  }, firstTransform, { timeout: 5000 });
-  await fallbackPage.locator("[data-exploded-canvas] [data-component-id]").nth(12).focus();
-  await fallbackPage.keyboard.press("Enter");
-  const focusedFallbackId = await fallbackPage.evaluate(() => document.activeElement?.getAttribute("data-component-id") || "");
-  assert(focusedFallbackId === "crown-stem", `${label} fallback should restore SVG focus, got ${focusedFallbackId || "none"}`);
-  console.log("OK interactive-mechanical-watch SVG fallback");
-  await fallbackPage.close();
-
-  const browser = context.browser();
-  assert(browser, `${label} could not create route-specific input contexts`);
-
-  const reducedContext = await browser.newContext({
-    reducedMotion: "reduce",
-    viewport: { width: 1280, height: 900 },
-  });
-  const reducedPage = await reducedContext.newPage();
-  await assertRoute(reducedPage, "interactive-mechanical-watch/", "#hero canvas");
-  await reducedPage.waitForFunction(() => document.body.dataset.watchReducedMotion === "paused", null, { timeout: 30000 });
-  const reducedState = await reducedPage.evaluate(() => ({
-    playingCount: document.querySelectorAll(".play_pause_button.playing").length,
-    runningDrawerCount: Array.from(document.querySelectorAll(".drawer_container")).filter((container) => container.drawer && !container.drawer.paused).length,
-  }));
-  assert(reducedState.playingCount === 0, `${label} reduced-motion startup left ${reducedState.playingCount} play controls running`);
-  assert(reducedState.runningDrawerCount === 0, `${label} reduced-motion startup left ${reducedState.runningDrawerCount} drawers running`);
-  const reducedPlay = reducedPage.locator("#hero .play_pause_button").first();
-  await reducedPlay.focus();
-  await reducedPlay.press("Space");
-  assert(await reducedPlay.getAttribute("aria-pressed") === "true", `${label} reduced-motion policy should allow explicit playback`);
-  await reducedContext.close();
-  console.log("OK interactive-mechanical-watch reduced motion");
-
-  const touchContext = await browser.newContext({
-    hasTouch: true,
-    isMobile: true,
-    viewport: { width: 390, height: 844 },
-  });
-  const touchPage = await touchContext.newPage();
-  await assertRoute(touchPage, "interactive-mechanical-watch/", "#hero_sl0 .slider_knob");
-  await touchPage.waitForSelector(canvasSelector, { timeout: 30000 });
-  const touchCutaway = touchPage.locator("#hero canvas").first();
-  await touchCutaway.scrollIntoViewIfNeeded();
-  await touchPage.waitForFunction(() => {
-    const hero = document.querySelector("#hero");
-    hero?.drawer?.set_visible(true);
-    hero?.drawer?.request_repaint();
-    return !hero?.querySelector(".loading_text");
-  }, null, { timeout: 30000 });
-  const touchCutawayBefore = await touchCutaway.evaluate((canvas) => canvas.toDataURL());
-  const touchSliderBefore = await touchPage.locator("#hero_sl0 .slider_knob").getAttribute("aria-valuenow");
-  await dragNativeTouch(touchPage, "#hero_sl0 .slider_knob", 70, 0, `${label} touch slider`);
-  assert(await touchPage.locator("#hero_sl0 .slider_knob").getAttribute("aria-valuenow") !== touchSliderBefore, `${label} touch slider did not update its value`);
-  await touchPage.waitForFunction((previous) => document.querySelector("#hero canvas")?.toDataURL() !== previous, touchCutawayBefore, { timeout: 5000 });
-  const touchWebgl = touchPage.locator(canvasSelector);
-  const touchRenderBefore = Number(await touchWebgl.getAttribute("data-render-count") || 0);
-  await dragNativeTouch(touchPage, canvasSelector, 54, 28, `${label} touch orbit`);
-  await touchPage.waitForFunction((previousCount) => Number(document.querySelector("[data-exploded-canvas] canvas")?.dataset.renderCount || 0) > previousCount, touchRenderBefore, { timeout: 5000 });
-  await touchPage.locator("[data-exploded-parts] [data-component-id='rotor']").tap();
-  assert(await touchPage.locator("[data-exploded-detail] .exploded-watch__lesson-link").getAttribute("href") === "#automatic-winding", `${label} touch selection did not expose the rotor lesson link`);
-  await assertViewportUsable(touchPage, `${label} touch mobile`);
-  await touchContext.close();
-  console.log("OK interactive-mechanical-watch touch controls");
-
-  const narrowPage = await context.newPage();
-  await narrowPage.setViewportSize({ width: 320, height: 844 });
-  await assertRoute(narrowPage, "interactive-mechanical-watch/", "[data-exploded-parts]");
-  const narrowState = await narrowPage.locator("[data-exploded-parts]").evaluate((parts) => {
-    const button = parts.querySelector("button");
-    const style = getComputedStyle(parts);
-    return {
-      clientHeight: parts.clientHeight,
-      scrollHeight: parts.scrollHeight,
-      overflowY: style.overflowY,
-      buttonHeight: button?.getBoundingClientRect().height || 0,
-      detailTop: document.querySelector("[data-exploded-detail]")?.getBoundingClientRect().top || 0,
-    };
-  });
-  assert(narrowState.scrollHeight > narrowState.clientHeight, `${label} 320px component list should remain capped and scrollable`);
-  assert(["auto", "scroll"].includes(narrowState.overflowY), `${label} 320px component list exposed overflow-y ${narrowState.overflowY}`);
-  assert(narrowState.buttonHeight >= 44, `${label} 320px part target measured ${narrowState.buttonHeight}px`);
-  assert(narrowState.detailTop > 0, `${label} 320px detail panel was not reachable below the component list`);
-  await assertViewportUsable(narrowPage, `${label} 320px`);
-  await narrowPage.close();
-  console.log("OK interactive-mechanical-watch narrow layout");
-
-  await page.waitForTimeout(250);
-  assertPageRuntimeClean(label);
-  await assertViewportUsable(page, label);
-  console.log("OK interactive-mechanical-watch exploded view");
+  assert(movedState.x > frameState.x && movedState.y === frameState.y, "Ballot keyboard control did not move the selected object right");
+  assert(movedState.text.includes("at "), "Ballot keyboard movement did not expose updated state");
   await page.close();
 }
 
-async function main() {
-  const server = await startServer();
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
+async function smokePolygons(context) {
+  const page = await context.newPage();
+  await page.goto(new URL("polygons/play/manual/manual.html", baseUrl).href, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector("#polygon-select", { timeout: 15000 });
+  const move = await page.evaluate(() => {
+    const directions = [
+      { name: "Up", dx: 0, dy: -1 },
+      { name: "Left", dx: -1, dy: 0 },
+      { name: "Right", dx: 1, dy: 0 },
+      { name: "Down", dx: 0, dy: 1 },
+    ];
+    for (let attempt = 0; attempt < 20; attempt++) {
+      for (let index = 0; index < draggables.length; index++) {
+        const polygon = draggables[index];
+        if (!polygon.shaking) continue;
+        const fromX = Math.floor(polygon.gotoX / TILE_SIZE);
+        const fromY = Math.floor(polygon.gotoY / TILE_SIZE);
+        for (const direction of directions) {
+          const x = fromX + direction.dx;
+          const y = fromY + direction.dy;
+          const occupied = draggables.some((other, otherIndex) => {
+            return otherIndex !== index &&
+              Math.floor(other.gotoX / TILE_SIZE) === x &&
+              Math.floor(other.gotoY / TILE_SIZE) === y;
+          });
+          if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE && !occupied) {
+            return { index, name: direction.name, fromX, fromY };
+          }
+        }
+      }
+      reset();
+    }
+    return null;
+  });
+  assert(move, "Polygons manual board had no unhappy polygon with an adjacent empty cell");
+  await page.locator("#polygon-select").selectOption(String(move.index));
+  await page.getByRole("button", { name: move.name, exact: true }).press("Enter");
+  const moved = await page.evaluate(() => {
+    const selected = Number(document.querySelector("#polygon-select")?.value);
+    const polygon = draggables[selected];
+    return {
+      text: document.querySelector("#manual_controls output")?.textContent || "",
+      x: Math.floor(polygon.gotoX / TILE_SIZE),
+      y: Math.floor(polygon.gotoY / TILE_SIZE),
+    };
+  });
+  assert(moved.x !== move.fromX || moved.y !== move.fromY, "Polygons keyboard control did not move the selected polygon");
+  assert(moved.text.includes("at "), "Polygons keyboard movement did not expose updated state");
+  await page.goto(new URL("polygons/play/automatic/automatic4.html", baseUrl).href, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector("#moving", { timeout: 15000 });
+  assert(await page.locator("#moving").evaluate((element) => element.tagName === "BUTTON"), "Polygons start control is not a button");
+  assert(await page.locator(".ds input[type='range']").count() === 2, "Polygons two-handle slider has no native range equivalent");
+  await page.close();
+  await assertRouteViewportUsable(context, "polygons/", "#reference-footer", ".playable", "polygons mobile", 320, 844);
+}
+
+async function smokeFormula1Racing(context) {
+  const page = await context.newPage();
+  const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await page.addInitScript(() => {
+    const fillText = CanvasRenderingContext2D.prototype.fillText;
+    CanvasRenderingContext2D.prototype.fillText = function (text, ...args) {
+      if (/^(?:Floor|Tyre|Brake|Braking) \+[\d.]+ s$/.test(String(text))) {
+        window.__formula1ContributionLabels = window.__formula1ContributionLabels || [];
+        window.__formula1ContributionLabels.push(String(text));
+      }
+      return fillText.call(this, text, ...args);
+    };
+  });
+  await assertRoute(page, "formula-1-racing/", "#reference-footer");
+  await assertEngineeringSandboxShell(page, "formula-1-racing route", {
+    expectedFamily: "engineering-longform",
+    expectedRoute: "formula-1-racing",
+  });
+  await page.waitForFunction(() => document.querySelectorAll(".drawer_container canvas").length >= 5, null, { timeout: 30000 });
+  const namedControls = await page.locator(".padding_wrapper [data-control]").evaluateAll((mounts) => {
+    return mounts.map((mount) => {
+      const control = mount.querySelector("[role='slider'], [role='radiogroup']");
+      return {
+        name: mount.getAttribute("data-control") || "",
+        ariaLabel: control?.getAttribute("aria-label") || "",
+        visibleLabel: mount.classList.contains("f1_labeled_control")
+          ? getComputedStyle(mount, "::before").content.replace(/^['\"]|['\"]$/g, "")
+          : mount.parentElement?.querySelector(".f1_control_label span")?.textContent?.trim() || "",
+      };
+    });
+  });
+  assert(namedControls.length === 42, `Formula 1 expected 42 named controls, found ${namedControls.length}`);
+  assert(namedControls.every((control) => control.name === control.ariaLabel), "Formula 1 control names did not match their aria labels");
+  assert(namedControls.every((control) => control.name === control.visibleLabel || control.name === "Floor pitch" && control.visibleLabel === "Pitch"), "Formula 1 did not expose every control name visibly");
+
+  const track = page.locator("#f1_track_seg0 [role='radio']").first();
+  await track.focus();
+  const trackBefore = await track.getAttribute("aria-checked");
+  await track.press("ArrowRight");
+  await page.waitForFunction(() => {
+    return /Monaco/.test(document.querySelector("#f1_track_caption")?.textContent || "") &&
+      /Monaco setup/.test(document.querySelector("#f1_setup_caption")?.textContent || "") &&
+      /Monaco/.test(document.querySelector("#f1_lap_caption")?.textContent || "");
+  }, null, { timeout: 5000 });
+  assert(trackBefore === "true", "Formula 1 track control did not expose its initial selection");
+  assert(await track.getAttribute("aria-checked") === "false", "Formula 1 track keyboard selection did not update aria state");
+
+  const airflow = page.locator("#f1_airflow_sl0 [role='slider']");
+  const airflowBefore = await airflow.getAttribute("aria-valuenow");
+  await airflow.focus();
+  await airflow.press("ArrowRight");
+  assert(await airflow.getAttribute("aria-valuenow") !== airflowBefore, "Formula 1 slider keyboard action did not update aria value");
+  assert((await page.locator("#f1_airflow_caption").textContent()).length > 0, "Formula 1 slider did not update its caption");
+
+  const floorRide = page.getByRole("slider", { name: "Live ride height" });
+  const floorCaptionBefore = await page.locator("#f1_floor_caption").textContent();
+  const lapCaptionBefore = await page.locator("#f1_lap_caption").textContent();
+  await floorRide.focus();
+  await floorRide.press("End");
+  await page.waitForFunction(({ floorCaption, lapCaption }) => {
+    return document.querySelector("#f1_floor_caption")?.textContent !== floorCaption &&
+      document.querySelector("#f1_lap_caption")?.textContent !== lapCaption;
+  }, { floorCaption: floorCaptionBefore, lapCaption: lapCaptionBefore }, { timeout: 5000 });
+  const floorLapCaption = await page.locator("#f1_lap_caption").textContent();
+  const floorDelta = Number(floorLapCaption.match(/floor posture contributes \+([\d.]+) s/i)?.[1] || 0);
+  assert(await floorRide.getAttribute("aria-valuenow") === "100", "Formula 1 ride-height control did not reach its keyboard maximum");
+  assert(/platform risk (?:is )?high/i.test(floorLapCaption), "Formula 1 lap summary did not expose the floor-platform risk");
+  assert(floorDelta > 0, "Formula 1 floor posture did not add measurable lap loss");
+
+  const tyreTemperature = page.getByRole("slider", { name: "Tyre temperature" });
+  const tyreCaptionBefore = await page.locator("#f1_tyre_caption").textContent();
+  const tyreLapCaptionBefore = await page.locator("#f1_lap_caption").textContent();
+  await tyreTemperature.focus();
+  await tyreTemperature.press("End");
+  await page.waitForFunction(({ tyreCaption, lapCaption }) => {
+    return document.querySelector("#f1_tyre_caption")?.textContent !== tyreCaption &&
+      document.querySelector("#f1_lap_caption")?.textContent !== lapCaption;
+  }, { tyreCaption: tyreCaptionBefore, lapCaption: tyreLapCaptionBefore }, { timeout: 5000 });
+  const tyreLapCaption = await page.locator("#f1_lap_caption").textContent();
+  const tyreDelta = Number(tyreLapCaption.match(/tyre condition contributes \+([\d.]+) s/i)?.[1] || 0);
+  assert(await tyreTemperature.getAttribute("aria-valuenow") === "100", "Formula 1 tyre-temperature control did not reach its keyboard maximum");
+  assert(/overheated/i.test(await page.locator("#f1_tyre_caption").textContent()), "Formula 1 tyre summary did not expose overheating");
+  assert(/tyre is overheated/i.test(tyreLapCaption), "Formula 1 lap summary did not expose tyre condition");
+  assert(tyreDelta > 0, "Formula 1 tyre condition did not add measurable lap loss");
+
+  const brakeRecovery = page.getByRole("slider", { name: "Energy recovery" });
+  const brakeCaptionBefore = await page.locator("#f1_brake_caption").textContent();
+  const brakeLapCaptionBefore = await page.locator("#f1_lap_caption").textContent();
+  await brakeRecovery.focus();
+  await brakeRecovery.press("End");
+  await page.waitForFunction(({ brakeCaption, lapCaption }) => {
+    return document.querySelector("#f1_brake_caption")?.textContent !== brakeCaption &&
+      document.querySelector("#f1_lap_caption")?.textContent !== lapCaption;
+  }, { brakeCaption: brakeCaptionBefore, lapCaption: brakeLapCaptionBefore }, { timeout: 5000 });
+  const brakeLapCaption = await page.locator("#f1_lap_caption").textContent();
+  const brakeDelta = Number(brakeLapCaption.match(/braking balance contributes \+([\d.]+) s/i)?.[1] || 0);
+  assert(await brakeRecovery.getAttribute("aria-valuenow") === "100", "Formula 1 recovery control did not reach its keyboard maximum");
+  assert(/braking now looks compromised/i.test(await page.locator("#f1_brake_caption").textContent()), "Formula 1 brake summary did not expose compromised braking");
+  assert(/braking is compromised/i.test(brakeLapCaption), "Formula 1 lap summary did not expose braking condition");
+  assert(brakeDelta > 0, "Formula 1 braking balance did not add measurable lap loss");
+
+  await page.evaluate(() => {
+    window.__formula1ContributionLabels = [];
+  });
+  await page.locator("#f1_lap").scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => window.__formula1ContributionLabels?.length >= 3, null, { timeout: 5000 });
+  const contributionLabels = await page.evaluate(() => window.__formula1ContributionLabels.slice(-3));
+  assert(contributionLabels.includes(`Floor +${floorDelta.toFixed(2)} s`), "Formula 1 lap canvas did not label its floor contribution");
+  assert(contributionLabels.includes(`Tyre +${tyreDelta.toFixed(2)} s`), "Formula 1 lap canvas did not label its tyre contribution");
+  assert(contributionLabels.includes(`Braking +${brakeDelta.toFixed(2)} s`), "Formula 1 lap canvas did not label its braking contribution");
+
+  const weather = page.locator("#f1_weather_seg0 [role='radio']").first();
+  await weather.focus();
+  await weather.press("ArrowRight");
+  await page.waitForFunction(() => /Mixed/.test(document.querySelector("#f1_weather_caption")?.textContent || ""), null, { timeout: 5000 });
+  const lapPlan = page.locator("#f1_lap_seg0 [role='radio']").first();
+  await lapPlan.focus();
+  await lapPlan.press("ArrowRight");
+  assert(await lapPlan.getAttribute("aria-checked") === "false", "Formula 1 lap-plan keyboard selection did not update aria state");
+
+  await assertViewportUsable(page, "formula-1-racing desktop");
+  assertPageRuntimeClean("formula-1-racing desktop");
+  await page.close();
+
+  const mobilePage = await context.newPage();
+  const assertMobileRuntimeClean = createRuntimeMonitor(mobilePage);
+  await mobilePage.setViewportSize({ width: 390, height: 844 });
+  await assertRoute(mobilePage, "formula-1-racing/", "#reference-footer");
+  await mobilePage.waitForSelector("#f1_lap_caption", { timeout: 30000 });
+  await assertViewportUsable(mobilePage, "formula-1-racing mobile");
+  assertMobileRuntimeClean("formula-1-racing mobile");
+  await mobilePage.close();
+}
+
+async function smokeWatchMeshExplorer(context) {
+  const page = await context.newPage();
+  const assertRuntimeClean = createRuntimeMonitor(page, { rejectOffOriginRequests: true });
+  await assertRoute(page, "watch-mesh-explorer/", "#reference-footer");
+  await page.waitForFunction(() => document.querySelector("[data-watch-workbench]")?.dataset.threeReady === "true", null, { timeout: 30000 });
+
+  const initial = await page.evaluate(() => {
+    const canvas = document.querySelector("[data-viewport] canvas");
+    return {
+      busy: document.querySelector("[data-viewport]")?.getAttribute("aria-busy"),
+      componentCount: Number(canvas?.dataset.componentCount || 0),
+      hidden: canvas?.getAttribute("aria-hidden"),
+      lessonPlacementError: Number(canvas?.dataset.lessonPlacementError || Infinity),
+      transformedSourceCount: Number(canvas?.dataset.transformedSourceCount || 0),
+      sourceRotationOrder: canvas?.dataset.sourceRotationOrder || "",
+      touchAction: canvas?.style.touchAction,
+    };
+  });
+  assert(initial.busy === "false", "Watch workbench did not clear its loading state");
+  assert(initial.componentCount === 71, `Watch workbench expected 71 components, got ${initial.componentCount}`);
+  assert(initial.hidden === "true", "Watch workbench pointer canvas should remain hidden from assistive technology");
+  assert(initial.lessonPlacementError === 0, `Watch workbench lesson parts moved away from assembled positions by ${initial.lessonPlacementError}`);
+  assert(initial.transformedSourceCount === 16, `Watch workbench expected 16 authored source transforms, got ${initial.transformedSourceCount}`);
+  assert(initial.sourceRotationOrder === "ZYX", "Watch workbench source transforms should preserve archived ZYX rotation order");
+  assert(initial.touchAction === "pan-y", "Watch workbench should preserve page scrolling while orbit is locked");
+  assert(await page.locator("[data-lesson-list] button").count() === 10, "Watch workbench did not expose ten guided lessons");
+  assert(await page.locator("[data-lesson-count]").textContent() === "01 / 10", "Watch workbench did not start at lesson one");
+  assert(await page.locator("[data-viewport] canvas").getAttribute("data-mode") === "lesson", "Watch workbench did not start in guided mode");
+  assert(await page.locator("[data-viewport] canvas").getAttribute("data-lesson-id") === "power", "Watch workbench did not start with the power lesson");
+  assert(await page.locator("[data-part-list] button:not([hidden])").count() === 4, "Watch workbench power lesson did not isolate four register parts");
+
+  const workbenchLiveRegions = await page.evaluate(() => ({
+    lessonBrief: document.querySelector(".lesson-brief")?.getAttribute("aria-atomic") || "",
+    partDetail: document.querySelector("[data-part-detail]")?.getAttribute("aria-atomic") || "",
+    systemFilterRole: document.querySelector("div.system-filter[data-system-filter]")?.getAttribute("role") || "",
+    systemFilterLabel: document.querySelector("div.system-filter[data-system-filter]")?.getAttribute("aria-label") || "",
+  }));
+  assert(workbenchLiveRegions.lessonBrief === "true", "Watch workbench lesson brief should announce atomically");
+  assert(workbenchLiveRegions.partDetail === "true", "Watch workbench part detail should announce atomically");
+  assert(workbenchLiveRegions.systemFilterRole === "group", "Watch workbench subsystem filter should expose a group role");
+  assert(
+    workbenchLiveRegions.systemFilterLabel === "Filter by subsystem",
+    "Watch workbench subsystem filter lost its accessible name",
+  );
+
+  await page.locator("[data-next-lesson]").click();
+  await page.waitForFunction(() => document.querySelector("[data-viewport] canvas")?.dataset.lessonId === "gears");
+  assert(await page.locator("[data-lesson-count]").textContent() === "02 / 10", "Watch workbench next control did not advance the lesson");
+  assert((await page.locator("[data-lesson-problem]").textContent()).includes("barrel's slow rotation"), "Watch workbench lesson did not update its causal explanation");
+  assert(Number(await page.locator("[data-viewport] canvas").getAttribute("data-lesson-placement-error")) === 0, "Watch workbench moved gear lesson parts away from assembled positions");
+
+  await page.locator(".explore-tools summary").click();
+  await page.locator("[data-mode='atlas']").click();
+  await page.getByRole("button", { name: "Power", exact: true }).click();
+  await page.waitForFunction(() => {
+    const canvas = document.querySelector("[data-viewport] canvas");
+    return canvas?.dataset.mode === "atlas" && canvas?.dataset.systemFilter === "Power" && canvas?.dataset.selectedId === "barrel-drum";
+  });
+  const filtered = await page.evaluate(() => ({
+    filteredCount: Number(document.querySelector("[data-viewport] canvas")?.dataset.filteredCount || 0),
+    visibleRows: Array.from(document.querySelectorAll("[data-part-list] button")).filter((button) => getComputedStyle(button).display !== "none").length,
+  }));
+  assert(filtered.filteredCount === 5, `Watch workbench Power filter expected four parts plus mainplate, got ${filtered.filteredCount}`);
+  assert(filtered.visibleRows === 4, `Watch workbench Power register expected four rows, got ${filtered.visibleRows}`);
+
+  await page.locator("button[data-orbit]").click();
+  assert(await page.locator("button[data-orbit]").getAttribute("aria-pressed") === "true", "Watch workbench did not enable free orbit");
+  assert(await page.locator("[data-viewport] canvas").evaluate((canvas) => canvas.style.touchAction) === "none", "Watch workbench orbit did not claim touch gestures");
+  await page.locator("[data-reset-view]").click();
+  assert(await page.locator("button[data-orbit]").getAttribute("aria-pressed") === "false", "Watch workbench reset did not lock the camera");
+  assert(await page.locator("[data-viewport] canvas").evaluate((canvas) => canvas.style.touchAction) === "pan-y", "Watch workbench reset did not restore page scrolling");
+
+  await page.locator("[data-play]").click();
+  await page.waitForFunction(() => document.querySelector("[data-viewport] canvas")?.dataset.playing === "false");
+  await page.waitForTimeout(800);
+  const pausedRenderCount = Number(await page.locator("[data-viewport] canvas").getAttribute("data-render-count"));
+  await page.waitForTimeout(250);
+  assert(Number(await page.locator("[data-viewport] canvas").getAttribute("data-render-count")) === pausedRenderCount, "Watch workbench kept rendering while paused and settled");
+
+  await page.getByRole("button", { name: "All", exact: true }).click();
+  await page.locator("[data-mode='energy']").click();
+  await page.waitForFunction(() => document.querySelector("[data-viewport] canvas")?.dataset.mode === "energy");
+  assert(await page.locator("[data-part-list] .is-flowing").count() === 14, "Watch workbench energy mode did not expose all torque branches");
+
+  const speed1 = page.locator("button[data-speed='1']");
+  const speed8 = page.locator("button[data-speed='8']");
+  await speed1.focus();
+  await speed1.press("ArrowRight");
+  assert(await speed8.getAttribute("aria-checked") === "true", "Watch workbench speed keyboard control did not select 8x");
+  assert(await speed8.getAttribute("tabindex") === "0", "Watch workbench selected speed did not receive the roving tab stop");
+
+  await page.getByRole("button", { name: "Calendar", exact: true }).click();
+  await page.locator("[data-component-id='date-ring']").click();
+  assert((await page.locator("[data-part-detail]").textContent()).includes("Service stageCalendar"), "Watch workbench assigned the date ring to the wrong service stage");
+  await page.locator("[data-install-stage]").click();
+  assert(await page.locator("[data-stage-count]").textContent() === "04 / 06", "Watch workbench inspector action did not open the Calendar stage");
+  await page.locator("[data-stage-list] button").nth(5).click();
+  assert(await page.locator("[data-stage-count]").textContent() === "06 / 06", "Watch workbench did not reach the Hands stage");
+
+  await assertViewportUsable(page, "watch-mesh-explorer desktop interactions");
+  assertRuntimeClean("watch-mesh-explorer interactions");
+  await page.close();
+}
+
+async function createSmokeContext(browser) {
+  return browser.newContext({
     acceptDownloads: true,
     viewport: { width: 1400, height: 1000 },
   });
+}
+
+async function main() {
+  validateSelections();
+  phaseLog(`Starting smoke run${selectedGroups.size ? ` [groups: ${Array.from(selectedGroups).join(", ")}]` : ""}${selectedRoutes.size ? ` [routes: ${Array.from(selectedRoutes).join(", ")}]` : ""}`);
+  const server = await startServer();
+  const browser = await chromium.launch({ headless: true });
+  let context = await createSmokeContext(browser);
 
   try {
+    for (const route of selectedManifestRoutes()) {
+      await assertManifestRouteBaseline(context, route);
+    }
+
     const routePage = await context.newPage();
     const routeChecks = [
       ["", "[data-page-list]"],
-      ["trust/", "#reference-footer"],
-      ["polygons/", "#reference-footer"],
-      ["ballot/", "#reference-footer"],
-      ["crowds/", "#reference-footer"],
-      ["loopy/", "#reference-footer"],
-      ["neurons/", "#reference-footer"],
-      ["remember/", "#reference-footer"],
-      ["anxiety/", "#reference-footer"],
-      ["anxiety/sharing/", "#reference-footer"],
-      ["docs/trust/", "[data-parity-list]"],
-      ["docs/polygons/", "[data-parity-list]"],
-      ["docs/ballot/", "[data-parity-list]"],
-      ["docs/crowds/", "[data-parity-list]"],
-      ["docs/loopy/", "[data-parity-list]"],
-      ["docs/neurons/", "[data-parity-list]"],
-      ["docs/remember/", "[data-parity-list]"],
-      ["docs/anxiety/", "[data-parity-list]"],
+      ...selectedManifestRoutes().flatMap((route) => [
+        [`${route.slug}/`, "#reference-footer"],
+        [`docs/${route.slug}/`, "[data-parity-list]"],
+      ]),
     ];
 
-    if (exists("wbwwb")) {
-      routeChecks.push(["wbwwb/", "#reference-footer"]);
-      routeChecks.push(["docs/wbwwb/", "[data-parity-list]"]);
+    if (exists("anxiety/sharing")) {
+      routeChecks.push(["anxiety/sharing/", "#reference-footer"]);
     }
-    if (exists("coming-out-simulator-2014")) {
-      routeChecks.push(["coming-out-simulator-2014/", "#reference-footer"]);
-      routeChecks.push(["docs/coming-out-simulator-2014/", "[data-parity-list]"]);
-    }
-    if (exists("covid-19")) {
-      routeChecks.push(["covid-19/", "#reference-footer"]);
-      routeChecks.push(["docs/covid-19/", "[data-parity-list]"]);
-    }
-    if (exists("simulating")) {
-      routeChecks.push(["simulating/", "main"]);
+    if (exists("simulating/original")) {
       routeChecks.push(["simulating/original/", "#splash_iframe"]);
+    }
+    if (exists("simulating/model")) {
       routeChecks.push(["simulating/model/", "#play_controls"]);
-      routeChecks.push(["docs/simulating/", "[data-parity-list]"]);
     }
-    if (exists("sim")) {
-      routeChecks.push(["sim/", "#play_controls"]);
-      routeChecks.push(["docs/sim/", "[data-parity-list]"]);
-    }
-    if (exists("decision-tree")) {
-      routeChecks.push(["decision-tree/", "#reference-footer"]);
-      routeChecks.push(["docs/decision-tree/", "[data-parity-list]"]);
-    }
-    if (exists("random-forest")) {
-      routeChecks.push(["random-forest/", "#reference-footer"]);
-      routeChecks.push(["docs/random-forest/", "[data-parity-list]"]);
-    }
-    if (exists("conditional-probability")) {
-      routeChecks.push(["conditional-probability/", "#reference-footer"]);
-      routeChecks.push(["docs/conditional-probability/", "[data-parity-list]"]);
-    }
-    if (exists("markov-chains")) {
-      routeChecks.push(["markov-chains/", "#reference-footer"]);
+    if (exists("markov-chains/playground")) {
       routeChecks.push(["markov-chains/playground/", "#reference-footer"]);
       routeChecks.push(["markov-chains/playground/playground.html", "#reference-footer"]);
-      routeChecks.push(["docs/markov-chains/", "[data-parity-list]"]);
     }
-    if (exists("principal-component-analysis")) {
-      routeChecks.push(["principal-component-analysis/", "#reference-footer"]);
-      routeChecks.push(["docs/principal-component-analysis/", "[data-parity-list]"]);
-    }
-    if (exists("exponentiation")) {
-      routeChecks.push(["exponentiation/", "#reference-footer"]);
-      routeChecks.push(["docs/exponentiation/", "[data-parity-list]"]);
-    }
-    if (exists("pi")) {
-      routeChecks.push(["pi/", "#reference-footer"]);
-      routeChecks.push(["docs/pi/", "[data-parity-list]"]);
-    }
-    if (exists("sine-and-cosine")) {
-      routeChecks.push(["sine-and-cosine/", "#reference-footer"]);
-      routeChecks.push(["docs/sine-and-cosine/", "[data-parity-list]"]);
-    }
-    if (exists("eigenvectors-and-eigenvalues")) {
-      routeChecks.push(["eigenvectors-and-eigenvalues/", "#reference-footer"]);
-      routeChecks.push(["docs/eigenvectors-and-eigenvalues/", "[data-parity-list]"]);
-    }
-    if (exists("image-kernels")) {
-      routeChecks.push(["image-kernels/", "#reference-footer"]);
-      routeChecks.push(["docs/image-kernels/", "[data-parity-list]"]);
-    }
-    if (exists("ordinary-least-squares-regression")) {
-      routeChecks.push(["ordinary-least-squares-regression/", "#reference-footer"]);
-      routeChecks.push(["docs/ordinary-least-squares-regression/", "[data-parity-list]"]);
-    }
-    if (exists("blockchain")) {
-      routeChecks.push(["blockchain/", "#reference-footer"]);
-      routeChecks.push(["docs/blockchain/", "[data-parity-list]"]);
-    }
-    if (exists("public-private-keys")) {
-      routeChecks.push(["public-private-keys/", "#reference-footer"]);
-      routeChecks.push(["docs/public-private-keys/", "[data-parity-list]"]);
-    }
-    if (exists("linear-regression")) {
-      routeChecks.push(["linear-regression/", "#reference-footer"]);
-      routeChecks.push(["docs/linear-regression/", "[data-parity-list]"]);
-    }
-    if (exists("logistic-regression")) {
-      routeChecks.push(["logistic-regression/", "#reference-footer"]);
-      routeChecks.push(["docs/logistic-regression/", "[data-parity-list]"]);
-    }
-    if (exists("precision-recall")) {
-      routeChecks.push(["precision-recall/", "#reference-footer"]);
-      routeChecks.push(["docs/precision-recall/", "[data-parity-list]"]);
-    }
-    if (exists("roc-auc")) {
-      routeChecks.push(["roc-auc/", "#reference-footer"]);
-      routeChecks.push(["docs/roc-auc/", "[data-parity-list]"]);
-    }
-    if (exists("bias-variance")) {
-      routeChecks.push(["bias-variance/", "#reference-footer"]);
-      routeChecks.push(["docs/bias-variance/", "[data-parity-list]"]);
-    }
-    if (exists("train-test-validation")) {
-      routeChecks.push(["train-test-validation/", "#reference-footer"]);
-      routeChecks.push(["docs/train-test-validation/", "[data-parity-list]"]);
-    }
-    if (exists("double-descent")) {
-      routeChecks.push(["double-descent/", "#reference-footer"]);
-      routeChecks.push(["docs/double-descent/", "[data-parity-list]"]);
-    }
-    if (exists("double-descent2")) {
-      routeChecks.push(["double-descent2/", "#reference-footer"]);
-      routeChecks.push(["docs/double-descent2/", "[data-parity-list]"]);
-    }
-
-    if (exists("interactive-mechanical-watch")) {
-      routeChecks.push(["interactive-mechanical-watch/", "#reference-footer"]);
-      routeChecks.push(["docs/interactive-mechanical-watch/", "[data-parity-list]"]);
-    }
-
     for (const [relativePath, selector] of routeChecks) {
       await assertRoute(routePage, relativePath, selector);
     }
     await routePage.close();
+    await smokeAtlas(context);
+    await smokeWayfinding(context);
+    phaseLog("Route checks completed");
 
-    await smokeRemember(context);
-    await smokeAnxiety(context);
+    if (exists("ballot")) {
+      await smokeBallot(context);
+    }
+    if (exists("polygons")) {
+      await smokePolygons(context);
+    }
+    if (exists("formula-1-racing")) {
+      await smokeFormula1Racing(context);
+    }
+    if (exists("watch-mesh-explorer")) {
+      await smokeWatchMeshExplorer(context);
+    }
+    if (exists("remember")) {
+      await smokeRemember(context);
+    }
+    if (exists("neurons")) {
+      await smokeNeurons(context);
+    }
+    if (exists("loopy")) {
+      await smokeLoopy(context);
+    }
+    if (exists("trust")) {
+      await smokeTrustFallback(context);
+    }
+    if (exists("anxiety")) {
+      await smokeAnxiety(context);
+    }
     if (exists("wbwwb")) {
       await smokeWbwwb(context);
     }
@@ -3031,6 +8043,166 @@ async function main() {
     if (exists("public-private-keys")) {
       await smokePublicPrivateKeys(context);
     }
+    if (exists("zero-knowledge-proof-demo")) {
+      await smokeZeroKnowledgeProofDemo(context);
+    }
+    if (exists("alpha-compositing")) {
+      await smokeAlphaCompositing(context);
+    }
+    if (exists("color-spaces")) {
+      await smokeColorSpaces(context);
+    }
+    if (exists("sound")) {
+      await smokeSound(context);
+    }
+    if (exists("cameras-and-lenses")) {
+      await smokeCamerasAndLenses(context);
+    }
+    if (exists("lights-and-shadows")) {
+      await smokeLightsAndShadows(context);
+    }
+    if (exists("tesseract")) {
+      await smokeTesseract(context);
+    }
+    if (exists("gears")) {
+      await smokeGears(context);
+    }
+    if (exists("gps")) {
+      await smokeGps(context);
+    }
+    if (exists("earth-and-sun")) {
+      await smokeEarthAndSun(context);
+    }
+    if (exists("stargazing-dashboard")) {
+      await smokeStargazingDashboard(context);
+    }
+    if (exists("bicycle")) {
+      await smokeBicycle(context);
+    }
+    if (exists("airfoil")) {
+      await smokeAirfoil(context);
+    }
+    if (exists("curves-and-surfaces")) {
+      await smokeCurvesAndSurfaces(context);
+    }
+    if (exists("internal-combustion-engine")) {
+      await smokeInternalCombustionEngine(context);
+    }
+    if (exists("mechanical-watch")) {
+      await smokeMechanicalWatch(context);
+    }
+    if (exists("interactive-mechanical-watch")) {
+      await smokeInteractiveMechanicalWatch(context);
+    }
+    if (exists("naval-architecture")) {
+      await smokeNavalArchitecture(context);
+    }
+    if (exists("reading-qr-codes-without-a-computer")) {
+      await smokeReadingQrCodesWithoutAComputer(context);
+    }
+    if (exists("teoria-interval-ear-training")) {
+      await smokeTeoriaIntervalEarTraining(context);
+    }
+    if (exists("teoria-note-ear-training")) {
+      await smokeTeoriaNoteEarTraining(context);
+    }
+    if (exists("teoria-key-and-note-ear-training")) {
+      await smokeTeoriaKeyAndNoteEarTraining(context);
+    }
+    if (exists("teoria-random-key-and-note-ear-training")) {
+      await smokeTeoriaRandomKeyAndNoteEarTraining(context);
+    }
+    if (exists("teoria-scale-construction")) {
+      await smokeTeoriaScaleConstruction(context);
+    }
+    if (exists("teoria-interval-identification-and-inversion")) {
+      await smokeTeoriaIntervalIdentificationAndInversion(context);
+    }
+    if (exists("ableton-learning-music-playground")) {
+      await smokeAbletonLearningMusicPlayground(context);
+    }
+    if (exists("ableton-learning-music-play-with-beats")) {
+      await smokeAbletonLearningMusicPlayWithBeats(context);
+    }
+    if (exists("ableton-learning-music-play-with-notes-and-scales")) {
+      await smokeAbletonLearningMusicPlayWithNotesAndScales(context);
+    }
+    if (exists("ableton-learning-music-play-with-chords")) {
+      await smokeAbletonLearningMusicPlayWithChords(context);
+    }
+    if (exists("ableton-learning-music-play-with-basslines")) {
+      await smokeAbletonLearningMusicPlayWithBasslines(context);
+    }
+    if (exists("ableton-learning-music-play-with-melodies")) {
+      await smokeAbletonLearningMusicPlayWithMelodies(context);
+    }
+    if (exists("ableton-learning-music-play-with-song-structures")) {
+      await smokeAbletonLearningMusicPlayWithSongStructures(context);
+    }
+    if (exists("ableton-learning-synths-get-started")) {
+      await smokeAbletonLearningSynthsGetStarted(context);
+    }
+    if (exists("ableton-learning-synths-how-synths-make-sound")) {
+      await smokeAbletonLearningSynthsHowSynthsMakeSound(context);
+    }
+    if (exists("ableton-learning-synths-filter-resonance")) {
+      await smokeAbletonLearningSynthsFilterResonance(context);
+    }
+    if (exists("ableton-learning-synths-modulating-amplitude-with-envelopes")) {
+      await smokeAbletonLearningSynthsModulatingAmplitudeWithEnvelopes(context);
+    }
+    if (exists("ableton-learning-synths-matching-envelopes")) {
+      await smokeAbletonLearningSynthsMatchingEnvelopes(context);
+    }
+    if (exists("ableton-learning-synths-recipes")) {
+      await smokeAbletonLearningSynthsRecipes(context);
+    }
+    if (exists("chrome-music-lab-song-maker")) {
+      await smokeChromeMusicLabSongMaker(context);
+    }
+    if (exists("musicmap")) {
+      await smokeMusicmap(context);
+    }
+    if (exists("music-interactive-hub")) {
+      await smokeMusicInteractiveHub(context);
+    }
+    if (
+      exists("memory-allocation") ||
+      exists("load-balancing") ||
+      exists("hysteresis-slack") ||
+      exists("rigid-body-collisions") ||
+      exists("blockchain-101-combined-flow") ||
+      exists("primary-interactive-hub") ||
+      exists("linear-regression") ||
+      exists("logistic-regression") ||
+      exists("precision-recall") ||
+      exists("roc-auc") ||
+      exists("bias-variance") ||
+      exists("train-test-validation") ||
+      exists("double-descent") ||
+      exists("double-descent2")
+    ) {
+      await context.close();
+      context = await createSmokeContext(browser);
+    }
+    if (exists("memory-allocation")) {
+      await smokeMemoryAllocation(context);
+    }
+    if (exists("load-balancing")) {
+      await smokeLoadBalancing(context);
+    }
+    if (exists("hysteresis-slack")) {
+      await smokeHysteresisSlack(context);
+    }
+    if (exists("rigid-body-collisions")) {
+      await smokeRigidBodyCollisions(context);
+    }
+    if (exists("blockchain-101-combined-flow")) {
+      await smokeBlockchain101CombinedFlow(context);
+    }
+    if (exists("primary-interactive-hub")) {
+      await smokePrimaryInteractiveHub(context);
+    }
     if (exists("linear-regression")) {
       await smokeLinearRegression(context);
     }
@@ -3055,9 +8227,7 @@ async function main() {
     if (exists("double-descent2")) {
       await smokeDoubleDescent2(context);
     }
-    if (exists("interactive-mechanical-watch")) {
-      await smokeInteractiveMechanicalWatch(context);
-    }
+    phaseLog("Smoke checks completed");
   } finally {
     await context.close();
     await browser.close();

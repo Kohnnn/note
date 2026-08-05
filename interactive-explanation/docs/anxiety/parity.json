@@ -120,5 +120,45 @@
       "The recheck plan explicitly called out corrected local share behavior and any new subpages.",
       "Current source rewrites share URLs from <code>window.location</code> and retains the shipped media assets."
     ]
+  },
+  {
+    "moduleId": "native-dialog-and-choice-accessibility",
+    "originalBehavior": "Content notes, about information, persistent controls, and dialogue choices are part of the story flow.",
+    "localStatus": "Content notes and about use native dialogs with Escape handling and opener-focus restoration; persistent controls and actionable dialogue choices are native buttons.",
+    "sourceFiles": [
+      "index.html",
+      "scripts/game/About.js",
+      "scripts/game/ContentNotes.js",
+      "scripts/game/Game.js",
+      "styles/game.css"
+    ],
+    "notes": [
+      "The legacy options overlay remains unchanged because its pause architecture does not safely support a second concurrent native dialog.",
+      "Focus indicators and reduced-motion overrides apply without changing story timing logic."
+    ],
+    "evidence": [
+      "Focused smoke coverage opens each dialog, sends Escape, and verifies focus returns to the opener.",
+      "Smoke coverage confirms actionable choices and persistent controls use native buttons."
+    ]
+  },
+  {
+    "moduleId": "phase-10-main-dialog-and-native-controls",
+    "originalBehavior": "The story runtime loads into one game stage with content notes, about information, dialogue choices, and persistent controls.",
+    "localStatus": "The game stage is the route's single meaningful main landmark; loading state clears after boot, content notes and about use native dialogs, and choices and persistent controls use named native buttons.",
+    "sourceFiles": [
+      "index.html",
+      "scripts/main.js",
+      "scripts/game/About.js",
+      "scripts/game/ContentNotes.js",
+      "scripts/game/Game.js"
+    ],
+    "notes": [
+      "The native dialog focus and Escape behavior preserves the original pause architecture.",
+      "The canvas remains the visual stage while adjacent native controls provide keyboard operation."
+    ],
+    "evidence": [
+      "Focused browser coverage verifies dialog dismissal, focus restoration, choice controls, and the loaded main landmark.",
+      "Phase 10 source and browser contracts enforce exactly one meaningful main landmark."
+    ]
   }
 ]

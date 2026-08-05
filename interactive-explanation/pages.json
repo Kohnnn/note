@@ -4,6 +4,13 @@
     "title": "The Evolution of Trust",
     "summary": "Game-theory slideshow about cooperation, betrayal, noise, and repair under repeated interaction.",
     "referenceUrl": "https://ncase.me/trust/",
+    "topicTags": [
+      "game-theory",
+      "cooperation",
+      "social-dynamics"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "simulation",
     "docsUrl": "./docs/trust/"
   },
   {
@@ -11,6 +18,13 @@
     "title": "Parable of the Polygons",
     "summary": "Playable essay on segregation, tipping points, and small anti-bias changes that reshape the whole board.",
     "referenceUrl": "https://ncase.me/polygons/",
+    "topicTags": [
+      "segregation",
+      "social-dynamics",
+      "simulation"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "simulation",
     "docsUrl": "./docs/polygons/"
   },
   {
@@ -18,6 +32,13 @@
     "title": "To Build a Better Ballot",
     "summary": "Voting-systems explainer with draggable electorates, counting flows, spoiler scenarios, and a sandbox.",
     "referenceUrl": "https://ncase.me/ballot/",
+    "topicTags": [
+      "voting",
+      "game-theory",
+      "simulation"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "simulation",
     "docsUrl": "./docs/ballot/"
   },
   {
@@ -25,6 +46,13 @@
     "title": "The Wisdom and/or Madness of Crowds",
     "summary": "Network-science slideshow with drawing tools, contagion puzzles, chapter presets, and sandbox experiments.",
     "referenceUrl": "https://ncase.me/crowds/",
+    "topicTags": [
+      "networks",
+      "contagion",
+      "social-dynamics"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "simulation",
     "docsUrl": "./docs/crowds/"
   },
   {
@@ -32,6 +60,13 @@
     "title": "LOOPY",
     "summary": "Systems-thinking tool with node drawing, signed feedback arrows, example models, and local share or export flows.",
     "referenceUrl": "https://ncase.me/loopy/",
+    "topicTags": [
+      "systems-thinking",
+      "simulation",
+      "feedback-loops"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "create",
     "docsUrl": "./docs/loopy/"
   },
   {
@@ -39,6 +74,13 @@
     "title": "Neurotic Neurons",
     "summary": "Interactive animation about neuron firing, Hebbian and anti-Hebbian learning, anxiety loops, and rewiring scenes.",
     "referenceUrl": "https://ncase.me/neurons/",
+    "topicTags": [
+      "neuroscience",
+      "learning",
+      "simulation"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "simulation",
     "docsUrl": "./docs/neurons/"
   },
   {
@@ -46,6 +88,13 @@
     "title": "How To Remember Anything Forever-ish",
     "summary": "Interactive comic about memory, forgetting curves, active recall, spaced repetition, and Leitner-box practice.",
     "referenceUrl": "https://ncase.me/remember/",
+    "topicTags": [
+      "memory",
+      "learning",
+      "spaced-repetition"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "practice",
     "docsUrl": "./docs/remember/"
   },
   {
@@ -53,6 +102,13 @@
     "title": "Adventures With Anxiety!",
     "summary": "Narrative game about anxiety loops, branching choices, pacing controls, replay flow, and resource handoff.",
     "referenceUrl": "https://ncase.me/anxiety/",
+    "topicTags": [
+      "mental-health",
+      "narrative-game",
+      "psychology"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "simulation",
     "docsUrl": "./docs/anxiety/"
   },
   {
@@ -60,6 +116,13 @@
     "title": "We Become What We Behold",
     "summary": "Short camera-driven game about headlines, outrage loops, crowd escalation, and replaying the spiral.",
     "referenceUrl": "https://ncase.itch.io/wbwwb",
+    "topicTags": [
+      "media",
+      "narrative-game",
+      "social-dynamics"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "simulation",
     "docsUrl": "./docs/wbwwb/"
   },
   {
@@ -67,6 +130,13 @@
     "title": "Coming Out Simulator 2014",
     "summary": "Branching dialogue game about a family conversation, consequence mapping, alternate paths, and replaying difficult scenes.",
     "referenceUrl": "https://ncase.itch.io/coming-out-simulator-2014",
+    "topicTags": [
+      "narrative-game",
+      "identity",
+      "branching-story"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "simulation",
     "docsUrl": "./docs/coming-out-simulator-2014/"
   },
   {
@@ -74,6 +144,13 @@
     "title": "What Happens Next? COVID-19 Futures",
     "summary": "Playable epidemiology article with SEIR sims, R-value calculators, intervention schedules, ICU overlays, and a long-term sandbox.",
     "referenceUrl": "https://ncase.me/covid-19/",
+    "topicTags": [
+      "epidemiology",
+      "simulation",
+      "public-health"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "simulation",
     "docsUrl": "./docs/covid-19/"
   },
   {
@@ -81,6 +158,13 @@
     "title": "Simulating",
     "summary": "Launcher replica for the relaunched Emoji Simulator plus the nested legacy original article and model editor surfaces.",
     "referenceUrl": "https://ncase.me/simulating/",
+    "topicTags": [
+      "cellular-automata",
+      "simulation",
+      "emoji"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "create",
     "docsUrl": "./docs/simulating/"
   },
   {
@@ -88,6 +172,13 @@
     "title": "Emoji Simulator",
     "summary": "Relaunched emoji-based cellular-automata editor with model presets, local save links, export flow, and editable rules.",
     "referenceUrl": "https://ncase.me/sim/",
+    "topicTags": [
+      "cellular-automata",
+      "simulation",
+      "emoji"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "create",
     "docsUrl": "./docs/sim/"
   },
   {
@@ -95,6 +186,13 @@
     "title": "Decision Trees",
     "summary": "Scrollytelling explainer about split boundaries, entropy, information gain, and tree-depth tradeoffs.",
     "referenceUrl": "https://mlu-explain.github.io/decision-tree/",
+    "topicTags": [
+      "machine-learning",
+      "decision-trees",
+      "classification"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "explainer",
     "docsUrl": "./docs/decision-tree/"
   },
   {
@@ -102,6 +200,13 @@
     "title": "Random Forest",
     "summary": "Interactive article about bagging, feature randomness, majority-vote prediction, and ensemble variance.",
     "referenceUrl": "https://mlu-explain.github.io/random-forest/",
+    "topicTags": [
+      "machine-learning",
+      "ensembles",
+      "classification"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "explainer",
     "docsUrl": "./docs/random-forest/"
   },
   {
@@ -109,6 +214,13 @@
     "title": "Conditional Probability",
     "summary": "Visual probability explainer with overlap geometry, conditioning lenses, and synchronized probability readouts.",
     "referenceUrl": "https://setosa.io/ev/conditional-probability/",
+    "topicTags": [
+      "probability",
+      "statistics",
+      "visualization"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "explainer",
     "docsUrl": "./docs/conditional-probability/"
   },
   {
@@ -116,6 +228,13 @@
     "title": "Markov Chains",
     "summary": "Interactive article about transition matrices, state evolution, stochastic sequences, and a local playground.",
     "referenceUrl": "https://setosa.io/ev/markov-chains/",
+    "topicTags": [
+      "probability",
+      "stochastic-processes",
+      "statistics"
+    ],
+    "addedDate": "2026-03-10",
+    "intent": "simulation",
     "docsUrl": "./docs/markov-chains/"
   },
   {
@@ -123,6 +242,13 @@
     "title": "Principal Component Analysis",
     "summary": "Interactive PCA explainer with draggable samples, a 3D projection view, and fixed UK-food dataset projections.",
     "referenceUrl": "https://setosa.io/ev/principal-component-analysis/",
+    "topicTags": [
+      "statistics",
+      "dimensionality-reduction",
+      "linear-algebra"
+    ],
+    "addedDate": "2026-03-14",
+    "intent": "explainer",
     "docsUrl": "./docs/principal-component-analysis/"
   },
   {
@@ -130,6 +256,13 @@
     "title": "Exponentiation",
     "summary": "Interactive explainer about repeated addition, repeated multiplication, and a virus-spread toy model.",
     "referenceUrl": "https://setosa.io/ev/exponentiation/",
+    "topicTags": [
+      "mathematics",
+      "exponential-growth",
+      "arithmetic"
+    ],
+    "addedDate": "2026-03-14",
+    "intent": "explainer",
     "docsUrl": "./docs/exponentiation/"
   },
   {
@@ -137,6 +270,13 @@
     "title": "Pi (π)",
     "summary": "Interactive pi explainer with draggable circle geometry, circumference unwrapping, and synchronized ratio readouts.",
     "referenceUrl": "https://setosa.io/ev/pi/",
+    "topicTags": [
+      "mathematics",
+      "geometry",
+      "circles"
+    ],
+    "addedDate": "2026-03-14",
+    "intent": "explainer",
     "docsUrl": "./docs/pi/"
   },
   {
@@ -144,6 +284,13 @@
     "title": "Sine and Cosine",
     "summary": "Interactive trigonometry explainer with similar triangles, autoplay transforms, and linked polar-cartesian views.",
     "referenceUrl": "https://setosa.io/ev/sine-and-cosine/",
+    "topicTags": [
+      "mathematics",
+      "trigonometry",
+      "geometry"
+    ],
+    "addedDate": "2026-03-14",
+    "intent": "explainer",
     "docsUrl": "./docs/sine-and-cosine/"
   },
   {
@@ -151,6 +298,13 @@
     "title": "Eigenvectors and Eigenvalues",
     "summary": "Interactive linear algebra explainer with draggable matrix columns, Fibonacci growth, steady-state migration, and complex spirals.",
     "referenceUrl": "https://setosa.io/ev/eigenvectors-and-eigenvalues/",
+    "topicTags": [
+      "linear-algebra",
+      "mathematics",
+      "matrices"
+    ],
+    "addedDate": "2026-03-14",
+    "intent": "explainer",
     "docsUrl": "./docs/eigenvectors-and-eigenvalues/"
   },
   {
@@ -158,6 +312,13 @@
     "title": "Image Kernels",
     "summary": "Interactive image-kernel explainer with preset filters, hoverable pixel arithmetic, a custom kernel playground, uploads, and live video.",
     "referenceUrl": "https://setosa.io/ev/image-kernels/",
+    "topicTags": [
+      "image-processing",
+      "convolution",
+      "computer-vision"
+    ],
+    "addedDate": "2026-03-14",
+    "intent": "simulation",
     "docsUrl": "./docs/image-kernels/"
   },
   {
@@ -165,77 +326,303 @@
     "title": "Ordinary Least Squares Regression",
     "summary": "Interactive explainer about fitted lines, squared error, draggable points, and coefficient readouts in ordinary least squares.",
     "referenceUrl": "https://setosa.io/ev/ordinary-least-squares-regression/",
+    "topicTags": [
+      "statistics",
+      "regression",
+      "machine-learning"
+    ],
+    "addedDate": "2026-03-18",
+    "intent": "explainer",
     "docsUrl": "./docs/ordinary-least-squares-regression/"
   },
   {
     "slug": "blockchain",
     "title": "Blockchain",
     "summary": "Interactive blockchain demo with editable block fields, nonce mining, downstream invalidation, and multi-chain comparison views.",
-    "referenceUrl": "https://andersbrownworth.com/Blockchain/blockchain.html",
-    "docsUrl": "./docs/blockchain/"
+    "referenceUrl": "https://andersbrownworth.com/blockchain/",
+    "topicTags": [
+      "blockchain",
+      "cryptography",
+      "distributed-systems"
+    ],
+    "addedDate": "2026-03-18",
+    "intent": "simulation",
+    "docsUrl": "./docs/blockchain/",
+    "learning": {
+      "difficulty": "beginner",
+      "durationMinutes": 8,
+      "order": 1,
+      "prerequisites": []
+    }
   },
   {
     "slug": "public-private-keys",
     "title": "Public / Private Keys",
     "summary": "Interactive signing demo with keypair generation, message signatures, transaction flows, and blockchain records backed by public-key cryptography.",
-    "referenceUrl": "https://andersbrownworth.com/blockchain/public-private-keys/keys",
-    "docsUrl": "./docs/public-private-keys/"
+    "referenceUrl": "https://andersbrownworth.com/blockchain/public-private-keys/",
+    "topicTags": [
+      "cryptography",
+      "blockchain",
+      "security"
+    ],
+    "addedDate": "2026-03-18",
+    "intent": "simulation",
+    "docsUrl": "./docs/public-private-keys/",
+    "learning": {
+      "difficulty": "intermediate",
+      "durationMinutes": 12,
+      "order": 2,
+      "prerequisites": [
+        "blockchain"
+      ]
+    }
   },
   {
-    "slug": "linear-regression",
-    "title": "Linear Regression",
-    "summary": "Interactive article about fitted lines, residuals, MSE, coefficient updates, and scroll-linked regression scenes.",
-    "referenceUrl": "https://mlu-explain.github.io/linear-regression/",
-    "docsUrl": "./docs/linear-regression/"
+    "slug": "zero-knowledge-proof-demo",
+    "title": "Zero Knowledge Proof Demo",
+    "summary": "Interactive zero-knowledge proof demo with a selectable US map, hidden color classes, palette shuffling, and resettable region selection.",
+    "referenceUrl": "https://andersbrownworth.com/zero-knowledge-proof-demo/",
+    "topicTags": [
+      "cryptography",
+      "privacy",
+      "blockchain"
+    ],
+    "addedDate": "2026-03-18",
+    "intent": "simulation",
+    "docsUrl": "./docs/zero-knowledge-proof-demo/",
+    "learning": {
+      "difficulty": "intermediate",
+      "durationMinutes": 8,
+      "order": 3,
+      "prerequisites": [
+        "public-private-keys"
+      ]
+    }
   },
   {
-    "slug": "logistic-regression",
-    "title": "Logistic Regression",
-    "summary": "Interactive article about binary classification, sigmoid probabilities, thresholding, and linked logistic-regression scenes.",
-    "referenceUrl": "https://mlu-explain.github.io/logistic-regression/",
-    "docsUrl": "./docs/logistic-regression/"
+    "slug": "alpha-compositing",
+    "title": "Alpha Compositing",
+    "summary": "Interactive article about opacity, coverage, premultiplied alpha, Porter-Duff operators, and layered compositing.",
+    "referenceUrl": "https://ciechanow.ski/alpha-compositing/",
+    "topicTags": [
+      "graphics",
+      "compositing",
+      "rendering"
+    ],
+    "addedDate": "2026-03-20",
+    "intent": "explainer",
+    "docsUrl": "./docs/alpha-compositing/"
   },
   {
-    "slug": "precision-recall",
-    "title": "Precision & Recall",
-    "summary": "Interactive article about confusion matrices, precision and recall tradeoffs, thresholding, and F1 score.",
-    "referenceUrl": "https://mlu-explain.github.io/precision-recall/",
-    "docsUrl": "./docs/precision-recall/"
+    "slug": "color-spaces",
+    "title": "Color Spaces",
+    "summary": "Interactive article about RGB pickers, tone response curves, matrix conversions, gamuts, chromaticity diagrams, and white points.",
+    "referenceUrl": "https://ciechanow.ski/color-spaces/",
+    "topicTags": [
+      "graphics",
+      "color",
+      "rendering"
+    ],
+    "addedDate": "2026-03-20",
+    "intent": "explainer",
+    "docsUrl": "./docs/color-spaces/"
   },
   {
-    "slug": "roc-auc",
-    "title": "ROC & AUC",
-    "summary": "Interactive article about ROC curves, threshold sweeps, AUC interpretation, and classifier comparison scenes.",
-    "referenceUrl": "https://mlu-explain.github.io/roc-auc/",
-    "docsUrl": "./docs/roc-auc/"
+    "slug": "sound",
+    "title": "Sound",
+    "summary": "Interactive article about sound synthesis, particle motion in air, pressure waves, waveforms, harmonics, and acoustic interference.",
+    "referenceUrl": "https://ciechanow.ski/sound/",
+    "topicTags": [
+      "audio",
+      "physics",
+      "waves"
+    ],
+    "addedDate": "2026-03-20",
+    "intent": "explainer",
+    "docsUrl": "./docs/sound/"
   },
   {
-    "slug": "bias-variance",
-    "title": "Bias-Variance Tradeoff",
-    "summary": "Interactive article about underfitting, overfitting, error decomposition, model complexity, LOESS smoothing, and K-nearest neighbors.",
-    "referenceUrl": "https://mlu-explain.github.io/bias-variance/",
-    "docsUrl": "./docs/bias-variance/"
+    "slug": "cameras-and-lenses",
+    "title": "Cameras and Lenses",
+    "summary": "Interactive article about exposure, pinhole cameras, refraction, waves, focus, depth of field, and optical aberrations.",
+    "referenceUrl": "https://ciechanow.ski/cameras-and-lenses/",
+    "topicTags": [
+      "optics",
+      "photography",
+      "physics"
+    ],
+    "addedDate": "2026-03-20",
+    "intent": "explainer",
+    "docsUrl": "./docs/cameras-and-lenses/"
   },
   {
-    "slug": "train-test-validation",
-    "title": "Train, Test, and Validation Sets",
-    "summary": "Interactive article about data splitting, draggable training examples, logistic-regression boundaries, and validation versus test evaluation.",
-    "referenceUrl": "https://mlu-explain.github.io/train-test-validation/",
-    "docsUrl": "./docs/train-test-validation/"
+    "slug": "lights-and-shadows",
+    "title": "Lights and Shadows",
+    "summary": "Interactive article about emitted power, radiance, solid angles, reflections, area lights, color, and shadowing.",
+    "referenceUrl": "https://ciechanow.ski/lights-and-shadows/",
+    "topicTags": [
+      "graphics",
+      "rendering",
+      "optics"
+    ],
+    "addedDate": "2026-03-20",
+    "intent": "explainer",
+    "docsUrl": "./docs/lights-and-shadows/"
   },
   {
-    "slug": "double-descent",
-    "title": "Double Descent",
-    "summary": "Interactive article about classical and interpolation regimes, complexity-driven error curves, model smoothness, and the interpolation gap.",
-    "referenceUrl": "https://mlu-explain.github.io/double-descent/",
-    "docsUrl": "./docs/double-descent/"
+    "slug": "tesseract",
+    "title": "Tesseract",
+    "summary": "Interactive article about building cubes across dimensions, projecting a tesseract, 4D rotation planes, and 3D slices through 4D space.",
+    "referenceUrl": "https://ciechanow.ski/tesseract/",
+    "topicTags": [
+      "mathematics",
+      "geometry",
+      "4d"
+    ],
+    "addedDate": "2026-03-20",
+    "intent": "explainer",
+    "docsUrl": "./docs/tesseract/"
   },
   {
-    "slug": "double-descent2",
-    "title": "Double Descent, Part 2",
-    "summary": "Interactive mathematical walkthrough of interpolation thresholds, spline limits, local KaTeX derivations, and charted double-descent examples.",
-    "referenceUrl": "https://mlu-explain.github.io/double-descent2/",
-    "docsUrl": "./docs/double-descent2/"
+    "slug": "gears",
+    "title": "Gears",
+    "summary": "Interactive article about angular velocity, torque transfer, involute tooth profiles, and compound gear trains.",
+    "referenceUrl": "https://ciechanow.ski/gears/",
+    "topicTags": [
+      "mechanical-engineering",
+      "physics",
+      "machines"
+    ],
+    "addedDate": "2026-03-20",
+    "intent": "explainer",
+    "docsUrl": "./docs/gears/"
+  },
+  {
+    "slug": "gps",
+    "title": "GPS",
+    "summary": "Interactive article about trilateration, pseudorange, orbital geometry, timing bias, GPS messages, and signal correlation.",
+    "referenceUrl": "https://ciechanow.ski/gps/",
+    "topicTags": [
+      "navigation",
+      "physics",
+      "signals"
+    ],
+    "addedDate": "2026-03-20",
+    "intent": "explainer",
+    "docsUrl": "./docs/gps/"
+  },
+  {
+    "slug": "earth-and-sun",
+    "title": "Earth and Sun",
+    "summary": "Interactive article about orbits, Kepler's laws, axial tilt, sidereal versus solar day, seasons, and the tropical year.",
+    "referenceUrl": "https://ciechanow.ski/earth-and-sun/",
+    "topicTags": [
+      "astronomy",
+      "physics",
+      "orbits"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "explainer",
+    "docsUrl": "./docs/earth-and-sun/"
+  },
+  {
+    "slug": "bicycle",
+    "title": "Bicycle",
+    "summary": "Interactive article about bicycle forces, rider control, slip, stability, wheel loads, torsion, and frame stresses.",
+    "referenceUrl": "https://ciechanow.ski/bicycle/",
+    "topicTags": [
+      "mechanical-engineering",
+      "physics",
+      "dynamics"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "explainer",
+    "docsUrl": "./docs/bicycle/"
+  },
+  {
+    "slug": "airfoil",
+    "title": "Airfoil",
+    "summary": "Interactive article about flow visualization, pressure, viscosity, lift, boundary layers, stall, and airfoil shape tradeoffs.",
+    "referenceUrl": "https://ciechanow.ski/airfoil/",
+    "topicTags": [
+      "aerodynamics",
+      "physics",
+      "fluid-dynamics"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "explainer",
+    "docsUrl": "./docs/airfoil/"
+  },
+  {
+    "slug": "curves-and-surfaces",
+    "title": "Curves and Surfaces",
+    "summary": "Interactive article about control points, interpolation, Bezier curves, splines, tangents, and subdivision surfaces.",
+    "referenceUrl": "https://ciechanow.ski/curves-and-surfaces/",
+    "topicTags": [
+      "graphics",
+      "geometry",
+      "mathematics"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "explainer",
+    "docsUrl": "./docs/curves-and-surfaces/"
+  },
+  {
+    "slug": "internal-combustion-engine",
+    "title": "Internal Combustion Engine",
+    "summary": "Interactive article about crank motion, pistons, valves, camshafts, combustion pressure, torque, flywheels, and starter behavior.",
+    "referenceUrl": "https://ciechanow.ski/internal-combustion-engine/",
+    "topicTags": [
+      "mechanical-engineering",
+      "engines",
+      "physics"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "explainer",
+    "docsUrl": "./docs/internal-combustion-engine/"
+  },
+  {
+    "slug": "mechanical-watch",
+    "title": "Mechanical Watch",
+    "summary": "Interactive article about mainsprings, gear trains, escapements, keyless works, automatic winding, and miniature watch movements.",
+    "referenceUrl": "https://ciechanow.ski/mechanical-watch/",
+    "topicTags": [
+      "mechanical-engineering",
+      "horology",
+      "machines"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "explainer",
+    "docsUrl": "./docs/mechanical-watch/"
+  },
+  {
+    "slug": "naval-architecture",
+    "title": "Naval Architecture",
+    "summary": "Interactive article about pressure, buoyancy, hull stability, free-surface effects, waves, propeller thrust, and ship balance.",
+    "referenceUrl": "https://ciechanow.ski/naval-architecture/",
+    "topicTags": [
+      "engineering",
+      "fluid-dynamics",
+      "physics"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "explainer",
+    "docsUrl": "./docs/naval-architecture/"
+  },
+  {
+    "slug": "formula-1-racing",
+    "title": "Formula 1 Racing",
+    "summary": "Original interactive article about airflow, ground effect, hybrid power units, tyres, braking, track layout, and setup tradeoffs in modern Formula 1.",
+    "topicTags": [
+      "aerodynamics",
+      "engineering",
+      "motorsport"
+    ],
+    "addedDate": "2026-03-27",
+    "intent": "simulation",
+    "docsUrl": "./docs/formula-1-racing/",
+    "referenceMode": "neutral",
+    "familyKey": "engineering-longform"
   },
   {
     "slug": "interactive-mechanical-watch",
@@ -249,6 +636,592 @@
     "addedDate": "2026-06-27",
     "intent": "simulation",
     "docsUrl": "./docs/interactive-mechanical-watch/",
+    "referenceMode": "neutral",
+    "familyKey": "engineering-longform"
+  },
+  {
+    "slug": "reading-qr-codes-without-a-computer",
+    "title": "Reading QR Codes Without a Computer!",
+    "summary": "Interactive QR explainer about anatomy, masking, reading order, bytes, error correction, and reconstructing payloads by hand.",
+    "referenceUrl": "https://qr.blinry.org/",
+    "topicTags": [
+      "qr-codes",
+      "encoding",
+      "error-correction"
+    ],
+    "addedDate": "2026-03-20",
+    "intent": "explainer",
+    "docsUrl": "./docs/reading-qr-codes-without-a-computer/"
+  },
+  {
+    "slug": "teoria-interval-ear-training",
+    "title": "Teoria Interval Ear Training",
+    "summary": "Replica of Teoria's interval ear-training exercise with local notation, keyboard, and piano audio assets for interval identification practice.",
+    "referenceUrl": "https://www.teoria.com/en/exercises/ie.php",
+    "topicTags": [
+      "music-theory",
+      "ear-training",
+      "intervals"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "practice",
+    "docsUrl": "./docs/teoria-interval-ear-training/",
+    "learning": {
+      "difficulty": "beginner",
+      "durationMinutes": 8,
+      "order": 1,
+      "prerequisites": []
+    }
+  },
+  {
+    "slug": "teoria-note-ear-training",
+    "title": "Teoria Note Ear Training",
+    "summary": "Replica of Teoria's note ear-training exercise with local notation, keyboard answer modes, and piano audio assets for single-note identification.",
+    "referenceUrl": "https://www.teoria.com/en/exercises/ne.php",
+    "topicTags": [
+      "music-theory",
+      "ear-training",
+      "notes"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "practice",
+    "docsUrl": "./docs/teoria-note-ear-training/"
+  },
+  {
+    "slug": "teoria-key-and-note-ear-training",
+    "title": "Teoria Key and Note Ear Training",
+    "summary": "Replica of Teoria's key-and-note ear-training exercise with local notation, reference playback, keyboard answer modes, and piano audio assets.",
+    "referenceUrl": "https://www.teoria.com/en/exercises/kne.php",
+    "topicTags": [
+      "music-theory",
+      "ear-training",
+      "keys"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "practice",
+    "docsUrl": "./docs/teoria-key-and-note-ear-training/"
+  },
+  {
+    "slug": "teoria-random-key-and-note-ear-training",
+    "title": "Teoria Random Key and Note Ear Training",
+    "summary": "Replica of Teoria's random key-and-note ear-training exercise with local notation, randomized key contexts, keyboard answer modes, and piano audio assets.",
+    "referenceUrl": "https://www.teoria.com/en/exercises/kner.php",
+    "topicTags": [
+      "music-theory",
+      "ear-training",
+      "keys"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "practice",
+    "docsUrl": "./docs/teoria-random-key-and-note-ear-training/"
+  },
+  {
+    "slug": "teoria-scale-construction",
+    "title": "Teoria Scale Construction",
+    "summary": "Replica of Teoria's scale-construction exercise with local notation rendering, note-entry controls, and piano playback for scale-building practice.",
+    "referenceUrl": "https://www.teoria.com/en/exercises/sc.php",
+    "topicTags": [
+      "music-theory",
+      "scales",
+      "notation"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "practice",
+    "docsUrl": "./docs/teoria-scale-construction/"
+  },
+  {
+    "slug": "teoria-interval-identification-and-inversion",
+    "title": "Teoria Interval Identification and Inversion",
+    "summary": "Replica of Teoria's interval identification and inversion exercise with local notation, interval answer grids, and piano playback for two-step interval practice.",
+    "referenceUrl": "https://www.teoria.com/en/exercises/iv.php",
+    "topicTags": [
+      "music-theory",
+      "intervals",
+      "ear-training"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "practice",
+    "docsUrl": "./docs/teoria-interval-identification-and-inversion/"
+  },
+  {
+    "slug": "ableton-learning-music-playground",
+    "title": "Ableton Learning Music Playground",
+    "summary": "Local replica of Ableton's Playground with synced beats, basslines, chords, and melodies powered by vendored widgets and route-local sample banks.",
+    "referenceUrl": "https://learningmusic.ableton.com/the-playground",
+    "topicTags": [
+      "music",
+      "sequencer",
+      "sandbox"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-music-playground/",
+    "learning": {
+      "difficulty": "beginner",
+      "durationMinutes": 10,
+      "order": 3,
+      "prerequisites": [
+        "ableton-learning-music-play-with-beats"
+      ]
+    }
+  },
+  {
+    "slug": "ableton-learning-music-play-with-beats",
+    "title": "Ableton Learning Music: Play with beats",
+    "summary": "Local replica of Ableton's Play with beats lesson with a recordable drum grid, local 909 sample bank, and archived widget runtime.",
+    "referenceUrl": "https://learningmusic.ableton.com/make-beats/play-with-beats.html",
+    "topicTags": [
+      "music",
+      "rhythm",
+      "drums"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-music-play-with-beats/",
+    "learning": {
+      "difficulty": "beginner",
+      "durationMinutes": 8,
+      "order": 2,
+      "prerequisites": [
+        "teoria-interval-ear-training"
+      ]
+    }
+  },
+  {
+    "slug": "ableton-learning-music-play-with-notes-and-scales",
+    "title": "Ableton Learning Music: Play with notes and scales",
+    "summary": "Local replica of Ableton's Play with notes and scales lesson with local piano and drum assets, tonic and scale choosers, and archived widget controls.",
+    "referenceUrl": "https://learningmusic.ableton.com/notes-and-scales/play-with-notes-and-scales.html",
+    "topicTags": [
+      "music",
+      "scales",
+      "melody"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-music-play-with-notes-and-scales/"
+  },
+  {
+    "slug": "ableton-learning-music-play-with-chords",
+    "title": "Ableton Learning Music: Play with chords",
+    "summary": "Local replica of Ableton's Play with chords lesson with local piano and drum assets, archived chord widgets, and route-local transport controls.",
+    "referenceUrl": "https://learningmusic.ableton.com/chords/play-with-chords.html",
+    "topicTags": [
+      "music",
+      "chords",
+      "harmony"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-music-play-with-chords/"
+  },
+  {
+    "slug": "ableton-learning-music-play-with-basslines",
+    "title": "Ableton Learning Music: Play with basslines",
+    "summary": "Local replica of Ableton's Play with basslines lesson with local bass and drum samples, archived sequencer widgets, and route-local transport.",
+    "referenceUrl": "https://learningmusic.ableton.com/make-basslines/play-with-basslines.html",
+    "topicTags": [
+      "music",
+      "bassline",
+      "sequencer"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-music-play-with-basslines/"
+  },
+  {
+    "slug": "ableton-learning-music-play-with-melodies",
+    "title": "Ableton Learning Music: Play with melodies",
+    "summary": "Local replica of Ableton's Play with melodies lesson with local piano and drum samples, archived melody widgets, and route-local playback controls.",
+    "referenceUrl": "https://learningmusic.ableton.com/make-melodies/play-with-melodies.html",
+    "topicTags": [
+      "music",
+      "melody",
+      "sequencer"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-music-play-with-melodies/"
+  },
+  {
+    "slug": "ableton-learning-music-play-with-song-structures",
+    "title": "Ableton Learning Music: Play with song structures",
+    "summary": "Local replica of Ableton's Play with song structures lesson shell with archived Learning Music assets and a route-local arrangement primer.",
+    "referenceUrl": "https://learningmusic.ableton.com/song-structure/song-structure.html",
+    "topicTags": [
+      "music",
+      "song-structure",
+      "arrangement"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-music-play-with-song-structures/"
+  },
+  {
+    "slug": "ableton-learning-synths-get-started",
+    "title": "Ableton Learning Synths: Get started",
+    "summary": "Local replica of Ableton's opening Learning Synths lesson with a draggable synth pad, archived RNBO runtime, and route-local synth media.",
+    "referenceUrl": "https://learningsynths.ableton.com/en/get-started",
+    "topicTags": [
+      "synthesis",
+      "music",
+      "sound-design"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-synths-get-started/",
+    "learning": {
+      "difficulty": "beginner",
+      "durationMinutes": 8,
+      "order": 4,
+      "prerequisites": [
+        "ableton-learning-music-playground"
+      ]
+    }
+  },
+  {
+    "slug": "ableton-learning-synths-how-synths-make-sound",
+    "title": "Ableton Learning Synths: How synths make sound",
+    "summary": "Local replica of Ableton's oscillator lesson with archived synth visualizations, local preset catalogs, and route-local lesson assets.",
+    "referenceUrl": "https://learningsynths.ableton.com/en/oscillators/how-synths-make-sound",
+    "topicTags": [
+      "synthesis",
+      "oscillators",
+      "sound-design"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-synths-how-synths-make-sound/"
+  },
+  {
+    "slug": "ableton-learning-synths-filter-resonance",
+    "title": "Ableton Learning Synths: Filter resonance",
+    "summary": "Local replica of Ableton's filter resonance lesson with archived XY filter controls, local text payloads, and route-local synth media.",
+    "referenceUrl": "https://learningsynths.ableton.com/en/filters/filter-resonance",
+    "topicTags": [
+      "synthesis",
+      "filters",
+      "sound-design"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-synths-filter-resonance/"
+  },
+  {
+    "slug": "ableton-learning-synths-modulating-amplitude-with-envelopes",
+    "title": "Ableton Learning Synths: Modulating amplitude with envelopes",
+    "summary": "Local replica of Ableton's amplitude-envelope lesson with archived ADSR controls, local RNBO assets, and route-local synth media.",
+    "referenceUrl": "https://learningsynths.ableton.com/en/envelopes/modulating-amplitude-with-envelopes",
+    "topicTags": [
+      "synthesis",
+      "envelopes",
+      "sound-design"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-synths-modulating-amplitude-with-envelopes/"
+  },
+  {
+    "slug": "ableton-learning-synths-matching-envelopes",
+    "title": "Ableton Learning Synths: Matching envelopes",
+    "summary": "Local replica of Ableton's matching envelopes lesson with archived sampler comparisons, ADSR controls, and route-local synth media.",
+    "referenceUrl": "https://learningsynths.ableton.com/en/envelopes/matching-envelopes",
+    "topicTags": [
+      "synthesis",
+      "envelopes",
+      "sound-design"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-synths-matching-envelopes/"
+  },
+  {
+    "slug": "ableton-learning-synths-recipes",
+    "title": "Ableton Learning Synths: Recipes",
+    "summary": "Local replica of Ableton's Recipes chapter with archived preset panels, local lesson data, and route-local Learning Synths media.",
+    "referenceUrl": "https://learningsynths.ableton.com/en/recipes/",
+    "topicTags": [
+      "synthesis",
+      "presets",
+      "sound-design"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/ableton-learning-synths-recipes/"
+  },
+  {
+    "slug": "chrome-music-lab-song-maker",
+    "title": "Chrome Music Lab Song Maker",
+    "summary": "Local replica of Song Maker with vendored canvas runtime, instrument banks, percussion packs, and responsive sequencer controls under one route-local archive.",
+    "referenceUrl": "https://musiclab.chromeexperiments.com/Song-Maker/",
+    "topicTags": [
+      "music",
+      "sequencer",
+      "sandbox"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "create",
+    "docsUrl": "./docs/chrome-music-lab-song-maker/"
+  },
+  {
+    "slug": "musicmap",
+    "title": "Musicmap",
+    "summary": "Local replica of Musicmap with vendored graph, search, genre panels, and user-click-triggered YouTube or Spotify embeds under a scoped music-family exception.",
+    "referenceUrl": "https://musicmap.info/",
+    "topicTags": [
+      "music",
+      "genres",
+      "visualization"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "explainer",
+    "docsUrl": "./docs/musicmap/",
+    "learning": {
+      "difficulty": "beginner",
+      "durationMinutes": 10,
+      "order": 5,
+      "prerequisites": [
+        "ableton-learning-synths-get-started"
+      ]
+    }
+  },
+  {
+    "slug": "music-interactive-hub",
+    "title": "Music Interactive Hub",
+    "summary": "Editorial local hub that connects the shipped Teoria drills, sequencer playgrounds, and genre-history map into one music-focused learning path.",
+    "referenceMode": "neutral",
+    "topicTags": [
+      "music",
+      "learning-path",
+      "hub"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "guided-path",
+    "docsUrl": "./docs/music-interactive-hub/"
+  },
+  {
+    "slug": "linear-regression",
+    "title": "Linear Regression",
+    "summary": "Interactive article about fitted lines, residuals, MSE, coefficient updates, and scroll-linked regression scenes.",
+    "referenceUrl": "https://mlu-explain.github.io/linear-regression/",
+    "topicTags": [
+      "machine-learning",
+      "regression",
+      "statistics"
+    ],
+    "addedDate": "2026-03-14",
+    "intent": "explainer",
+    "docsUrl": "./docs/linear-regression/"
+  },
+  {
+    "slug": "logistic-regression",
+    "title": "Logistic Regression",
+    "summary": "Interactive article about binary classification, sigmoid probabilities, thresholding, and linked logistic-regression scenes.",
+    "referenceUrl": "https://mlu-explain.github.io/logistic-regression/",
+    "topicTags": [
+      "machine-learning",
+      "classification",
+      "probability"
+    ],
+    "addedDate": "2026-03-14",
+    "intent": "explainer",
+    "docsUrl": "./docs/logistic-regression/"
+  },
+  {
+    "slug": "precision-recall",
+    "title": "Precision & Recall",
+    "summary": "Interactive article about confusion matrices, precision and recall tradeoffs, thresholding, and F1 score.",
+    "referenceUrl": "https://mlu-explain.github.io/precision-recall/",
+    "topicTags": [
+      "machine-learning",
+      "evaluation",
+      "metrics"
+    ],
+    "addedDate": "2026-03-17",
+    "intent": "explainer",
+    "docsUrl": "./docs/precision-recall/"
+  },
+  {
+    "slug": "roc-auc",
+    "title": "ROC & AUC",
+    "summary": "Interactive article about ROC curves, threshold sweeps, AUC interpretation, and classifier comparison scenes.",
+    "referenceUrl": "https://mlu-explain.github.io/roc-auc/",
+    "topicTags": [
+      "machine-learning",
+      "evaluation",
+      "metrics"
+    ],
+    "addedDate": "2026-03-17",
+    "intent": "explainer",
+    "docsUrl": "./docs/roc-auc/"
+  },
+  {
+    "slug": "bias-variance",
+    "title": "Bias-Variance Tradeoff",
+    "summary": "Interactive article about underfitting, overfitting, error decomposition, model complexity, LOESS smoothing, and K-nearest neighbors.",
+    "referenceUrl": "https://mlu-explain.github.io/bias-variance/",
+    "topicTags": [
+      "machine-learning",
+      "model-complexity",
+      "statistics"
+    ],
+    "addedDate": "2026-03-17",
+    "intent": "explainer",
+    "docsUrl": "./docs/bias-variance/"
+  },
+  {
+    "slug": "train-test-validation",
+    "title": "Train, Test, and Validation Sets",
+    "summary": "Interactive article about data splitting, draggable training examples, logistic-regression boundaries, and validation versus test evaluation.",
+    "referenceUrl": "https://mlu-explain.github.io/train-test-validation/",
+    "topicTags": [
+      "machine-learning",
+      "evaluation",
+      "data-splitting"
+    ],
+    "addedDate": "2026-03-17",
+    "intent": "explainer",
+    "docsUrl": "./docs/train-test-validation/"
+  },
+  {
+    "slug": "double-descent",
+    "title": "Double Descent",
+    "summary": "Interactive article about classical and interpolation regimes, complexity-driven error curves, model smoothness, and the interpolation gap.",
+    "referenceUrl": "https://mlu-explain.github.io/double-descent/",
+    "topicTags": [
+      "machine-learning",
+      "model-complexity",
+      "statistics"
+    ],
+    "addedDate": "2026-03-18",
+    "intent": "explainer",
+    "docsUrl": "./docs/double-descent/"
+  },
+  {
+    "slug": "double-descent2",
+    "title": "Double Descent, Part 2",
+    "summary": "Interactive mathematical walkthrough of interpolation thresholds, spline limits, local KaTeX derivations, and charted double-descent examples.",
+    "referenceUrl": "https://mlu-explain.github.io/double-descent2/",
+    "topicTags": [
+      "machine-learning",
+      "model-complexity",
+      "mathematics"
+    ],
+    "addedDate": "2026-03-18",
+    "intent": "explainer",
+    "docsUrl": "./docs/double-descent2/"
+  },
+  {
+    "slug": "memory-allocation",
+    "title": "Memory Allocation",
+    "summary": "Interactive article about memory grids, hexadecimal addresses, stack and free-list allocators, fragmentation, and inline allocation metadata.",
+    "referenceUrl": "https://samwho.dev/memory-allocation/",
+    "topicTags": [
+      "systems",
+      "memory",
+      "computer-science"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "simulation",
+    "docsUrl": "./docs/memory-allocation/"
+  },
+  {
+    "slug": "load-balancing",
+    "title": "Load Balancing",
+    "summary": "Interactive article about round robin, weighted variants, least connections, PEWMA, latency graphs, and a live load-balancing playground.",
+    "referenceUrl": "https://samwho.dev/load-balancing/",
+    "topicTags": [
+      "systems",
+      "networking",
+      "distributed-systems"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "simulation",
+    "docsUrl": "./docs/load-balancing/"
+  },
+  {
+    "slug": "hysteresis-slack",
+    "title": "Hysteresis & Slack",
+    "summary": "Interactive explainer about slack, hysteresis loops, path dependence, and input-output trajectories with memory.",
+    "referenceUrl": "https://joshuahhh.com/projects/hysteresis/",
+    "topicTags": [
+      "physics",
+      "systems",
+      "dynamics"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "simulation",
+    "docsUrl": "./docs/hysteresis-slack/"
+  },
+  {
+    "slug": "rigid-body-collisions",
+    "title": "Rigid Body Collisions",
+    "summary": "Interactive article about rigid-body collision basics, velocity vectors, surface normals, dot products, and collision intuition.",
+    "referenceUrl": "https://www.sassnow.ski/rigid-body-collisions/1",
+    "topicTags": [
+      "physics",
+      "simulation",
+      "dynamics"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "simulation",
+    "docsUrl": "./docs/rigid-body-collisions/"
+  },
+  {
+    "slug": "blockchain-101-combined-flow",
+    "title": "Combined Blockchain Flow",
+    "summary": "Local chapter map that connects the shipped blockchain, signing, transaction, and zero-knowledge routes into one teaching sequence.",
+    "referenceUrl": "https://andersbrownworth.com/",
+    "topicTags": [
+      "blockchain",
+      "cryptography",
+      "learning-path"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "guided-path",
+    "docsUrl": "./docs/blockchain-101-combined-flow/"
+  },
+  {
+    "slug": "primary-interactive-hub",
+    "title": "Primary Interactive Hub",
+    "summary": "Curated local hub for the shipped social simulations, narrative games, and editable playgrounds in the primary interactive collection.",
+    "referenceUrl": "https://github.com/ncase?tab=repositories",
+    "topicTags": [
+      "hub",
+      "learning-path",
+      "simulation"
+    ],
+    "addedDate": "2026-03-21",
+    "intent": "guided-path",
+    "docsUrl": "./docs/primary-interactive-hub/"
+  },
+  {
+    "slug": "stargazing-dashboard",
+    "title": "Stargazing Dashboard",
+    "summary": "Original interactive first-person stargazing dashboard with a topocentric sky dome, location and time engine, bundled star and constellation data, sun/moon/planet positions, guided target navigation, and a telemetry HUD overlay.",
+    "topicTags": [
+      "astronomy",
+      "visualization",
+      "dashboard"
+    ],
+    "addedDate": "2026-06-26",
+    "intent": "simulation",
+    "docsUrl": "./docs/stargazing-dashboard/",
+    "referenceMode": "neutral",
+    "familyKey": "engineering-longform"
+  },
+  {
+    "slug": "watch-mesh-explorer",
+    "title": "Inside a Mechanical Watch",
+    "summary": "Ten focused ETA 2824-2 lessons explain how stored energy becomes regulated time, with one active mechanism at a time and a secondary atlas for all 71 components.",
+    "topicTags": [
+      "horology",
+      "visualization",
+      "webgl"
+    ],
+    "addedDate": "2026-07-25",
+    "intent": "explainer",
+    "docsUrl": "./docs/watch-mesh-explorer/",
     "referenceMode": "neutral",
     "familyKey": "engineering-longform"
   }

@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Local replica of Ableton's Playground with synced beats, basslines, chords, and melodies powered by vendored widgets and route-local sample banks.">
+  <meta property="og:title" content="Ableton Learning Music Playground">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://kohnnn.github.io/interactive-explanation/ableton-learning-music-playground/">
+  <meta property="og:description" content="Local replica of Ableton's Playground with route-local widgets, multitrack sync, and archived sample banks.">
+  <link rel="canonical" href="https://kohnnn.github.io/interactive-explanation/ableton-learning-music-playground/">
+  <title>Ableton Learning Music Playground</title>
+  <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+  <link rel="stylesheet" href="./css/main.css">
+  <link rel="stylesheet" href="../shared/engineering-sandbox.css">
+  <link rel="stylesheet" href="./css/playground-shell.css">
+  <link rel="stylesheet" href="../shared/public-footer.css">
+  <style>
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .playground-route-shell {
+      padding-bottom: 5rem;
+    }
+
+    .playground-route-shell .page-header {
+      max-width: 42rem;
+    }
+
+    .playground-route-shell .page-header p {
+      margin-bottom: 0;
+    }
+
+    .story-practice-surface .body-text.text-container {
+      max-width: none;
+    }
+
+    .story-practice-surface .widget,
+    .story-practice-surface .widget-drumpad {
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 767px) {
+      .playground-route-shell {
+        padding-bottom: 4rem;
+      }
+    }
+  </style>
+  <script src="./third-party/polyfills/polyfills.js"></script>
+  <script src="../shared/tone.min.js"></script>
+  <script src="./third-party/microevent/microevent.js"></script>
+  <script src="./widgets/build/widgets.min.js"></script>
+  <script>
+    function onLoad() {
+      ANIMATION_FRAMER = new AnimationFramer();
+      ANIMATION_FRAMER.init();
+
+      SUPERVISOR = new AudioSupervisor();
+      SUPERVISOR.init();
+
+      EXPORTER = new LiveSetExporter();
+      EXPORTER.init();
+
+      KEY_SUPERVISOR = new KeySupervisor();
+      KEY_SUPERVISOR.init();
+
+      METRONOME = new Metronome();
+      METRONOME.init();
+
+      LOCALE = "";
+      LOCALE_PATH = "";
+    }
+
+    onLoad();
+
+    document.addEventListener("DOMContentLoaded", function () {
+      var widgets = document.getElementsByClassName("widget");
+      var widgetIds = {};
+      for (var index = 0; index < widgets.length; index += 1) {
+        var id = widgets[index].id;
+        if (widgetIds[id]) {
+          throw new Error("Duplicate widget id: " + id);
+        }
+        widgetIds[id] = true;
+      }
+    });
+  </script>
+</head>
+<body
+  class="lang-- bg--base color--inverted ltr"
+  dir="ltr"
+  data-reference-url="https://learningmusic.ableton.com/the-playground"
+  data-reference-text="Ableton Learning Music: The Playground"
+  data-footer-label="Original lesson"
+  data-story-shell="engineering-sandbox"
+  data-story-variant="practice"
+  data-story-family="ableton-practice"
+  data-story-nav="none"
+  data-story-route="ableton-learning-music-playground"
+>
+  <section class="story-hero">
+    <p class="story-hero__eyebrow">Engineering Sandbox practice · ableton learning music</p>
+    <div class="story-hero__grid">
+      <div>
+        <h1 class="story-hero__title">Build one loop by moving beats, bass, chords, and melody together.</h1>
+        <p class="story-hero__summary">
+          Playground is the fastest way to hear how arrangement decisions interact. Start the shared
+          transport, change one track, and listen to how the whole loop shifts when the parts stay synced.
+        </p>
+        <div class="story-hero__meta">
+          <span class="story-chip">Four synced widget tracks</span>
+          <span class="story-chip">Local sample bank and transport</span>
+          <span class="story-chip">Edit one layer, hear the whole loop react</span>
+        </div>
+      </div>
+      <div class="story-callout story-hero__panel" data-story-callout="play">
+        <span class="story-callout__label">How to use this page</span>
+        <p>
+          Start with the beats section, then change either the bassline or the melody while the loop
+          is running. The lesson lands when you can hear which edits change groove, harmony, or shape.
+        </p>
+        <div class="story-hero__actions">
+          <a class="story-button" href="#beats">Play first: start with beats</a>
+          <a class="story-button story-button--secondary" href="#melodies">Jump to melodies</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="story-callout story-practice-callout" data-story-callout="story">
+    <div class="story-practice-grid">
+      <div class="story-practice-panel">
+        <p class="story-practice-kicker">Quick start</p>
+        <ol class="story-practice-checklist">
+          <li><span class="story-practice-checklist__step">1</span><div><strong>Start the shared loop</strong>Hit play in the beats section so every later track can join the same transport.</div></li>
+          <li><span class="story-practice-checklist__step">2</span><div><strong>Edit one layer</strong>Change the bass, chords, or melody and keep listening to the unchanged parts around it.</div></li>
+          <li><span class="story-practice-checklist__step">3</span><div><strong>Compare sections</strong>Use the four tracks to hear which musical job belongs to rhythm, harmony, and melodic contour.</div></li>
+        </ol>
+      </div>
+      <div class="story-callout story-practice-panel">
+        <span class="story-callout__label">Why this lesson matters</span>
+        <p>
+          This is the family bridge from isolated drills into arrangement thinking. It makes rhythm,
+          bass motion, harmony, and melodic shape audible as one system.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="story-practice-strip" aria-label="Practice hints">
+    <span class="story-practice-hint"><strong>Shared loop:</strong> all four tracks ride one transport — play or stop in any track drives the whole loop.</span>
+    <span class="story-practice-hint"><strong>Listen:</strong> start with the beat before changing any pitched track.</span>
+    <span class="story-practice-hint"><strong>Edit:</strong> move one layer at a time so the effect stays audible.</span>
+    <span class="story-practice-hint"><strong>Loop:</strong> let the transport keep running while you compare sections.</span>
+  </div>
+
+  <main class="playground-route-shell story-practice-main">
+    <div class="page-header body-text">
+      <h2 id="the-playground">Ableton Learning Music: The Playground</h2>
+      <p>
+        Local replica of Ableton's multitrack playground. The shipped route preserves the synced
+        beats, basslines, chords, and melodies widgets with route-local sample banks and removes
+        the surrounding marketing, cookie, and export-service shell.
+      </p>
+    </div>
+
+    <div class="playground-track playground-track--primary playground-track--beats">
+      <div class="playground-track__header">
+        <span class="playground-track__index" aria-hidden="true">1</span>
+        <div class="playground-track__heading">
+          <h3>Beats</h3>
+          <span class="playground-track__role">Rhythm · start here</span>
+        </div>
+      </div>
+    <section class="story-practice-focus" data-primary-control>
+      <div class="story-practice-focus__label">
+        <div>
+          <strong>Primary practice surface</strong>
+          Start the synced transport in beats, then shape bass, chords, and melody without breaking the loop.
+        </div>
+        <a class="story-button story-button--secondary" href="#melodies">Jump to later track</a>
+      </div>
+      <div class="story-practice-surface">
+    <div class="body-text text-container limit-line-length-inside">
+      <h2 id="beats" class="playground-track-anchor">Beats</h2>
+      <script>_theplaygroundplaygrounddrumsrecorder = new Recorder();</script>
+      <div class="widget theme-a" id="_theplaygroundplaygrounddrums" dir="ltr">
+        <div
+          class="widget-pianoroll drumsequencer"
+          id="_theplaygroundplaygrounddrumssequencer"
+          data-material="drums"
+          data-tempo="85"
+          data-onPlay="join"
+          data-targetState=""
+          data-defaultState=""
+          data-lanes='[{"name":"Kick","midi":36,"path":"simplesequencer/909/Kick"},{"name":"Rim","midi":37,"path":"simplesequencer/909/Rim"},{"name":"Snare","midi":38,"path":"simplesequencer/909/Snare"},{"name":"Clap","midi":39,"path":"simplesequencer/909/Clap"},{"name":"Closed Hat","midi":42,"choke":46,"path":"simplesequencer/909/ClosedHat"},{"name":"Open Hat","midi":46,"path":"simplesequencer/909/OpenHat"},{"name":"Tom","midi":48,"path":"simplesequencer/909/TomHi"},{"name":"Ride","midi":51,"path":"simplesequencer/909/Ride"}]'
+          data-instrument='{"livePreset":"Kit-Core 909","samples":[{"name":"Kick","midi":36,"path":"simplesequencer/909/Kick"},{"name":"Rim","midi":37,"path":"simplesequencer/909/Rim"},{"name":"Snare","midi":38,"path":"simplesequencer/909/Snare"},{"name":"Clap","midi":39,"path":"simplesequencer/909/Clap"},{"name":"Closed Hat","midi":42,"choke":46,"path":"simplesequencer/909/ClosedHat"},{"name":"Open Hat","midi":46,"path":"simplesequencer/909/OpenHat"},{"name":"Tom","midi":48,"path":"simplesequencer/909/TomHi"},{"name":"Ride","midi":51,"path":"simplesequencer/909/Ride"}]}'
+          data-beats="8"
+          data-gridSize="16"
+          data-allowResize="false"
+          data-disableExport="yes"
+          data-recorder="_theplaygroundplaygrounddrumsrecorder"
+          data-tip=""
+          data-tips='{"playstop":{"@text":"Click this button to start and stop playback."},"createdeletenotes":{"@text":"Click in the grid to create a note. Click an existing note to delete it."},"tempo":{"@text":"Drag the slider to change the tempo."},"overview":{"@text":"Click to focus on a single bar. Click again to see the whole pattern."},"record":{"@text":"Click to start and stop real-time recording. When active, you can record what you play on the pads."},"dragnotes":{"@text":"You can move notes around the grid by clicking and dragging them."},"resizenotes":{"@text":"You can lengthen or shorten notes by dragging on their right edge."},"selectnotes":{"@text":"Click and drag around multiple notes to select them. You can then move them together."},"export":{"@text":"Export to Live is unavailable in the local archive build."},"keyboard":{"@text":"Click here to play these sounds using your keyboard keys."},"drumpad":{"@text":"Click on the pads to play a sound."},"lowhighpitch":{"@text":"Click and drag. Lower pitches are to the left, higher pitches to the right."},"songformsections":{"@text":"Click on the blocks to jump to a particular section of the song."},"devicemute":{"@text":"If you do not hear any sound, check that your device is not muted and that the volume is turned up."},"exportnotsupportedchromeios":{"@text":"Export to Live is unavailable in the local archive build.","showalways":true}}'
+          data-highlightedLanes="[]"
+          data-lang='{"@reset":"Reset","@clear":"Clear","@exporttolive":"Export unavailable","@exporting":"Exporting","@tempo":"Tempo","@keyboard":"Keyboard","@on":"On","@off":"Off","@close":"Close","@lowpitch":"Low Pitch","@highpitch":"High Pitch","@fillinsolution":"Fill in solution","@incompatiblebrowser":"Your browser can’t display the interactive musical examples on this page.<br>Please use a browser that supports Web Audio such as Chrome, Safari, Firefox, or Edge."}'
+        ></div>
+        <div
+          class="widget-drumpad widget-recordabledrumpad"
+          id="_theplaygroundplaygrounddrumsdrumpad"
+          data-keyboard="12345678"
+          data-kit='{"livePreset":"Kit-Core 909","samples":[{"name":"Kick","midi":36,"path":"simplesequencer/909/Kick"},{"name":"Rim","midi":37,"path":"simplesequencer/909/Rim"},{"name":"Snare","midi":38,"path":"simplesequencer/909/Snare"},{"name":"Clap","midi":39,"path":"simplesequencer/909/Clap"},{"name":"Closed Hat","midi":42,"choke":46,"path":"simplesequencer/909/ClosedHat"},{"name":"Open Hat","midi":46,"path":"simplesequencer/909/OpenHat"},{"name":"Tom","midi":48,"path":"simplesequencer/909/TomHi"},{"name":"Ride","midi":51,"path":"simplesequencer/909/Ride"}]}'
+          data-recorder="_theplaygroundplaygrounddrumsrecorder"
+          data-lang='{"@reset":"Reset","@clear":"Clear","@exporttolive":"Export unavailable","@exporting":"Exporting","@tempo":"Tempo","@keyboard":"Keyboard","@on":"On","@off":"Off","@close":"Close","@lowpitch":"Low Pitch","@highpitch":"High Pitch","@fillinsolution":"Fill in solution","@incompatiblebrowser":"Your browser can’t display the interactive musical examples on this page.<br>Please use a browser that supports Web Audio such as Chrome, Safari, Firefox, or Edge."}'
+        ></div>
+      </div>
+    </div>
+      </div>
+    </section>
+    </div>
+
+    <p class="playground-track-intro">
+      Once the beat is carrying the loop, add one later track at a time. Keep the transport
+      running so bass movement, chord color, and melody shape stay easy to compare against the
+      same rhythmic bed.
+    </p>
+
+    <div class="playground-track playground-track--bass">
+      <div class="playground-track__header">
+        <span class="playground-track__index" aria-hidden="true">2</span>
+        <div class="playground-track__heading">
+          <h3>Basslines</h3>
+          <span class="playground-track__role">Low end · movement</span>
+        </div>
+      </div>
+      <div class="playground-track__body">
+    <div class="body-text text-container limit-line-length-inside">
+      <h2 id="basslines" class="playground-track-anchor">Basslines</h2>
+      <div
+        class="widget widget-pianoroll theme-d"
+        id="_theplaygroundplaygroundbass"
+        dir="ltr"
+        data-material="tonal"
+        data-tempo="85"
+        data-onPlay="join"
+        data-targetState=""
+        data-defaultState=""
+        data-lanes="[]"
+        data-beats="8"
+        data-gridSize="16"
+        data-allowResize="true"
+        data-disableExport="yes"
+        data-instrument='{"livePreset":"Boffner Bass","fadeout":{"duration":0.1,"offset":0},"samples":[{"midi":24,"path":"boffner/boffner1"},{"midi":36,"path":"boffner/boffner2"}]}'
+        data-showTempoSlider=""
+        data-showRootChooser="yes"
+        data-showScaleChooser="yes"
+        data-availableScales="Major/Ionian,Minor/Aeolian,Dorian,Phrygian,Lydian,Mixolydian,Locrian"
+        data-defaultScale="Major/Ionian"
+        data-defaultRoot="C"
+        data-defaultOctave="2"
+        data-defaultOctaveCount="2"
+        data-tip=""
+        data-tips='{"playstop":{"@text":"Click this button to start and stop playback."},"createdeletenotes":{"@text":"Click in the grid to create a note. Click an existing note to delete it."},"tempo":{"@text":"Drag the slider to change the tempo."},"overview":{"@text":"Click to focus on a single bar. Click again to see the whole pattern."},"record":{"@text":"Click to start and stop real-time recording. When active, you can record what you play on the pads."},"dragnotes":{"@text":"You can move notes around the grid by clicking and dragging them."},"resizenotes":{"@text":"You can lengthen or shorten notes by dragging on their right edge."},"selectnotes":{"@text":"Click and drag around multiple notes to select them. You can then move them together."},"export":{"@text":"Export to Live is unavailable in the local archive build."},"keyboard":{"@text":"Click here to play these sounds using your keyboard keys."},"drumpad":{"@text":"Click on the pads to play a sound."},"lowhighpitch":{"@text":"Click and drag. Lower pitches are to the left, higher pitches to the right."},"songformsections":{"@text":"Click on the blocks to jump to a particular section of the song."},"devicemute":{"@text":"If you do not hear any sound, check that your device is not muted and that the volume is turned up."},"exportnotsupportedchromeios":{"@text":"Export to Live is unavailable in the local archive build.","showalways":true}}'
+        data-highlightedLanes="[0,7,14]"
+        data-lang='{"@reset":"Reset","@clear":"Clear","@exporttolive":"Export unavailable","@exporting":"Exporting","@tempo":"Tempo","@keyboard":"Keyboard","@on":"On","@off":"Off","@close":"Close","@lowpitch":"Low Pitch","@highpitch":"High Pitch","@fillinsolution":"Fill in solution","@incompatiblebrowser":"Your browser can’t display the interactive musical examples on this page.<br>Please use a browser that supports Web Audio such as Chrome, Safari, Firefox, or Edge."}'
+      ></div>
+    </div>
+      </div>
+    </div>
+
+    <div class="playground-track playground-track--chords">
+      <div class="playground-track__header">
+        <span class="playground-track__index" aria-hidden="true">3</span>
+        <div class="playground-track__heading">
+          <h3>Chords</h3>
+          <span class="playground-track__role">Harmony · color</span>
+        </div>
+      </div>
+      <div class="playground-track__body">
+    <div class="body-text text-container limit-line-length-inside">
+      <h2 id="chords" class="playground-track-anchor">Chords</h2>
+      <div
+        class="widget widget-pianoroll theme-c"
+        id="_theplaygroundplaygroundpiano"
+        dir="ltr"
+        data-material="tonal"
+        data-tempo="85"
+        data-onPlay="join"
+        data-targetState=""
+        data-defaultState=""
+        data-lanes="[]"
+        data-beats="8"
+        data-gridSize="16"
+        data-allowResize="true"
+        data-disableExport="yes"
+        data-instrument='{"livePreset":"Grand Piano","fadeout":{"duration":0.4,"offset":0},"samples":[{"midi":24,"path":"piano/C1v10"},{"midi":30,"path":"piano/Fs1v10"},{"midi":36,"path":"piano/C2v10"},{"midi":42,"path":"piano/Fs2v10"},{"midi":48,"path":"piano/C3v10"},{"midi":54,"path":"piano/Fs3v10"},{"midi":60,"path":"piano/C4v10"},{"midi":66,"path":"piano/Fs4v10"},{"midi":72,"path":"piano/C5v10"},{"midi":78,"path":"piano/Fs5v10"},{"midi":84,"path":"piano/C6v10"},{"midi":90,"path":"piano/Fs6v10"},{"midi":96,"path":"piano/C7v10"},{"midi":102,"path":"piano/Fs7v10"},{"midi":108,"path":"piano/C8v10"}]}'
+        data-showTempoSlider=""
+        data-showRootChooser="yes"
+        data-showScaleChooser="yes"
+        data-availableScales="Major/Ionian,Minor/Aeolian,Dorian,Phrygian,Lydian,Mixolydian,Locrian"
+        data-defaultScale="Major/Ionian"
+        data-defaultRoot="C"
+        data-defaultOctave="5"
+        data-defaultOctaveCount="2"
+        data-tip=""
+        data-tips='{"playstop":{"@text":"Click this button to start and stop playback."},"createdeletenotes":{"@text":"Click in the grid to create a note. Click an existing note to delete it."},"tempo":{"@text":"Drag the slider to change the tempo."},"overview":{"@text":"Click to focus on a single bar. Click again to see the whole pattern."},"record":{"@text":"Click to start and stop real-time recording. When active, you can record what you play on the pads."},"dragnotes":{"@text":"You can move notes around the grid by clicking and dragging them."},"resizenotes":{"@text":"You can lengthen or shorten notes by dragging on their right edge."},"selectnotes":{"@text":"Click and drag around multiple notes to select them. You can then move them together."},"export":{"@text":"Export to Live is unavailable in the local archive build."},"keyboard":{"@text":"Click here to play these sounds using your keyboard keys."},"drumpad":{"@text":"Click on the pads to play a sound."},"lowhighpitch":{"@text":"Click and drag. Lower pitches are to the left, higher pitches to the right."},"songformsections":{"@text":"Click on the blocks to jump to a particular section of the song."},"devicemute":{"@text":"If you do not hear any sound, check that your device is not muted and that the volume is turned up."},"exportnotsupportedchromeios":{"@text":"Export to Live is unavailable in the local archive build.","showalways":true}}'
+        data-highlightedLanes="[0,7,14]"
+        data-lang='{"@reset":"Reset","@clear":"Clear","@exporttolive":"Export unavailable","@exporting":"Exporting","@tempo":"Tempo","@keyboard":"Keyboard","@on":"On","@off":"Off","@close":"Close","@lowpitch":"Low Pitch","@highpitch":"High Pitch","@fillinsolution":"Fill in solution","@incompatiblebrowser":"Your browser can’t display the interactive musical examples on this page.<br>Please use a browser that supports Web Audio such as Chrome, Safari, Firefox, or Edge."}'
+      ></div>
+    </div>
+      </div>
+    </div>
+
+    <div class="playground-track playground-track--melody">
+      <div class="playground-track__header">
+        <span class="playground-track__index" aria-hidden="true">4</span>
+        <div class="playground-track__heading">
+          <h3>Melodies</h3>
+          <span class="playground-track__role">Lead · contour</span>
+        </div>
+      </div>
+      <div class="playground-track__body">
+    <div class="body-text text-container limit-line-length-inside">
+      <h2 id="melodies" class="playground-track-anchor">Melodies</h2>
+      <div
+        class="widget widget-pianoroll theme-e"
+        id="_theplaygroundplaygroundsynth"
+        dir="ltr"
+        data-material="tonal"
+        data-tempo="85"
+        data-onPlay="join"
+        data-targetState=""
+        data-defaultState=""
+        data-lanes="[]"
+        data-beats="8"
+        data-gridSize="16"
+        data-allowResize="true"
+        data-disableExport="yes"
+        data-instrument='{"livePreset":"Chiffy Sinusoid Lead","fadeout":{"duration":0.06,"offset":0.05},"samples":[{"midi":48,"path":"sinelead/sinelead1"},{"midi":60,"path":"sinelead/sinelead2"},{"midi":72,"path":"sinelead/sinelead3"},{"midi":84,"path":"sinelead/sinelead4"}]}'
+        data-showTempoSlider=""
+        data-showRootChooser="yes"
+        data-showScaleChooser="yes"
+        data-availableScales="Major/Ionian,Minor/Aeolian,Dorian,Phrygian,Lydian,Mixolydian,Locrian"
+        data-defaultScale="Major/Ionian"
+        data-defaultRoot="C"
+        data-defaultOctave="5"
+        data-defaultOctaveCount="2"
+        data-tip=""
+        data-tips='{"playstop":{"@text":"Click this button to start and stop playback."},"createdeletenotes":{"@text":"Click in the grid to create a note. Click an existing note to delete it."},"tempo":{"@text":"Drag the slider to change the tempo."},"overview":{"@text":"Click to focus on a single bar. Click again to see the whole pattern."},"record":{"@text":"Click to start and stop real-time recording. When active, you can record what you play on the pads."},"dragnotes":{"@text":"You can move notes around the grid by clicking and dragging them."},"resizenotes":{"@text":"You can lengthen or shorten notes by dragging on their right edge."},"selectnotes":{"@text":"Click and drag around multiple notes to select them. You can then move them together."},"export":{"@text":"Export to Live is unavailable in the local archive build."},"keyboard":{"@text":"Click here to play these sounds using your keyboard keys."},"drumpad":{"@text":"Click on the pads to play a sound."},"lowhighpitch":{"@text":"Click and drag. Lower pitches are to the left, higher pitches to the right."},"songformsections":{"@text":"Click on the blocks to jump to a particular section of the song."},"devicemute":{"@text":"If you do not hear any sound, check that your device is not muted and that the volume is turned up."},"exportnotsupportedchromeios":{"@text":"Export to Live is unavailable in the local archive build.","showalways":true}}'
+        data-highlightedLanes="[0,7,14]"
+        data-lang='{"@reset":"Reset","@clear":"Clear","@exporttolive":"Export unavailable","@exporting":"Exporting","@tempo":"Tempo","@keyboard":"Keyboard","@on":"On","@off":"Off","@close":"Close","@lowpitch":"Low Pitch","@highpitch":"High Pitch","@fillinsolution":"Fill in solution","@incompatiblebrowser":"Your browser can’t display the interactive musical examples on this page.<br>Please use a browser that supports Web Audio such as Chrome, Safari, Firefox, or Edge."}'
+      ></div>
+    </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="./widgets/build/SimplePianoRoll.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var drumPads = document.getElementsByClassName("widget-drumpad");
+      Array.from(drumPads).forEach(function (element) {
+        window[element.id] = new SimpleDrumpad();
+        window[element.id].init({
+          widgetId: element.id,
+          keyboard: element.getAttribute("data-keyboard"),
+          kit: JSON.parse(element.getAttribute("data-kit")),
+          recorder: window[element.getAttribute("data-recorder")],
+          tips: JSON.parse(element.getAttribute("data-tips") || "{}"),
+          tip: element.getAttribute("data-tip"),
+          lang: JSON.parse(element.getAttribute("data-lang")),
+        });
+      });
+
+      var sequencers = document.getElementsByClassName("widget-pianoroll");
+      Array.from(sequencers).forEach(function (element) {
+        window[element.id] = new SimplePianoRoll();
+        window[element.id].init({
+          widgetId: element.id,
+          material: element.getAttribute("data-material"),
+          tempo: element.getAttribute("data-tempo"),
+          onPlay: element.getAttribute("data-onplay"),
+          targetState: element.getAttribute("data-targetstate"),
+          defaultState: element.getAttribute("data-defaultstate"),
+          lanes: JSON.parse(element.getAttribute("data-lanes")),
+          beats: parseInt(element.getAttribute("data-beats"), 10),
+          gridSize: parseInt(element.getAttribute("data-gridsize"), 10),
+          allowResize: element.getAttribute("data-allowresize") === "true",
+          disableExport: element.getAttribute("data-disableexport"),
+          instrument: JSON.parse(element.getAttribute("data-instrument")),
+          showTempoSlider: element.getAttribute("data-showtemposlider"),
+          showRootChooser: element.getAttribute("data-showrootchooser"),
+          showScaleChooser: element.getAttribute("data-showscalechooser"),
+          availableScales: element.getAttribute("data-availablescales"),
+          defaultScale: element.getAttribute("data-defaultscale"),
+          defaultRoot: element.getAttribute("data-defaultroot"),
+          defaultOctave: element.getAttribute("data-defaultoctave"),
+          defaultOctaveCount: element.getAttribute("data-defaultoctavecount"),
+          recorder: window[element.getAttribute("data-recorder")],
+          exporter: EXPORTER,
+          tip: element.getAttribute("data-tip"),
+          tips: JSON.parse(element.getAttribute("data-tips")),
+          highlightedLanes: JSON.parse(element.getAttribute("data-highlightedlanes")),
+          lang: JSON.parse(element.getAttribute("data-lang")),
+        });
+      });
+    });
+  </script>
+  <script defer src="../shared/engineering-sandbox.js"></script>
+  <script defer src="../shared/public-footer.js"></script>
+</body>
+</html>

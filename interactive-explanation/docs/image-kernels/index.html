@@ -8,20 +8,25 @@
     name="description"
     content="Provenance, parity notes, and implementation references for the local image-kernels replica."
   >
+  <meta name="robots" content="noindex,follow">
+  <meta property="og:title" content="Image Kernels Replica Docs">
+  <meta property="og:description" content="Provenance, parity notes, and implementation references for the local image-kernels replica.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kohnnn.github.io/interactive-explanation/docs/image-kernels/">
+  <link rel="canonical" href="https://kohnnn.github.io/interactive-explanation/docs/image-kernels/">
   <link rel="icon" type="image/png" href="../../favicon.png">
+  <script src="../../shared/theme-init.js"></script>
   <link rel="stylesheet" href="../../shared/site.css">
 </head>
 <body data-page-type="docs" data-parity-url="./parity.json">
   <main class="site-page docs-page">
-    <a class="back-link" href="../../">Back to replicas</a>
+    <a class="back-link" href="../../">Back to Atlas</a>
 
     <header class="hero hero-compact">
       <p class="eyebrow">Replica documentation</p>
       <h1>Image Kernels</h1>
       <p class="lead">
-        Local route <code>/interactive-explanation/image-kernels/</code> keeps the published Setosa
-        EV image-processing walkthrough while moving provenance and maintenance notes out of the
-        public page body.
+        Local route <code>/interactive-explanation/image-kernels/</code> now layers the lighter Engineering Sandbox essay shell, local font stack, play-first framing, and generated chapter navigation onto the published EV explainer while keeping the original interactive runtime and public provenance limited to the shared footer.
       </p>
       <div class="action-row">
         <a class="action-link" href="../../image-kernels/">Open replica</a>
@@ -45,6 +50,7 @@
           <li>Live original verified against <code>https://setosa.io/ev/image-kernels/</code> on 2026-03-14.</li>
           <li>The local copy removes EV branding, creator bylines, share widgets, newsletter prompts, analytics, and comments.</li>
           <li>The public surface still includes the upload and live-video playground because the published page ships those controls.</li>
+                  <li>The route now also loads the lighter Engineering Sandbox shell so the page gains local typography, editorial framing, and chapter navigation without displacing the EV chart layouts.</li>
         </ul>
       </article>
 
@@ -54,6 +60,7 @@
           <li><code>../ev/scripts/d3.js</code>, <code>angular.js</code>, and <code>common.js</code> are reused as the main runtime layer.</li>
           <li><code>../ev/scripts/exif.js</code> is vendored locally so uploaded-image orientation handling does not depend on a remote runtime.</li>
           <li><code>image-kernels/style.css</code> adds only narrow-screen overflow and control-layout helpers.</li>
+                  <li><code>../../shared/engineering-sandbox.css</code> and <code>../../shared/engineering-sandbox.js</code> provide the local font stack, chapter rail, and mobile jump bar used by this essay rollout.</li>
         </ul>
       </article>
 
@@ -73,6 +80,7 @@
           <li>The public route no longer shows EV branding, creator links, share widgets, newsletter forms, analytics, or comments.</li>
           <li>The vendored script now loads its default images from <code>./resources/</code> so the page works under the GitHub Pages-style subpath.</li>
           <li>The route keeps the original upload and live-video copy instead of narrowing the surface, because that is part of the published page.</li>
+                  <li>The opening framing and section transitions were lightly rewritten for the Engineering Sandbox rollout, but the original EV interactions and formulas remain intact.</li>
         </ul>
       </article>
     </section>

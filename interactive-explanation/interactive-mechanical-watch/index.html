@@ -24,6 +24,7 @@
   <script defer src="../shared/mechanical-watch/js/base.js"></script>
   <script defer src="../shared/mechanical-watch/js/watch.js"></script>
   <script defer src="./js/legacy-watch-accessibility.js"></script>
+  <script defer src="./js/watch-parts.js"></script>
   <script defer src="./js/exploded-view.js"></script>
   <script type="module" src="./js/exploded-view-three.js"></script>
   <script defer src="../shared/engineering-sandbox.js"></script>
@@ -1089,27 +1090,44 @@
               really puts in perspective how small all the parts we&rsquo;ve talked about are.</p>
             <h1 id="from-pixels-to-resin">From Pixels to Resin<a href="#from-pixels-to-resin" class="hanchor"
                 aria-label="Anchor"><img src="../shared/mechanical-watch/images/anchor.png" width="16px" height="8px" alt="" /></a> </h1>
-            <p>Everything above lives as math and triangles. Inspect each component&rsquo;s mechanical role first, then
-              treat the exploded stack as a manufacturing placement problem rather than an operating watch. Designer
-              Lars Ellertsen set out to suspend a complete mechanical watch in clear resin with every component frozen
-              mid-air, as if the render had been poured into a block. What looks like a single confident pour is really
-              a long chain of prototyping failures, each one teaching the next.</p>
+            <p>Everything above lives as math and triangles. This technical-museum view separates the movement into
+              seventy-one inspectable assemblies and components, then runs the power train continuously so the ratios
+              remain visible even while the watch is exploded. Designer Lars Ellertsen set out to suspend a complete
+              mechanical watch in clear resin with every component frozen mid-air, as if the render had been poured into
+              a block. What looks like a single confident pour is really a long chain of prototyping failures, each one
+              teaching the next.</p>
             <section class="exploded-watch" aria-labelledby="exploded-watch-title">
               <div class="exploded-watch__header">
-                <p class="exploded-watch__eyebrow">Interactive exploded view</p>
-                <h2 id="exploded-watch-title">Select a component to inspect its role in the stack.</h2>
-                <p>Set the explosion depth, inspect a component from the list, and optionally orbit or zoom the 3D view. The component list is the primary inspection path when orbiting is unavailable or undesired. Each part uses the movement's original binary geometry where available, mapped into power, train, escapement, balance, keyless works, automatic winding, display, and casing systems.</p>
+                <p class="exploded-watch__eyebrow">Technical museum &middot; 71 components</p>
+                <h2 id="exploded-watch-title">Run the movement, separate every layer, and inspect the mechanism.</h2>
+                <p>The view combines the movement&rsquo;s canonical meshes with generated teeth, pinions, staffs, screws,
+                  dial markers, springs, case, and crystal. Orbit or zoom the 3D view, or use the complete component list
+                  as the primary keyboard and assistive-technology inspection path.</p>
+                <ol class="exploded-watch__firstrun" aria-label="Where to start with the exploded view">
+                  <li>Drag <strong>Explosion depth</strong> to 0 to reassemble the movement into one stack, then back up to separate the layers again.</li>
+                  <li>Pick a component from the list to read which system it belongs to and what it does.</li>
+                  <li>Leave the mechanism running at 8&times; and watch which separated layers actually move.</li>
+                </ol>
               </div>
               <div class="exploded-watch__stage" data-exploded-watch>
                 <div id="exploded-watch-diagram" class="exploded-watch__canvas" data-exploded-canvas aria-label="Interactive exploded mechanical watch component diagram"></div>
                 <div class="exploded-watch__panel">
+                  <div class="exploded-watch__transport">
+                    <button class="exploded-watch__play" type="button" data-exploded-play aria-pressed="true">Pause mechanism</button>
+                    <div class="exploded-watch__speed" data-exploded-speed role="radiogroup" aria-label="Simulation speed">
+                      <button type="button" role="radio" data-speed="1" aria-checked="false" tabindex="-1">1&times;</button>
+                      <button type="button" role="radio" data-speed="8" aria-checked="true" class="is-selected" tabindex="0">8&times;</button>
+                      <button type="button" role="radio" data-speed="60" aria-checked="false" tabindex="-1">60&times;</button>
+                    </div>
+                  </div>
                   <label class="exploded-watch__range-label" for="exploded-depth">Explosion depth</label>
                   <input id="exploded-depth" data-exploded-depth type="range" min="0" max="100" value="74" aria-controls="exploded-watch-diagram" aria-valuetext="74 percent exploded">
+                  <p class="exploded-watch__part-count">71 selectable components &middot; canonical and generated geometry</p>
                   <div class="exploded-watch__parts" data-exploded-parts role="group" aria-label="Watch components"></div>
-                  <article id="exploded-watch-detail" class="exploded-watch__detail" data-exploded-detail aria-live="polite"></article>
+                  <article id="exploded-watch-detail" class="exploded-watch__detail" data-exploded-detail aria-live="polite" aria-atomic="true"></article>
                 </div>
               </div>
-              <p class="exploded-watch__caption">The target: every watch subsystem frozen where an exploded diagram would place it, then translated into real suspension points for resin casting.</p>
+              <p class="exploded-watch__caption">The target: a working movement separated into readable systems, then frozen at coordinates that can become real suspension points for resin casting.</p>
             </section>
             <p>The first problem is gravity. Parts want to sink, drift, and clump while the resin is still liquid, so the
               exploded geometry has to be physically scaffolded before a single drop is poured.</p>

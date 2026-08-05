@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ableton Learning Synths: Get started Replica Docs</title>
+  <meta name="description" content="Provenance, parity notes, and implementation references for the local ableton-learning-synths-get-started route.">
+  <meta name="robots" content="noindex,follow">
+  <meta property="og:title" content="Ableton Learning Synths: Get started Replica Docs">
+  <meta property="og:description" content="Provenance, parity notes, and implementation references for the local ableton-learning-synths-get-started route.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kohnnn.github.io/interactive-explanation/docs/ableton-learning-synths-get-started/">
+  <link rel="canonical" href="https://kohnnn.github.io/interactive-explanation/docs/ableton-learning-synths-get-started/">
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <script src="../../shared/theme-init.js"></script>
+  <link rel="stylesheet" href="../../shared/site.css">
+</head>
+<body data-page-type="docs" data-parity-url="./parity.json">
+  <main class="site-page docs-page">
+    <a class="back-link" href="../../">Back to Atlas</a>
+
+    <header class="hero hero-compact">
+      <p class="eyebrow">Replica documentation</p>
+      <h1>Ableton Learning Synths: Get started</h1>
+      <p class="lead">
+        Local route <code>/interactive-explanation/ableton-learning-synths-get-started/</code> vendors Ableton's
+        opening Learning Synths lesson, keeps the archived RNBO runtime from shared scripts, and
+        preserves the playable XY synth pad with local lesson assets.
+      </p>
+      <div class="action-row">
+        <a class="action-link" href="../../ableton-learning-synths-get-started/">Open replica</a>
+        <a class="action-link secondary" href="https://learningsynths.ableton.com/en/get-started" target="_blank" rel="noreferrer">Open original</a>
+      </div>
+      <p class="meta-line">
+        Upstream snapshot: <code>lesson runtime and media inventory verified 2026-03-22</code><br>
+        Source family: <code>learningsynths.ableton.com get-started lesson</code>
+      </p>
+    </header>
+
+    <section class="note-grid">
+      <article class="note-section">
+        <h2>Source snapshot</h2>
+        <p>
+          Vendored from Ableton's opening Learning Synths lesson at
+          <code>learningsynths.ableton.com/en/get-started</code>. The local route keeps the published
+          lesson shell and the RNBO-backed synth runtime from shared scripts so the playable XY synth
+          pad boots from local assets.
+        </p>
+        <ul class="plain-list">
+          <li>Lesson runtime and media inventory verified 2026-03-22.</li>
+          <li>The route forces the stable low-quality audio mode at boot so the archived lesson mounts consistently from local assets.</li>
+          <li>The archive preserves the published runtime rather than rebuilding the synth pad in a custom stack.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Asset handoff</h2>
+        <ul class="plain-list">
+          <li><code>shared/ableton-learning-synths-musiclab.js</code> plus <code>shared/ableton-learning-synths-archive.js</code> drive the lesson shell and RNBO runtime.</li>
+          <li>Route-local inventory: 12 font files, 4 shared sound assets, 5 lesson WAVs, 4 GLB models, 6 text-payload JSON files, 2 preset catalogs, and 1 RNBO patch.</li>
+          <li>Assets such as <code>content/assets/models/synth003b.glb</code> and the lesson WAVs are served from relative paths for subpath hosting.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Known deviations</h2>
+        <ul class="plain-list">
+          <li>A shared footer carries the single original-page reference link; upstream lesson chrome is removed from the public body.</li>
+          <li>Ableton feedback, privacy, language-switch, analytics, and cookie surfaces are stripped from the public route.</li>
+          <li>Localizable chapter links are rewritten to shipped local synth routes after the React shell mounts so the family stays internally navigable.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Validation guidance</h2>
+        <ul class="plain-list">
+          <li><code>node tools/check-public-surface.mjs .</code> keeps the public route footer-only.</li>
+          <li><code>node tools/smoke-bundle.mjs . --group music</code> (or <code>--route ableton-learning-synths-get-started</code>) verifies local script loading, the XY control update path, and note-trigger state changes.</li>
+          <li>Smoke also asserts the expected local asset counts and the no-remote-playable-media guard before interaction checks.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="note-section">
+      <div class="section-heading">
+        <h2>Parity checklist</h2>
+        <span data-module-count class="meta-pill">Loading...</span>
+      </div>
+      <div class="parity-list" data-parity-list>
+        <div class="empty-state">Loading parity contract...</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../../shared/site.js"></script>
+</body>
+</html>

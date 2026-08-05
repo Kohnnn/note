@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ableton Learning Synths: How synths make sound Replica Docs</title>
+  <meta name="description" content="Provenance, parity notes, and implementation references for the local ableton-learning-synths-how-synths-make-sound route.">
+  <meta name="robots" content="noindex,follow">
+  <meta property="og:title" content="Ableton Learning Synths: How synths make sound Replica Docs">
+  <meta property="og:description" content="Provenance, parity notes, and implementation references for the local ableton-learning-synths-how-synths-make-sound route.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kohnnn.github.io/interactive-explanation/docs/ableton-learning-synths-how-synths-make-sound/">
+  <link rel="canonical" href="https://kohnnn.github.io/interactive-explanation/docs/ableton-learning-synths-how-synths-make-sound/">
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <script src="../../shared/theme-init.js"></script>
+  <link rel="stylesheet" href="../../shared/site.css">
+</head>
+<body data-page-type="docs" data-parity-url="./parity.json">
+  <main class="site-page docs-page">
+    <a class="back-link" href="../../">Back to Atlas</a>
+
+    <header class="hero hero-compact">
+      <p class="eyebrow">Replica documentation</p>
+      <h1>Ableton Learning Synths: How synths make sound</h1>
+      <p class="lead">
+        Local route <code>/interactive-explanation/ableton-learning-synths-how-synths-make-sound/</code> vendors
+        Ableton's oscillator lesson, keeps the archived Learning Synths runtime from shared scripts,
+        and preserves the opening waveform slider scene with local lesson assets.
+      </p>
+      <div class="action-row">
+        <a class="action-link" href="../../ableton-learning-synths-how-synths-make-sound/">Open replica</a>
+        <a class="action-link secondary" href="https://learningsynths.ableton.com/en/oscillators/how-synths-make-sound" target="_blank" rel="noreferrer">Open original</a>
+      </div>
+      <p class="meta-line">
+        Upstream snapshot: <code>lesson runtime and media inventory verified 2026-03-22</code><br>
+        Source family: <code>learningsynths.ableton.com oscillator lesson</code>
+      </p>
+    </header>
+
+    <section class="note-grid">
+      <article class="note-section">
+        <h2>Source snapshot</h2>
+        <p>
+          Vendored from Ableton's oscillator lesson at
+          <code>learningsynths.ableton.com/en/oscillators/how-synths-make-sound</code>. The local route
+          keeps the published lesson shell and oscillator runtime from shared scripts so the
+          slider-driven waveform scene boots from local assets.
+        </p>
+        <ul class="plain-list">
+          <li>The archive stays on the published runtime instead of rebuilding the oscillator examples in a custom synth UI.</li>
+          <li>The opening slider scene is treated as parity-critical because it is the clearest oscillator control surface in the lesson.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Asset handoff</h2>
+        <ul class="plain-list">
+          <li><code>shared/ableton-learning-synths-musiclab.js</code> plus <code>shared/ableton-learning-synths-archive.js</code> drive the lesson shell and oscillator runtime.</li>
+          <li>Route-local media matches the shared Learning Synths bundle: waveform visuals, text payloads, RNBO patch data, GLB models, and images.</li>
+          <li>Assets such as <code>content/assets/models/bee-scene.glb</code> and <code>content/texts/en/lesson-visualizations.json</code> stay route-local so the lesson does not fall back to the upstream root path.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Known deviations</h2>
+        <ul class="plain-list">
+          <li>A shared footer carries the single original-page reference link; the upstream lesson shell is stripped from the public body.</li>
+          <li>Ableton feedback, privacy, language-switch, analytics, and cookie surfaces are removed from the public route.</li>
+          <li>Local chapter links are rewritten after mount so the lesson stays within the shipped synth family.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Validation guidance</h2>
+        <ul class="plain-list">
+          <li><code>node tools/check-public-surface.mjs .</code> keeps the public route footer-only.</li>
+          <li><code>node tools/smoke-bundle.mjs . --group music</code> (or <code>--route ableton-learning-synths-how-synths-make-sound</code>) verifies local script loading, the slider fill and synth macro updates, and the active note state.</li>
+          <li>Smoke asserts the expected local asset counts and keeps the no-remote-playable-media guard clean after lesson boot.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="note-section">
+      <div class="section-heading">
+        <h2>Parity checklist</h2>
+        <span data-module-count class="meta-pill">Loading...</span>
+      </div>
+      <div class="parity-list" data-parity-list>
+        <div class="empty-state">Loading parity contract...</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../../shared/site.js"></script>
+</body>
+</html>

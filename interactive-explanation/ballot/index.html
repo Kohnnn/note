@@ -4,6 +4,7 @@
 
 	<!-- Meta -->
 	<title>To Build a Better Ballot</title>
+	<meta name="description" content="Voting-systems explainer with draggable electorates, counting flows, spoiler scenarios, and a sandbox.">
 	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 	<meta content="utf-8" http-equiv="encoding">
 	<meta charset="utf-8">
@@ -25,11 +26,10 @@
 	<!-- Open Graph data -->
 	<meta property="og:title" content="To Build a Better Ballot">
 	<meta property="og:type" content="website">
-	<meta property="og:url" content="./">
+  <meta property="og:url" content="https://kohnnn.github.io/interactive-explanation/ballot/">
 	<meta property="og:image" content="social/thumbnail.png">
 	<meta property="og:description" content="an interactive guide to alternative voting systems">
-	<link rel="canonical" href="./">
-
+  <link rel="canonical" href="https://kohnnn.github.io/interactive-explanation/ballot/">
 	<!-- Styles -->
 	<link rel="stylesheet" type="text/css" href="css/index.css">
 	<base target="_blank">
@@ -37,6 +37,7 @@
 </head>
 <body data-reference-url="https://ncase.me/ballot/">
 
+<main>
 <!-- - - - - - - - - 
 
 SPLASH!
@@ -44,8 +45,8 @@ SPLASH!
 - - - - - - - - - -->
 
 <div id="splash" class="banner">
-	<iframe id="splash_iframe" src="splash/splash.html" width="1500" height="400" scrolling="no"></iframe>
-	<img src="img/logo.png"/>
+	<iframe id="splash_iframe" src="splash/splash.html" width="1500" height="400" scrolling="no" title="Better Ballot introduction"></iframe>
+	<img src="img/logo.png" alt=""/>
 </div>
 
 </div>
@@ -74,7 +75,7 @@ THE SPOILER EFFECT
 	<p>No, this is not about the 2016 U.S. election. Not <em>just</em> that, anyway.</p>
 
 	<p>First, I need to explain a weird glitch in our voting system.
-	Let's say there's two candidates, Steven Square <img src="play/img/square.png"/> and Tracy Triangle <img src="play/img/triangle.png"/>, on a couple political axes. (for example, &ldquo;left vs. right&rdquo; and &ldquo;globalist vs. nationalist&rdquo;) Let's also say there's a voter <img src="play/img/voter.png"/> who simply votes for whoever's political position is closest. What would that look like?</p>
+	Let's say there's two candidates, Steven Square <img src="play/img/square.png" alt=""/> and Tracy Triangle <img src="play/img/triangle.png" alt=""/>, on a couple political axes. (for example, &ldquo;left vs. right&rdquo; and &ldquo;globalist vs. nationalist&rdquo;) Let's also say there's a voter <img src="play/img/voter.png" alt=""/> who simply votes for whoever's political position is closest. What would that look like?</p>
 
 </div>
 <div class="sim-intro" id="click-drag-candidates-voter">
@@ -82,7 +83,7 @@ THE SPOILER EFFECT
 	<p class="caption" style="margin-top:30px">
 		<b><span style="font-size:2.5em;">click &amp; drag</span><br>the candidates and the voter:</b>
 	</p>
-	<iframe src="play/model1.html" width="305" height="360" scrolling="no"></iframe>
+	<iframe src="play/model1.html" width="305" height="360" scrolling="no" title="One voter election model" loading="lazy"></iframe>
 
 </div>
 <div class="words">
@@ -97,12 +98,12 @@ THE SPOILER EFFECT
 	<p class="caption">
 		<b>drag the candidates &amp; voter<span class="underline">s</span> around.<br>(to move voters, drag the <em>middle</em> of the crowd)<br>watch how that changes the election:</b>
 	</p>
-	<iframe src="play/model2.html" width="320" height="400" scrolling="no"></iframe>
+	<iframe src="play/model2.html" width="320" height="400" scrolling="no" title="Many voter election model" loading="lazy"></iframe>
 
 </div>
 <div class="words">
 
-	<p>Now let's consider a different election. Say Tracy Triangle is <em>already</em> beating Steven Square in the polls, and a third candidate, Henry Hexagon <img src="play/img/hexagon.png"/>, sees this. (Hexagon's supporters like how he tackles problems from more angles) Inspired by her success, Hexagon swoops in and takes a political position close to Triangle's.</p>
+	<p>Now let's consider a different election. Say Tracy Triangle is <em>already</em> beating Steven Square in the polls, and a third candidate, Henry Hexagon <img src="play/img/hexagon.png" alt=""/>, sees this. (Hexagon's supporters like how he tackles problems from more angles) Inspired by her success, Hexagon swoops in and takes a political position close to Triangle's.</p>
 
 	<p>Now, you'd think giving the voters more of what they want should result in a <em>better</em> choice, or at least, not result in a <em>worse</em> choice, right? Well...</p>
 
@@ -111,11 +112,11 @@ THE SPOILER EFFECT
 
 	<p class="caption">
 		<b>
-		at first, <img src="play/img/triangle.png"> beats <img src="play/img/square.png">.<br>
-		drag <img src="play/img/hexagon.png"> to <i>just under</i> <img src="play/img/triangle.png">,<br>
+		at first, <img src="play/img/triangle.png" alt=""> beats <img src="play/img/square.png" alt="">.<br>
+		drag <img src="play/img/hexagon.png" alt=""> to <i>just under</i> <img src="play/img/triangle.png" alt="">,<br>
 		and see what happens:</b>
 	</p>
-	<iframe src="play/model3.html" width="320" height="460" scrolling="no"></iframe>
+	<iframe src="play/model3.html" width="320" height="460" scrolling="no" title="Spoiler effect election model" loading="lazy"></iframe>
 
 </div>
 <div class="words">
@@ -150,7 +151,7 @@ THE ALTERNATIVE BALLOTS
 - - - - - - - - - -->
 
 <div class="banner">
-	<img src="img/part1.png"/>
+	<img src="img/part1.png" alt=""/>
 </div>
 <div class="words" id="the-alternative-ballots">
 
@@ -174,7 +175,7 @@ THE ALTERNATIVE BALLOTS
 	<h2 class="ballot_title" style="margin-bottom: 0.2em;">FIRST PAST THE POST (FPTP)</h2>
 	<p class="ballot_caption">same as before. click &amp; drag<br>the candidates and voter</p>
 
-	<iframe src="play/ballot1.html" width="655" height="256" scrolling="no"></iframe>
+	<iframe src="play/ballot1.html" width="655" height="256" scrolling="no" title="First past the post ballot" loading="lazy"></iframe>
 </div>
 <div class="words">
 
@@ -189,7 +190,7 @@ THE ALTERNATIVE BALLOTS
 	<h2 class="ballot_title" style="margin-bottom: 0.15em;">RANKED VOTING</h2>
 	<p class="ballot_caption">again, click &amp; drag</p>
 
-	<iframe src="play/ballot2.html" width="655" height="256" scrolling="no"></iframe>
+	<iframe src="play/ballot2.html" width="655" height="256" scrolling="no" title="Ranked voting ballot" loading="lazy"></iframe>
 
 </div>
 <div class="words">
@@ -239,7 +240,7 @@ THE ALTERNATIVE BALLOTS
 	<h2 class="ballot_title" style="margin-bottom: 0.15em;">APPROVAL VOTING</h2>
 	<p class="ballot_caption">yup, stiiiiill click &amp; drag</p>
 
-	<iframe src="play/ballot3.html" width="655" height="256" scrolling="no"></iframe>
+	<iframe src="play/ballot3.html" width="655" height="256" scrolling="no" title="Approval voting ballot" loading="lazy"></iframe>
 
 </div>
 <div class="words">
@@ -256,7 +257,7 @@ THE ALTERNATIVE BALLOTS
 	<h2 class="ballot_title" style="margin-bottom: 0.15em;">SCORE VOTING</h2>
 	<p class="ballot_caption">you guessed it</p>
 
-	<iframe src="play/ballot4.html" width="655" height="256" scrolling="no"></iframe>
+	<iframe src="play/ballot4.html" width="655" height="256" scrolling="no" title="Score voting ballot" loading="lazy"></iframe>
 
 </div>
 <div class="words">
@@ -277,14 +278,14 @@ HOW DO THE ALTERNATIVES HOLD UP?
 - - - - - - - - - -->
 
 <div class="banner">
-	<img src="img/part2.png"/>
+	<img src="img/part2.png" alt=""/>
 </div>
 <div class="words" id="how-are-the-alternatives">
 	<p>Remember that simulation of the spoiler effect from earlier? Well, here it is again, but now you can switch between the six different voting systems! Here's the &quot;spoiler effect&quot; simulation again. See how different voting systems deal with potential spoilers:</p>
 </div>
 <div class="sim-test">
 	<p class="caption-test">
-	drag <img src="play/img/hexagon.png"> to <em>just under</em> <img src="play/img/triangle.png"> to create a spoiler effect.<br>
+	drag <img src="play/img/hexagon.png" alt=""> to <em>just under</em> <img src="play/img/triangle.png" alt=""> to create a spoiler effect.<br>
 	then compare the 6 different voting systems:
 	<br>
 	<span style="font-weight:bold; font-size:0.8em">
@@ -292,7 +293,7 @@ HOW DO THE ALTERNATIVES HOLD UP?
 	</span>
 	</p>
 
-	<iframe src="play/election1.html" width="800" height="380" scrolling="no"></iframe>
+	<iframe src="play/election1.html" width="800" height="380" scrolling="no" title="Spoiler effect comparison" loading="lazy"></iframe>
 </div>
 <div class="words">
 
@@ -300,29 +301,29 @@ HOW DO THE ALTERNATIVES HOLD UP?
 
 	<p>But, alas. In getting rid of one glitch, some of these alternative voting systems create <em>other</em> glitches – for some, the cure is even worse than the disease.</p>
 
-	<p>For example, here's a sim of Instant Runoff Voting. In the beginning, Tracy Triangle <img src="play/img/triangle.png"/> is already winning, and you're going to move the voters even <em>closer</em> to her. Obviously, if a candidate is already winning an election, and becomes even <em>more</em> popular, they should <em>still</em> win afterwards, right?</p>
+	<p>For example, here's a sim of Instant Runoff Voting. In the beginning, Tracy Triangle <img src="play/img/triangle.png" alt=""/> is already winning, and you're going to move the voters even <em>closer</em> to her. Obviously, if a candidate is already winning an election, and becomes even <em>more</em> popular, they should <em>still</em> win afterwards, right?</p>
 
 	<p>You can probably guess where this is going...</p>
 </div>
 <div class="sim-test" id="drag-voters-towards">
 
 	<p class="caption-test">
-	drag the voters <img src="play/img/voters.png"> <em>slowly</em> up towards <img src="play/img/triangle.png">:
+	drag the voters <img src="play/img/voters.png" alt=""> <em>slowly</em> up towards <img src="play/img/triangle.png" alt="">:
 	</p>
 
-	<iframe src="play/election2.html" width="800" height="380" scrolling="no"></iframe>
+	<iframe src="play/election2.html" width="800" height="380" scrolling="no" title="Instant runoff monotonicity comparison" loading="lazy"></iframe>
 
 </div>
 <div class="words">
 
 	<p>What happened?
-	Originally, <img src="play/img/hexagon.png"/> is eliminated in the first round, so
-	<img src="play/img/triangle.png"/>
-	goes against a weaker <img src="play/img/square.png"/>, and wins.
-	But when you move the voters closer to <img src="play/img/triangle.png"/>,
+	Originally, <img src="play/img/hexagon.png" alt=""/> is eliminated in the first round, so
+	<img src="play/img/triangle.png" alt=""/>
+	goes against a weaker <img src="play/img/square.png" alt=""/>, and wins.
+	But when you move the voters closer to <img src="play/img/triangle.png" alt=""/>,
 	the loser <em>changes!</em>
-	So now, <img src="play/img/square.png"/> is eliminated in the first round,
-	which means <img src="play/img/triangle.png"/> goes against a stronger <img src="play/img/hexagon.png"/>,
+	So now, <img src="play/img/square.png" alt=""/> is eliminated in the first round,
+	which means <img src="play/img/triangle.png" alt=""/> goes against a stronger <img src="play/img/hexagon.png" alt=""/>,
 	and <em>loses</em>.</p>
 
 	<p>Under Instant Runoff, it's possible for a winning candidate to lose, <em>by becoming more popular</em>. What a glitch!</p>
@@ -340,10 +341,10 @@ HOW DO THE ALTERNATIVES HOLD UP?
 <div class="sim-test" id="borda-count-spoiler">
 
 	<p class="caption-test">
-	drag <img src="play/img/hexagon.png"> to <em>just slightly left</em> of <img src="play/img/square.png">:
+	drag <img src="play/img/hexagon.png" alt=""> to <em>just slightly left</em> of <img src="play/img/square.png" alt="">:
 	</p>
 
-	<iframe src="play/election3.html" width="800" height="380" scrolling="no"></iframe>
+	<iframe src="play/election3.html" width="800" height="380" scrolling="no" title="Borda count comparison" loading="lazy"></iframe>
 
 </div>
 <div class="words">
@@ -351,12 +352,12 @@ HOW DO THE ALTERNATIVES HOLD UP?
 	<p>Yup. Borda Count has a <em>reverse</em> spoiler effect. Instead of one good candidate hurting another good candidate by moving closer, with Borda Count, one bad candidate can <em>help</em> another bad candidate by moving closer.</p>
 
 	<p>Here's what happened: at first, some voters ranked
-	<img src="play/img/square.png"/>&gt;<img src="play/img/triangle.png"/>&gt;<img src="play/img/hexagon.png"/>,
-	but when you moved <img src="play/img/hexagon.png"/> closer to <img src="play/img/square.png"/>,
+	<img src="play/img/square.png" alt=""/>&gt;<img src="play/img/triangle.png" alt=""/>&gt;<img src="play/img/hexagon.png" alt=""/>,
+	but when you moved <img src="play/img/hexagon.png" alt=""/> closer to <img src="play/img/square.png" alt=""/>,
 	those voters then <em>swung</em> to ranking
-	<img src="play/img/square.png"/>&gt;<img src="play/img/hexagon.png"/>&gt;<img src="play/img/triangle.png"/>,
-	hurting <img src="play/img/triangle.png"/> enough
-	to make her lose to <img src="play/img/square.png"/>.</p>
+	<img src="play/img/square.png" alt=""/>&gt;<img src="play/img/hexagon.png" alt=""/>&gt;<img src="play/img/triangle.png" alt=""/>,
+	hurting <img src="play/img/triangle.png" alt=""/> enough
+	to make her lose to <img src="play/img/square.png" alt=""/>.</p>
 
 	<p>Still, Borda's not the worst, and at least it's simpler and more transparent than Instant Runoff. But how does Condorcet Method compare? When Condorcet picks a winner, it's always the “theoretically best” winner – but that's <em>when</em> it picks a winner.</p>
 
@@ -368,10 +369,10 @@ HOW DO THE ALTERNATIVES HOLD UP?
 
 	<p class="caption-test">
 	create your own “condorcet cycle”!<br>
-	move the voters <img src="play/img/voters.png"> in such a way that NOBODY wins:
+	move the voters <img src="play/img/voters.png" alt=""> in such a way that NOBODY wins:
 	</p>
 
-	<iframe src="play/election4.html" width="800" height="380" scrolling="no"></iframe>
+	<iframe src="play/election4.html" width="800" height="380" scrolling="no" title="Condorcet cycle comparison" loading="lazy"></iframe>
 
 </div>
 <div class="words">
@@ -415,7 +416,7 @@ HOW DO THE ALTERNATIVES HOLD UP?
 	because it's makin' my eyes bleed:
 	</p>
 
-	<p><img class="real" src="img/comparison.png"></p>
+	<p><img class="real" src="img/comparison.png" alt=""></p>
 
 	<p>
 	Each voting method's results is shown as an ugly-blue bar.
@@ -451,12 +452,12 @@ HOW DO THE ALTERNATIVES HOLD UP?
 	<p class="caption-test">
 	a guesstimated model of the 2016 US election?...<br>
 	<span style="font-weight:100; font-size:0.85em">
-	how Clinton <img src="play/img/square.png"> wins IRV,
-	Trump <img src="play/img/hexagon.png"> wins Score,
-	and Johnson <img src="play/img/triangle.png"> wins Borda??
+	how Clinton <img src="play/img/square.png" alt=""> wins IRV,
+	Trump <img src="play/img/hexagon.png" alt=""> wins Score,
+	and Johnson <img src="play/img/triangle.png" alt=""> wins Borda??
 	</span>
 	</p>
-	<iframe src="play/election5.html" width="800" height="380" scrolling="no"></iframe>
+	<iframe src="play/election5.html" width="800" height="380" scrolling="no" title="2016 election comparison" loading="lazy"></iframe>
 </div>
 <div class="words">
 
@@ -478,7 +479,7 @@ CONCLUSION. OPEN LETTER
 - - - - - - - - - -->
 
 <div class="banner">
-	<img src="img/part3.png"/>
+	<img src="img/part3.png" alt=""/>
 </div>
 <div class="words" id="open-letter">
 
@@ -565,7 +566,7 @@ SANDBOX
 <div id="sandbox">
 	<div class="sim-sandbox">
 		<h1 class="caption-test" style="margin: 30px 0 15px 0;">SANDBOX MODE! <a href="sandbox">(link to <em>just</em> this)</a></h1>
-		<iframe src="sandbox/sandbox.html" width="802" height="508" scrolling="no"></iframe>
+		<iframe src="sandbox/sandbox.html" width="802" height="508" scrolling="no" title="Voting system sandbox" loading="lazy"></iframe>
 	</div>
 	<div class="words">
 		<p>
@@ -661,6 +662,7 @@ PART V: THE END
 
 </div>
 
+</main>
 </body>
 <script src="js/index.js"></script>
 <script>

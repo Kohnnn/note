@@ -1,0 +1,19 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Agent scratch and temp snapshots
+.codex-temp/
+tmp_*
+
+# OS and editor noise
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Stray Windows reserved-device file created by a bad shell redirect; git cannot index it
+nul
+
+# Node
+node_modules/

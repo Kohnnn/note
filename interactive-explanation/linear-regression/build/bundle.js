@@ -34235,11 +34235,13 @@ var app = (function () {
     }
 
     const app = new App({
-      target: document.body,
+      target: document.getElementById("app"),
       //   intro: true,
     });
 
+    document.querySelector("[data-runtime-fallback]")?.remove();
+    document.querySelector("main[data-runtime-main]")?.setAttribute("aria-busy", "false");
     return app;
 
 })();
-//# sourceMappingURL=bundle.js.map
+

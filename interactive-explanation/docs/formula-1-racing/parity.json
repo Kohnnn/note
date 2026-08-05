@@ -1,0 +1,178 @@
+[
+  {
+    "moduleId": "engineering-sandbox-longform-shell",
+    "originalBehavior": "The route should remain a longform Engineering Sandbox article with a shared hero, generated story rail, and local provenance handling.",
+    "localStatus": "The route still uses the shared Engineering Sandbox shell while keeping all public teaching content local to the Formula 1 route.",
+    "sourceFiles": [
+      "../../formula-1-racing/index.html",
+      "../../shared/engineering-sandbox.css",
+      "../../shared/engineering-sandbox.js",
+      "../../shared/public-footer.js"
+    ],
+    "notes": [
+      "The shell provides the longform wrapper and generated chapter navigation.",
+      "Public provenance remains neutral because the route is an original local build."
+    ],
+    "evidence": [
+      "The route hero, generated chapter rail, and mobile chapter navigation are mounted by the shared shell.",
+      "The public route still uses neutral provenance handling rather than an upstream reference page."
+    ]
+  },
+  {
+    "moduleId": "bartosz-family-base-runtime",
+    "originalBehavior": "The route should use the Bartosz-family base runtime for shared controls and math utilities, with the file kept unmodified.",
+    "localStatus": "The route now ships a local copy of base.js and base.css so sliders, segmented controls, touch handlers, ArcBall rotation, and shared math helpers are available inside the Formula 1 route itself.",
+    "sourceFiles": [
+      "../../formula-1-racing/js/base.js",
+      "../../formula-1-racing/css/base.css",
+      "../../formula-1-racing/index.html"
+    ],
+    "notes": [
+      "The local base runtime is intended to stay unmodified unless the route explicitly forks that engine.",
+      "The Formula 1 route uses the runtime directly rather than only imitating its control patterns."
+    ],
+    "evidence": [
+      "The route head now loads ./js/base.js and ./css/base.css before the route-specific runtime.",
+      "The overview scene uses ArcBall rotation and the route controls use Slider and SegmentedControl instances from the base runtime."
+    ]
+  },
+  {
+    "moduleId": "procedural-canvas-scenes",
+    "originalBehavior": "The route should feel closer to the Bartosz family by drawing key scenes procedurally instead of relying on static infographic panels.",
+    "localStatus": "The route now renders the overview, airflow, front-wing, floor, rear-wing, chassis, power, tyre, braking, track, racecraft, setup, weather, pit, and lap scenes procedurally on canvas, with the overview and aero chapters pushed toward fuller pseudo-3D geometry.",
+    "sourceFiles": [
+      "../../formula-1-racing/index.html",
+      "../../formula-1-racing/js/f1.js",
+      "../../formula-1-racing/css/f1.css"
+    ],
+    "notes": [
+      "The drawings are explanatory and stylized rather than scan-based or model-import-based.",
+      "The route uses procedural silhouettes, animated flow lines, shaded bands, and dynamic traces to make the scenes feel more alive.",
+      "Recent updates increased the depth and lighting of the overview and aero chapters so they read less like flat dashboards and more like procedural pseudo-3D scenes."
+    ],
+    "evidence": [
+      "Each chapter scene mounts through a drawer_container instead of static metric-card dashboards.",
+      "The route runtime draws and repaints scene state directly on canvas in response to base-runtime controls."
+    ]
+  },
+  {
+    "moduleId": "formula-1-system-state-sync",
+    "originalBehavior": "Track, setup, floor posture, power, tyre, braking, and weather decisions should connect back into a shared lap-time story rather than living as isolated widgets.",
+    "localStatus": "The route keeps a shared Formula 1 state model so track presets, setup sliders, live floor posture, live tyre condition, braking balance, power maps, and weather propagate into the lap-builder scene and chapter summaries.",
+    "sourceFiles": [
+      "../../formula-1-racing/js/f1.js",
+      "../../formula-1-racing/index.html"
+    ],
+    "notes": [
+      "Track presets change setup, tyre, power, and lap-plan defaults together.",
+      "The live floor controls model the platform during the lap while setup ride height remains the selected baseline.",
+      "Pit timing remains a separate race-strategy calculation because the final scene models one lap rather than a stint or race."
+    ],
+    "evidence": [
+      "Selecting a new track preset updates setup sliders, tyre compound, power mode, power bias, and lap plan together.",
+      "Changing live floor ride height or pitch updates floor health, track-weighted sector scores, the speed trace, and the final lap caption.",
+      "Changing tyre compound, temperature, load, or stint progress updates tyre health, track-weighted sector scores, speed and braking traces, and the final lap caption.",
+      "Changing brake bias or energy recovery updates braking stability, brake-demand-weighted sector scores, speed and braking traces, and the final lap caption.",
+      "Weather changes the lap model while pit state remains confined to the pit-strategy scene and caption."
+    ]
+  },
+  {
+    "moduleId": "floor-to-lap-causality",
+    "originalBehavior": "The Floor and Diffuser chapter should show why platform posture matters and carry that consequence into the final lap rather than ending at a local animation.",
+    "localStatus": "Named ride-height and pitch controls feed one computeFloorState result for suction, stability, risk, sector loss, trace shape, and the final floor contribution.",
+    "sourceFiles": [
+      "../../formula-1-racing/index.html",
+      "../../formula-1-racing/css/f1.css",
+      "../../formula-1-racing/js/f1.js",
+      "../../tools/smoke-bundle.mjs"
+    ],
+    "notes": [
+      "Track-specific weights make floor posture matter most on high-speed circuits and sectors.",
+      "The result is deliberately explanatory rather than telemetry-grade, CFD-derived, or suspension-simulated.",
+      "Tyre condition now has a separate attributed loss so floor and tyre explanations do not overwrite each other."
+    ],
+    "evidence": [
+      "The floor scene and caption consume the same computed health state as the lap model.",
+      "The lap canvas labels all three sector deltas and the lap caption identifies the floor-attributed loss.",
+      "Focused smoke drives live ride height to its keyboard maximum and verifies changed floor and lap captions, high platform risk, and nonzero floor loss."
+    ]
+  },
+  {
+    "moduleId": "tyre-to-lap-causality",
+    "originalBehavior": "The Tyres chapter should explain how compound, thermal state, load, and stint wear become lap performance rather than ending at a local tyre animation.",
+    "localStatus": "One computeTyreState result now drives the tyre scene, condition label, track-weighted sector loss, speed and braking traces, and tyre-attributed lap loss.",
+    "sourceFiles": [
+      "../../formula-1-racing/index.html",
+      "../../formula-1-racing/js/f1.js",
+      "../../tools/smoke-bundle.mjs"
+    ],
+    "notes": [
+      "The bounded grip penalty activates below the model's usable grip threshold and is weighted by each circuit's sector demands.",
+      "The result is a teaching model rather than telemetry, a carcass-temperature solver, or a full tyre-energy simulation.",
+      "Pit timing remains outside this single-lap model because it describes race strategy rather than one lap."
+    ],
+    "evidence": [
+      "The tyre scene and lap model consume the same compound, temperature, load, stint, wear, grip, and condition state.",
+      "The final lap caption reports tyre-attributed loss independently from floor-attributed loss.",
+      "Focused smoke drives tyre temperature to its keyboard maximum and verifies overheating plus nonzero tyre-attributed lap loss."
+    ]
+  },
+  {
+    "moduleId": "braking-to-lap-causality",
+    "originalBehavior": "The Braking chapter should explain how bias and energy recovery alter stability and carry that consequence into the final lap rather than ending at a local load-transfer animation.",
+    "localStatus": "One computeBrakeState result now drives the braking scene, authority and stability labels, brake-demand-weighted sector loss, speed and braking traces, and brake-attributed lap loss.",
+    "sourceFiles": [
+      "../../formula-1-racing/index.html",
+      "../../formula-1-racing/js/f1.js",
+      "../../tools/smoke-bundle.mjs"
+    ],
+    "notes": [
+      "Sector weights derive from each circuit's existing brake-demand trace instead of adding another circuit-specific table.",
+      "Entry speed remains scene context; brake bias and energy recovery determine the attributed stability penalty.",
+      "The result is a teaching model rather than telemetry, a brake-by-wire controller, or a tyre-lock simulation."
+    ],
+    "evidence": [
+      "The braking scene, chapter caption, and lap model consume the same authority, rear-rotation, stability, penalty, and condition state.",
+      "The final lap caption reports brake-attributed loss independently from floor- and tyre-attributed losses.",
+      "Focused smoke drives energy recovery to its keyboard maximum and verifies compromised braking plus nonzero brake-attributed lap loss."
+    ]
+  },
+  {
+    "moduleId": "lap-contribution-labels",
+    "originalBehavior": "The final lap canvas should make independently attributed floor, tyre, and braking losses visible without forcing readers to infer them from trace shape or prose alone.",
+    "localStatus": "The existing lap canvas now renders one compact contribution row for live floor posture, tyre condition, and braking balance while retaining sector deltas, total delta, and the three traces.",
+    "sourceFiles": [
+      "../../formula-1-racing/js/f1.js",
+      "../../tools/smoke-bundle.mjs"
+    ],
+    "notes": [
+      "The row reuses computeLapState outputs and does not introduce another scene, state model, or attribution calculation.",
+      "The mobile canvas uses shorter labels and tighter type while preserving all three values at 320px."
+    ],
+    "evidence": [
+      "Floor, tyre, and braking labels repaint with the same values exposed by the final lap caption.",
+      "Focused smoke captures canvas text and verifies all three labels against the independently computed caption losses.",
+      "A 320px browser check verifies no page overflow and enough canvas width for each compact label."
+    ]
+  },
+  {
+    "moduleId": "semantic-keyboard-controls",
+    "originalBehavior": "Formula 1 controls change procedural scene state and linked captions through pointer and touch interaction.",
+    "localStatus": "All 42 mounted controls expose visible domain labels and matching accessible names; segmented controls retain Arrow-key selection while sliders retain value semantics plus Arrow, Home, and End behavior.",
+    "sourceFiles": [
+      "../../formula-1-racing/js/base.js",
+      "../../formula-1-racing/js/f1.js",
+      "../../formula-1-racing/index.html",
+      "../../formula-1-racing/css/f1.css"
+    ],
+    "notes": [
+      "Every mounted control uses data-control as the shared source for its visible domain label and accessible name.",
+      "The two floor controls retain richer directional labels without modifying the shared base runtime.",
+      "Reduced-motion preference stops perpetual repainting but repaints scenes after state changes."
+    ],
+    "evidence": [
+      "Focused smoke verifies all 42 data-control names against mounted aria labels and rendered visible labels.",
+      "Focused smoke uses keyboard input on track, weather, lap-plan, airflow, live floor, tyre-temperature, and energy-recovery controls and verifies linked captions and lap consequences."
+    ]
+  }
+]

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Formula 1 Racing Docs</title>
+  <meta name="description" content="Implementation notes, parity tracking, and validation guidance for the local Formula 1 Racing route.">
+  <meta name="robots" content="noindex,follow">
+  <meta property="og:title" content="Formula 1 Racing Docs">
+  <meta property="og:description" content="Implementation notes, parity tracking, and validation guidance for the local Formula 1 Racing route.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kohnnn.github.io/interactive-explanation/docs/formula-1-racing/">
+  <link rel="canonical" href="https://kohnnn.github.io/interactive-explanation/docs/formula-1-racing/">
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <script src="../../shared/theme-init.js"></script>
+  <link rel="stylesheet" href="../../shared/site.css">
+</head>
+<body data-page-type="docs" data-parity-url="./parity.json">
+  <main class="site-page docs-page">
+    <a class="back-link" href="../../">Back to Atlas</a>
+
+    <header class="hero hero-compact">
+      <p class="eyebrow">Route documentation</p>
+      <h1>Formula 1 Racing</h1>
+      <p class="lead">
+        Local route <code>/interactive-explanation/formula-1-racing/</code> is an original Engineering Sandbox
+        longform article about modern Formula 1 performance. It now uses a local copy of the Bartosz-family
+        base runtime and procedural canvas scenes instead of mostly static SVG dashboard panels.
+      </p>
+      <div class="action-row">
+        <a class="action-link" href="../../formula-1-racing/">Open route</a>
+      </div>
+      <p class="meta-line">
+        Upstream snapshot: <code>original local route - no vendored upstream page</code><br>
+        Source family: <code>engineering-longform</code>
+      </p>
+    </header>
+
+    <section class="note-grid">
+      <article class="note-section">
+        <h2>Source snapshot</h2>
+        <p>
+          This route does not mirror one published external article. It is a local original build created for the
+          interactive-explanation collection and written specifically around modern Formula 1 systems.
+        </p>
+        <ul class="plain-list">
+          <li>The public route uses neutral provenance handling because there is no single upstream article to reference.</li>
+          <li>The shell still uses the shared Engineering Sandbox longform family for hero framing, rail navigation, and mobile chapter behavior.</li>
+          <li>The interaction layer now follows the Bartosz-family pattern more closely by using local <code>base.js</code> controls and procedural canvas scenes.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Asset handoff</h2>
+        <ul class="plain-list">
+          <li><code>formula-1-racing/index.html</code> owns the route shell, longform body, scene mounts, and control containers.</li>
+          <li><code>formula-1-racing/js/base.js</code> is a local unmodified copy of the Bartosz-family base runtime and must be treated as-is.</li>
+          <li><code>formula-1-racing/css/base.css</code> provides the slider, segmented-control, drawer, and canvas utility styling expected by the base runtime.</li>
+          <li><code>formula-1-racing/js/f1.js</code> drives the procedural canvas scenes, state synchronization, and route-specific calculations.</li>
+          <li><code>formula-1-racing/css/f1.css</code> adds Formula 1-specific colors, slider accents, and scene framing on top of the base runtime styles.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Current build</h2>
+        <ul class="plain-list">
+          <li>The route now ships a rotatable overview car, animated airflow, front-wing wake, floor, rear-wing, chassis, power, tyre, braking, track, racecraft, setup, weather, pit, and lap scenes.</li>
+          <li>The overview and aero chapters now use fuller pseudo-3D procedural geometry instead of flatter dashboard-style illustrations.</li>
+          <li>All 42 mounted controls now expose visible domain labels and matching accessible names while retaining the unmodified Bartosz-family controls.</li>
+          <li>The Floor and Diffuser chapter exposes live ride-height and pitch controls, one shared floor-health calculation, and visible suction, stability, and risk results.</li>
+          <li>Live floor health changes track-weighted sector scores, the speed trace, per-sector deltas, and the final lap summary.</li>
+          <li>The Tyres chapter carries compound, temperature, load, and stint condition into track-weighted sector scores, speed and braking traces, and tyre-attributed lap loss.</li>
+          <li>The Braking chapter now carries brake bias and energy recovery into a shared stability state, brake-demand-weighted sector loss, trace shape, and brake-attributed lap loss.</li>
+          <li>The final lap canvas now labels floor, tyre, and braking contributions beside the existing sector deltas and traces.</li>
+          <li>The scenes are procedural and explanatory rather than regulation-grade or telemetry-grade simulations.</li>
+          <li>Track selection, setup presets, live floor posture, live tyre condition, braking balance, power maps, and weather influence the final lap-builder scene. Pit timing remains a separate race-strategy calculation.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Keyboard interaction</h2>
+        <ul class="plain-list">
+          <li>Track, weather, lap-plan, and every shared segmented control are semantic radio groups with Arrow-key selection and synchronized checked state.</li>
+          <li>All slider and segmented-control mounts use <code>data-control</code> as the shared source for their visible labels and accessible names.</li>
+          <li>Shared sliders expose values plus Arrow, Home, and End keyboard behavior while their existing callbacks continue to update captions and canvases.</li>
+          <li>The two floor controls retain richer directional labels while preserving the same unmodified Bartosz-family slider runtime and keyboard contract.</li>
+          <li>Reduced-motion preference stops perpetual scene repainting while state changes still repaint the visible canvas.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Progress and next plan</h2>
+        <ul class="plain-list">
+          <li>Completed: all 42 control names, centralized floor, tyre, and braking states, track-weighted lap coupling, per-sector and per-system contribution labels, independently attributed losses, and focused keyboard smoke coverage.</li>
+          <li>Model boundary: live floor, tyre, and braking states are teaching inputs layered over the setup; they are not telemetry, CFD, a suspension solver, a brake-by-wire simulation, or a full tyre-energy model.</li>
+          <li>Next: keep the single-lap model stable; add another contribution only when a chapter gains an independently attributable loss.</li>
+          <li>Deferred: pit strategy stays outside the single-lap model unless the route adds a stint or race-time view.</li>
+        </ul>
+      </article>
+
+      <article class="note-section">
+        <h2>Validation guidance</h2>
+        <ul class="plain-list">
+          <li>Keep the route self-contained and subpath-safe; all assets should remain local to <code>formula-1-racing/</code> or the shared shell.</li>
+          <li>Do not edit <code>formula-1-racing/js/base.js</code> unless the route intentionally forks the Bartosz-family engine.</li>
+          <li>Preserve generated chapter behavior by keeping major sections anchored with top-level <code>h1</code> ids.</li>
+          <li>Run <code>node tools/check-public-surface.mjs .</code> and <code>node tools/smoke-bundle.mjs . --route formula-1-racing</code> from the <code>interactive-explanation/</code> directory after edits.</li>
+          <li>The control-label, causality, and lap-contribution passes completed JS syntax, parity JSON, metadata, public-surface, focused route smoke, and <code>engineering-longform</code> family smoke checks.</li>
+          <li>Responsive browser checks passed at 390px and 320px with 42 matching visible and accessible names, 50px slider hit areas, single-column floor controls, no horizontal overflow, measurable tyre and braking lap losses, and compact contribution labels that fit the 320px canvas.</li>
+          <li>The earlier all-route smoke run completed route baselines but exceeded the local ten-minute command window before its final smoke phase; focused route and affected-family runs completed separately.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="note-section">
+      <div class="section-heading">
+        <h2>Parity checklist</h2>
+        <span data-module-count class="meta-pill">Loading...</span>
+      </div>
+      <div class="parity-list" data-parity-list>
+        <div class="empty-state">Loading parity contract...</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../../shared/site.js"></script>
+</body>
+</html>

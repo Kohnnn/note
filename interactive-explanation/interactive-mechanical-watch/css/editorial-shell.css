@@ -742,11 +742,25 @@ body[data-story-route="interactive-mechanical-watch"] .exploded-watch__caption {
   color: var(--watch-muted-strong);
 }
 
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__firstrun {
+  margin: 0.9rem 0 0;
+  padding-left: 1.35rem;
+  display: grid;
+  gap: 0.35rem;
+  color: var(--watch-muted-strong);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__firstrun strong {
+  color: var(--watch-ink);
+}
+
 body[data-story-route="interactive-mechanical-watch"] .exploded-watch__stage {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(16rem, 19rem);
   gap: clamp(1rem, 3vw, 1.6rem);
-  align-items: stretch;
+  align-items: start;
 }
 
 body[data-story-route="interactive-mechanical-watch"] .exploded-watch__canvas {
@@ -828,6 +842,57 @@ body[data-story-route="interactive-mechanical-watch"] .exploded-watch__range-lab
   text-transform: uppercase;
 }
 
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__transport {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem;
+}
+
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__play,
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__speed button {
+  min-height: 2.75rem;
+  border: 1px solid rgba(216, 166, 87, 0.3);
+  border-radius: var(--watch-radius-sm);
+  background: rgba(216, 166, 87, 0.1);
+  color: var(--watch-ink);
+  font: 700 0.72rem/1 "IBM Plex Mono", monospace;
+  cursor: pointer;
+}
+
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__play {
+  padding: 0.7rem 0.85rem;
+  color: var(--watch-brass-soft);
+}
+
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__speed {
+  display: grid;
+  grid-template-columns: repeat(3, 2.8rem);
+  gap: 0.3rem;
+}
+
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__speed button {
+  padding: 0.5rem;
+}
+
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__play:hover,
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__play:focus-visible,
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__speed button:hover,
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__speed button:focus-visible,
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__speed button.is-selected {
+  border-color: var(--watch-border-strong);
+  background: rgba(216, 166, 87, 0.2);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 224, 163, 0.14);
+}
+
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__part-count {
+  margin: -0.25rem 0 0;
+  color: var(--watch-muted);
+  font: 0.66rem/1.45 "IBM Plex Mono", monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 body[data-story-route="interactive-mechanical-watch"] .exploded-watch__panel input[type="range"] {
   width: 100%;
   accent-color: var(--watch-brass);
@@ -850,7 +915,9 @@ body[data-story-route="interactive-mechanical-watch"] .exploded-watch__parts {
 
 body[data-story-route="interactive-mechanical-watch"] .exploded-watch__part {
   display: grid;
-  gap: 0.1rem;
+  grid-template-columns: 0.55rem minmax(0, 1fr);
+  gap: 0.1rem 0.5rem;
+  align-items: center;
   width: 100%;
   min-height: 2.75rem;
   padding: 0.58rem 0.7rem;
@@ -876,11 +943,21 @@ body[data-story-route="interactive-mechanical-watch"] .exploded-watch__part:focu
 }
 
 body[data-story-route="interactive-mechanical-watch"] .exploded-watch__part small {
+  grid-column: 2;
   color: var(--watch-muted);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+body[data-story-route="interactive-mechanical-watch"] .exploded-watch__swatch {
+  grid-row: 1 / span 2;
+  width: 0.5rem;
+  height: 1.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  box-shadow: 0 0 0.75rem color-mix(in srgb, currentColor 35%, transparent);
 }
 
 body[data-story-route="interactive-mechanical-watch"] .exploded-watch__detail {
@@ -1062,6 +1139,14 @@ body[data-story-route="interactive-mechanical-watch"] td {
 
   body[data-story-route="interactive-mechanical-watch"] .exploded-watch__panel {
     padding-bottom: 1rem;
+  }
+
+  body[data-story-route="interactive-mechanical-watch"] .exploded-watch__transport {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-story-route="interactive-mechanical-watch"] .exploded-watch__speed {
+    grid-template-columns: repeat(3, 1fr);
   }
 
   body[data-story-route="interactive-mechanical-watch"] .exploded-watch__parts {

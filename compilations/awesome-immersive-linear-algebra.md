@@ -15,6 +15,8 @@
 ## Access Notes
 - Access warning: crawl returned HTTP `509`; runtime verification is incomplete.
 - This page requires re-audit from an unblocked network before final implementation lock.
+- Fresh route audit on **March 21, 2026** confirmed the page is still blocked from the local shipping environment used for vendoring and smoke verification: both direct browser automation and shell fetches hit the same `509` or GeoIP restriction page.
+- Because the runtime and asset tree still cannot be captured reliably from the environment that would ship the replica, this target remains blocked and should not be half-shipped speculatively.
 
 ## What the Site is About
 - Immersive linear algebra learning site (access currently unavailable from this audit environment) intended to teach vectors, transforms, and geometric intuition interactively.

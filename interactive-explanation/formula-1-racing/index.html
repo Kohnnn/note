@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#8e1f1d">
+  <meta name="description" content="Original interactive article about modern Formula 1 airflow, ground effect, hybrid power units, tyres, braking, track layout, and setup tradeoffs.">
+  <meta property="og:title" content="Formula 1 Racing">
+  <meta property="og:description" content="Original interactive article about modern Formula 1 airflow, ground effect, hybrid power units, tyres, braking, track layout, and setup tradeoffs.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://kohnnn.github.io/interactive-explanation/formula-1-racing/">
+  <link rel="canonical" href="https://kohnnn.github.io/interactive-explanation/formula-1-racing/">
+  <title>Formula 1 Racing</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="../shared/engineering-sandbox.css">
+  <link rel="stylesheet" href="../shared/public-footer.css">
+  <link rel="stylesheet" href="./css/f1.css">
+  <script defer src="./js/base.js"></script>
+  <script defer src="./js/f1.js"></script>
+  <script defer src="../shared/engineering-sandbox.js"></script>
+  <script defer src="../shared/public-footer.js"></script>
+</head>
+<body
+  data-reference-mode="neutral"
+  data-reference-note="Original local Formula 1 route authored inside the interactive-explanation collection."
+  data-footer-label="Route provenance"
+  data-story-shell="engineering-sandbox"
+  data-story-family="engineering-longform"
+  data-story-nav="generated"
+  data-story-route="formula-1-racing"
+>
+  <main>
+  <section class="story-hero">
+    <p class="story-hero__eyebrow">Engineering Sandbox original · procedural Formula 1 notebook</p>
+    <div class="story-hero__grid">
+      <div>
+        <h1 class="story-hero__title">Read a modern F1 car as a moving stack of compromises.</h1>
+        <p class="story-hero__summary">
+          Start by rotating the car and isolating its major systems. Then move through airflow, the floor,
+          the rear wing, tyres, braking, weather, and pit windows until the final lap view stops looking like
+          a collection of motorsport buzzwords and starts behaving like one connected engineering machine.
+        </p>
+        <div class="story-hero__meta">
+          <span class="story-chip">Rotate the car</span>
+          <span class="story-chip">Scrub the aero window</span>
+          <span class="story-chip">Build a race lap</span>
+        </div>
+      </div>
+      <div class="story-callout story-hero__panel" data-story-callout="play">
+        <span class="story-callout__label">Start with the car map</span>
+        <p>
+          Drag the opening model first. Once the main components and their colors feel familiar, the later
+          scenes become much easier to read because the same front wing, floor, tyre, and power-unit logic
+          keeps reappearing in different contexts.
+        </p>
+        <div class="story-hero__actions">
+          <a class="story-button" href="#overview">Inspect the car</a>
+          <a class="story-button story-button--secondary" href="#airflow">Jump to airflow</a>
+          <a class="story-button story-button--secondary" href="#building-a-lap">Jump to lap builder</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="main_container">
+    <div id="body">
+      <div id="content">
+        <div class="article">
+          <div class="post_date">Original route</div>
+          <h1 class="post_title"><a href="./">Formula 1 Racing</a></h1>
+          <div class="padding_wrapper">
+            <p>
+              A modern Formula 1 car is usually described through disconnected terms: downforce, tyre window,
+              brake bias, dirty air, deployment, pit undercut. This route treats those terms as different views
+              of the same machine. The car is always trading one kind of lap-time help against another kind of
+              lap-time risk.
+            </p>
+            <p>
+              The route stays in the current ground-effect era because that gives us the clearest version of the
+              modern problem: how to keep the floor alive, the rear stable, the tyres inside their working range,
+              and the battery useful over a whole lap and a whole stint.
+            </p>
+
+            <h1 id="overview">Overview</h1>
+            <p>
+              Before the details, start with the whole object. The car below is not a scan or a model import.
+              It is drawn procedurally so the same color-coded systems can stay legible as you rotate the package
+              and isolate each major component family.
+            </p>
+            <div class="drawer_container ratio_65" id="f1_overview"></div>
+            <div id="f1_overview_seg0" class="segmented_container f1_labeled_control" data-control="Component"></div>
+            <p class="f1_live_note" id="f1_overview_caption"></p>
+
+            <h1 id="airflow">Airflow</h1>
+            <p>
+              At Formula 1 speeds the car is not moving through empty space. It is negotiating pressure and
+              velocity fields. The bodywork matters because it shapes where the air speeds up, where it separates,
+              and whether the floor gets the clean feed it needs.
+            </p>
+            <div class="drawer_container ratio_55" id="f1_airflow"></div>
+            <div id="f1_airflow_sl0" class="slider_blue f1_labeled_control" data-control="Air speed"></div>
+            <div id="f1_airflow_sl1" class="slider_red f1_labeled_control" data-control="Aerodynamic load"></div>
+            <div id="f1_airflow_sl2" class="slider_cyan f1_labeled_control" data-control="Platform height"></div>
+            <p class="f1_live_note" id="f1_airflow_caption"></p>
+
+            <h1 id="front-wing">Front Wing</h1>
+            <p>
+              The front wing is the first serious negotiation with the air. It buys front bite, but it also sets
+              the quality of the flow that reaches the rest of the car. That makes it especially vulnerable when
+              another car's wake starts corrupting the air ahead of it.
+            </p>
+            <div class="drawer_container ratio_52" id="f1_front"></div>
+            <div id="f1_front_sl0" class="slider_orange f1_labeled_control" data-control="Following distance"></div>
+            <div id="f1_front_sl1" class="slider_red f1_labeled_control" data-control="Flap angle"></div>
+            <div id="f1_front_sl2" class="slider_violet f1_labeled_control" data-control="Cornering demand"></div>
+            <p class="f1_live_note" id="f1_front_caption"></p>
+
+            <h1 id="floor-and-diffuser">Floor and Diffuser</h1>
+            <p>
+              The floor is where the modern cars make much of their support. That makes ride height and pitch more
+              than setup trivia. The underbody has a narrow zone where it feels brilliant, and then a much less
+              forgiving zone where the car becomes nervous or inconsistent.
+            </p>
+            <div class="drawer_container ratio_48" id="f1_floor"></div>
+            <div class="f1_control_grid" role="group" aria-label="Floor platform controls">
+              <div class="f1_control">
+                <div class="f1_control_label"><span>Live ride height</span><small>low to high</small></div>
+                <div id="f1_floor_sl0" class="slider_cyan" data-control="Live ride height"></div>
+              </div>
+              <div class="f1_control">
+                <div class="f1_control_label"><span>Pitch</span><small>shallow to steep</small></div>
+                <div id="f1_floor_sl1" class="slider_red" data-control="Floor pitch"></div>
+              </div>
+            </div>
+            <p class="f1_live_note" id="f1_floor_caption"></p>
+
+            <h1 id="rear-wing-and-drs">Rear Wing and DRS</h1>
+            <p>
+              The rear wing tells the clearest straight-line versus support story on the entire car. DRS does not
+              create free speed. It creates a temporary deal: less rear load and less drag in exchange for a faster
+              straight and a smaller confidence window at the next braking zone.
+            </p>
+            <div class="drawer_container ratio_48" id="f1_rear"></div>
+            <div id="f1_rear_seg0" class="segmented_container f1_labeled_control" data-control="DRS state"></div>
+            <div id="f1_rear_sl0" class="slider_red f1_labeled_control" data-control="Rear wing load"></div>
+            <div id="f1_rear_sl1" class="slider_blue f1_labeled_control" data-control="Car speed"></div>
+            <p class="f1_live_note" id="f1_rear_caption"></p>
+
+            <h1 id="chassis-and-suspension">Chassis and Suspension</h1>
+            <p>
+              Suspension in Formula 1 is not just there to keep the tyres on the asphalt. It is also managing the
+              car's aerodynamic posture. Too soft and the floor moves out of its sweet spot. Too stiff and the tyres
+              and kerbs become expensive to ride.
+            </p>
+            <div class="drawer_container ratio_52" id="f1_chassis"></div>
+            <div id="f1_chassis_sl0" class="slider_green f1_labeled_control" data-control="Suspension stiffness"></div>
+            <div id="f1_chassis_sl1" class="slider_orange f1_labeled_control" data-control="Kerb severity"></div>
+            <div id="f1_chassis_sl2" class="slider_red f1_labeled_control" data-control="Braking load"></div>
+            <p class="f1_live_note" id="f1_chassis_caption"></p>
+
+            <h1 id="power-unit">Power Unit</h1>
+            <p>
+              The modern Formula 1 power unit is not just an engine. It is a hybrid energy manager that chooses how
+              much combustion power to use, how much electrical push to spend, and how much heat or battery margin to
+              save for later sectors.
+            </p>
+            <div class="drawer_container ratio_46" id="f1_power"></div>
+            <div id="f1_power_seg0" class="segmented_container f1_labeled_control" data-control="Energy mode"></div>
+            <div id="f1_power_seg1" class="segmented_container f1_labeled_control" data-control="Deployment bias"></div>
+            <p class="f1_live_note" id="f1_power_caption"></p>
+
+            <h1 id="tyres">Tyres</h1>
+            <p>
+              Every good idea on the car has to pass through four contact patches. Tyres decide whether downforce,
+              braking load, and power delivery actually become lap time or simply become another form of heat and wear.
+            </p>
+            <div class="drawer_container ratio_52" id="f1_tyre"></div>
+            <div id="f1_tyre_seg0" class="segmented_container f1_labeled_control" data-control="Tyre compound"></div>
+            <div id="f1_tyre_sl0" class="slider_orange f1_labeled_control" data-control="Tyre temperature"></div>
+            <div id="f1_tyre_sl1" class="slider_cyan f1_labeled_control" data-control="Tyre load"></div>
+            <div id="f1_tyre_sl2" class="slider_gray long_slider f1_labeled_control" data-control="Stint progress"></div>
+            <p class="f1_live_note" id="f1_tyre_caption"></p>
+
+            <h1 id="braking">Braking</h1>
+            <p>
+              Braking is where the machine compresses several constraints into one instant. The car sheds speed,
+              moves load forward, changes floor attitude, recovers energy, and asks the rear to stay calm enough for
+              rotation on release.
+            </p>
+            <div class="drawer_container ratio_48" id="f1_brake"></div>
+            <div id="f1_brake_sl0" class="slider_red f1_labeled_control" data-control="Entry speed"></div>
+            <div id="f1_brake_sl1" class="slider_blue f1_labeled_control" data-control="Brake bias"></div>
+            <div id="f1_brake_sl2" class="slider_yellow f1_labeled_control" data-control="Energy recovery"></div>
+            <p class="f1_live_note" id="f1_brake_caption"></p>
+
+            <h1 id="track-layout">Track Layout</h1>
+            <p>
+              A setup only becomes meaningful once a track gives it something specific to solve. Monza, Monaco,
+              Silverstone, Spa, and Suzuka ask the car to spend its lap in very different ways, so the same setup
+              strength can turn into a different weakness from circuit to circuit.
+            </p>
+            <div class="drawer_container ratio_46" id="f1_track"></div>
+            <div id="f1_track_seg0" class="segmented_container f1_labeled_control" data-control="Circuit"></div>
+            <p class="f1_live_note" id="f1_track_caption"></p>
+
+            <h1 id="racecraft">Racecraft</h1>
+            <p>
+              A fast car still has to use its speed near other cars. Dirty air removes front confidence, DRS only helps
+              in certain windows, and overtaking requires the straight-line gain and the braking stability to arrive at
+              the same place at the same time.
+            </p>
+            <div class="drawer_container ratio_48" id="f1_race"></div>
+            <div id="f1_race_seg0" class="segmented_container f1_labeled_control" data-control="DRS availability"></div>
+            <div id="f1_race_sl0" class="slider_violet f1_labeled_control" data-control="Following gap"></div>
+            <div id="f1_race_sl1" class="slider_yellow f1_labeled_control" data-control="Energy deployment"></div>
+            <div id="f1_race_sl2" class="slider_red f1_labeled_control" data-control="Braking confidence"></div>
+            <p class="f1_live_note" id="f1_race_caption"></p>
+
+            <h1 id="setup-tradeoffs">Setup Tradeoffs</h1>
+            <p>
+              A setup sheet is a choice about what kinds of pain the car can afford. The preset controls below move
+              the car toward a representative circuit direction, then the detailed sliders show how that compromise is
+              being expressed in wing, ride height, stiffness, and brake balance.
+            </p>
+            <div class="drawer_container ratio_52" id="f1_setup"></div>
+            <div id="f1_setup_seg0" class="segmented_container f1_labeled_control" data-control="Circuit preset"></div>
+            <div id="f1_setup_sl0" class="slider_red f1_labeled_control" data-control="Wing level"></div>
+            <div id="f1_setup_sl1" class="slider_cyan f1_labeled_control" data-control="Setup ride height"></div>
+            <div id="f1_setup_sl2" class="slider_green f1_labeled_control" data-control="Setup stiffness"></div>
+            <div id="f1_setup_sl3" class="slider_blue f1_labeled_control" data-control="Setup brake bias"></div>
+            <p class="f1_live_note" id="f1_setup_caption"></p>
+
+            <h1 id="weather-and-strategy">Weather and Tyre Strategy</h1>
+            <p>
+              Once the car is understood as a machine, the problem shifts from pure setup to race engineering. Weather
+              changes tyre logic, crossover timing, and how brave the pit wall can be with long stints or delayed stops.
+            </p>
+            <div class="drawer_container ratio_44" id="f1_weather"></div>
+            <div id="f1_weather_seg0" class="segmented_container f1_labeled_control" data-control="Weather state"></div>
+            <div id="f1_weather_sl0" class="slider_orange f1_labeled_control" data-control="Track temperature"></div>
+            <div id="f1_weather_sl1" class="slider_gray f1_labeled_control" data-control="Laps remaining"></div>
+            <div id="f1_weather_sl2" class="slider_blue f1_labeled_control" data-control="Rain pressure"></div>
+            <p class="f1_live_note" id="f1_weather_caption"></p>
+
+            <h1 id="pit-strategy">Pit Strategy</h1>
+            <p>
+              A stop only works if the tyre gain can beat the pit loss, the rejoin is not ruined by traffic, or a
+              safety car shrinks the cost of stopping. This is where the route moves fully from car behavior into race
+              timing.
+            </p>
+            <div class="drawer_container ratio_44" id="f1_pit"></div>
+            <div id="f1_pit_sl0" class="slider_gray f1_labeled_control" data-control="Tyre age"></div>
+            <div id="f1_pit_sl1" class="slider_violet f1_labeled_control" data-control="Rejoin traffic"></div>
+            <div id="f1_pit_sl2" class="slider_yellow f1_labeled_control" data-control="Safety car chance"></div>
+            <p class="f1_live_note" id="f1_pit_caption"></p>
+
+            <h1 id="building-a-lap">Building a Lap</h1>
+            <p>
+              The final scene collapses everything back into the lap. Setup, live floor posture, live tyre condition,
+              braking balance, deployment, track type, weather, and plan shape all bend the same three traces. The point is not exact
+              simulation. The point is to see where the lap is being won and where the earlier compromises are finally
+              showing up.
+            </p>
+            <div class="drawer_container ratio_58" id="f1_lap"></div>
+            <div id="f1_lap_seg0" class="segmented_container f1_labeled_control" data-control="Lap plan"></div>
+            <p class="f1_live_note" id="f1_lap_caption"></p>
+
+            <h1 id="further-reading">Further Reading</h1>
+            <p>
+              For deeper reading beyond this route, the most useful sources are FIA technical regulations, Pirelli tyre
+              notes, track-sector analyses, and technical explainers on ground effect, hybrid deployment, braking, and
+              suspension layout.
+            </p>
+
+            <h1 id="final-words">Final Words</h1>
+            <p>
+              Formula 1 becomes much easier to understand once the car stops looking like a pile of impressive parts and
+              starts looking like a machine that is always negotiating with the air, the tyres, the track, and the race
+              clock. The best cars are not the ones that win every local tradeoff. They are the ones that lose the fewest
+              important ones over a full lap and a full stint.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </main>
+</body>
+</html>

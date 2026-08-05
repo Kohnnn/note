@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inside a Mechanical Watch Docs</title>
+  <meta name="description" content="Implementation and provenance notes for the local guided mechanical-watch route.">
+  <meta name="robots" content="noindex,follow">
+  <meta property="og:title" content="Inside a Mechanical Watch Docs">
+  <meta property="og:description" content="Implementation and provenance notes for the local guided mechanical-watch route.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kohnnn.github.io/interactive-explanation/docs/watch-mesh-explorer/">
+  <link rel="canonical" href="https://kohnnn.github.io/interactive-explanation/docs/watch-mesh-explorer/">
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <script src="../../shared/theme-init.js"></script>
+  <link rel="stylesheet" href="../../shared/site.css">
+</head>
+<body data-page-type="docs" data-parity-url="./parity.json">
+  <main class="site-page docs-page">
+    <a class="back-link" href="../../">Back to Atlas</a>
+
+    <header class="hero hero-compact">
+      <p class="eyebrow">Original route documentation</p>
+      <h1>Inside a Mechanical Watch</h1>
+      <p class="lead">
+        Local route <code>/interactive-explanation/watch-mesh-explorer/</code> turns the ETA 2824-2
+        mesh archive into ten causal lessons with the complete workbench available as a secondary tool.
+      </p>
+      <div class="action-row">
+        <a class="action-link" href="../../watch-mesh-explorer/">Open workbench</a>
+      </div>
+      <p class="meta-line">
+        Semantic inventory: <code>interactive-mechanical-watch/js/watch-parts.js</code><br>
+        Source geometry: <code>shared/mechanical-watch/models/watch_*.dat</code>
+      </p>
+    </header>
+
+    <section class="note-grid">
+      <article class="note-section">
+        <h2>Design intent</h2>
+        <p>
+          The route is an original guided explanation, not an embedded copy of the archived watch
+          renderer. Each step pairs one problem with one mechanism and one visible result on an ivory
+          drawing plane with restrained materials, authored framing, and one active-state color.
+        </p>
+      </article>
+
+      <article class="note-section">
+        <h2>Semantic model</h2>
+        <p>
+          Seventy-one meaningful assemblies provide names, roles, systems, mounting positions, explode
+          vectors, and animation labels. Sixteen pivot-sensitive source meshes preserve archived local
+          offsets, flips, and ZYX rotation composition after per-source centering. The assemblies reference
+          the 85 physical mesh templates only when source geometry is needed; digits, cutaway templates,
+          and reference shapes are not presented as installed components.
+        </p>
+      </article>
+
+      <article class="note-section">
+        <h2>Guided lessons</h2>
+        <p>
+          Ten ordered lessons isolate Power, Gear Train, Escapement, Balance, Mainplate, Click, Motion Works,
+          Keyless Works, Automatic Winding, and Physical Scale. Previous and next controls update the causal
+          explanation, focused camera, active parts, register, and selected component together.
+        </p>
+      </article>
+
+      <article class="note-section">
+        <h2>Component inspection</h2>
+        <p>
+          Canvas picking and the searchable register select the same assembly. Guided mode limits both
+          surfaces to the current module; the inspector reports role, lesson, service stage, mounting direction,
+          source templates, triangle count, and actionable neighbors. Reset view restores authored framing.
+        </p>
+      </article>
+
+      <article class="note-section">
+        <h2>Announcement and grouping semantics</h2>
+        <p>
+          The lesson brief and part detail are <code>aria-atomic</code>. <code>setLesson</code> rewrites five
+          sibling nodes and <code>showPart</code> replaces the detail subtree, so polite regions alone could
+          announce partial updates. The subsystem filter container carries <code>role="group"</code> next to
+          its existing accessible name so its generated pressed buttons form one named group.
+        </p>
+      </article>
+
+      <article class="note-section">
+        <h2>Runtime handoff</h2>
+        <p>
+          Route-local <code>index.html</code>, <code>css/explorer.css</code>,
+          <code>js/explorer.js</code>, and <code>js/model-table.js</code> own the experience. Three.js and
+          <code>OrbitControls</code> are reused from the sibling route; no new dependency or duplicate
+          geometry asset is introduced.
+        </p>
+      </article>
+
+      <article class="note-section">
+        <h2>Validation guidance</h2>
+        <p>
+          Run <code>node --check watch-mesh-explorer/js/explorer.js</code>,
+          <code>node tools/check-public-surface.mjs .</code>, and
+          <code>node tools/smoke-bundle.mjs . --route watch-mesh-explorer</code>. Browser checks should
+           verify ten lessons, lesson-to-part isolation, Previous and Next progression, 71 complete-atlas
+           components, all secondary modes, camera reset, paused render quiescence, footer mounting, and no overflow.
+        </p>
+      </article>
+    </section>
+
+    <section class="note-section">
+      <div class="section-heading">
+        <h2>Implementation contract</h2>
+        <span data-module-count class="meta-pill">Loading...</span>
+      </div>
+      <div class="parity-list" data-parity-list>
+        <div class="empty-state">Loading implementation contract...</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../../shared/site.js"></script>
+</body>
+</html>
