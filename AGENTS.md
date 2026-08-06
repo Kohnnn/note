@@ -185,3 +185,19 @@ import { chromium } from "playwright";
 2. Ensure route has a docs parity page under `interactive-explanation/docs/<slug>/`
 3. Verify route appears on home page and docs entry resolves
 4. Run policy audit and smoke tests before finalizing
+
+---
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as markdown files under `.scratch/<feature-slug>/` in this repo; there is no remote tracker. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical triage roles, each string equal to its name, written to an issue file's `Status:` line. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` plus `docs/adr/` at the repo root. See `docs/agents/domain.md`.
