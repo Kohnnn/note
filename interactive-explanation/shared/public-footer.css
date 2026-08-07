@@ -11,24 +11,32 @@ body.has-top-bar {
   width: 100%;
   box-sizing: border-box;
   z-index: 1200;
-  background: var(--topbar-bg);
+  background: color-mix(in srgb, var(--topbar-bg) 88%, transparent);
   color: var(--topbar-ink);
   border-bottom: 1px solid var(--topbar-line);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(12px) saturate(1.08);
 }
 
 .top-bar__inner {
-  width: min(1100px, 100%);
+  width: min(1180px, 100%);
   max-width: calc(100vw - 32px);
   margin: 0 auto;
   box-sizing: border-box;
-  padding: 8px 16px;
+  padding: 9px 16px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
-.top-bar__back,
+.top-bar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
 .top-bar__docs {
   color: inherit;
   font-weight: 700;
@@ -49,8 +57,22 @@ body.has-top-bar {
   margin-right: auto;
   overflow: hidden;
   color: inherit;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.top-bar__docs {
+  color: inherit;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.14em;
+  text-transform: uppercase;
+  transition: color 0.18s ease;
 }
 
 .top-bar__theme {
@@ -79,9 +101,9 @@ body.has-top-bar {
   width: 100%;
   margin-top: 32px;
   border-top: 1px solid var(--footer-line);
-  background: var(--footer-bg);
+  background: color-mix(in srgb, var(--footer-bg) 92%, transparent);
   color: var(--footer-ink);
-  font-family: "Trebuchet MS", "Gill Sans", sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
 }
 
 .public-footer__inner {

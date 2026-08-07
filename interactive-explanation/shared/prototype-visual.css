@@ -1,0 +1,33 @@
+body[data-story-route="ableton-learning-music-play-with-beats"] {
+  --story-accent: #b85c38;
+  --story-steel: #285e68;
+}
+
+body[data-story-route="ableton-learning-music-play-with-beats"] .story-hero {
+  padding-bottom: 2.2rem;
+}
+
+body[data-story-route="ableton-learning-music-play-with-beats"] .story-practice-main {
+  position: relative;
+  border-top: 1px solid var(--story-border);
+}
+
+body[data-story-route="ableton-learning-music-play-with-beats"] .story-practice-main::before {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 7rem;
+  height: 3px;
+  background: var(--story-accent);
+  content: "";
+}
+
+body[data-story-route="ableton-learning-music-play-with-beats"] .story-callout {
+  box-shadow: 0 16px 34px rgba(18, 32, 42, 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-story-route="ableton-learning-music-play-with-beats"] .story-callout {
+    box-shadow: none;
+  }
+}
