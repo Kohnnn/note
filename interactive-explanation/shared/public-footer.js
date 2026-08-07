@@ -426,19 +426,7 @@
 
   function topBarDisabled() {
     var body = document.body;
-    if (!body) {
-      return true;
-    }
-    if (body.dataset.topBar === "off") {
-      return true;
-    }
-    if (body.dataset.pageType === "home") {
-      return true;
-    }
-    if (body.dataset.storyShell === "engineering-sandbox") {
-      return true;
-    }
-    return false;
+    return !body || body.dataset.pageType === "home";
   }
 
   function formatSlug(slug) {
@@ -511,6 +499,9 @@
       var bar = document.createElement("div");
       bar.id = "top-bar";
       bar.className = "top-bar";
+      if (document.body.dataset.topBar === "off") {
+        bar.classList.add("top-bar--overlay");
+      }
       bar.setAttribute("role", "navigation");
       bar.setAttribute("aria-label", "Site");
 
@@ -540,8 +531,12 @@
       inner.appendChild(theme);
 
       bar.appendChild(inner);
-      document.body.appendChild(bar);
-      document.body.classList.add("has-top-bar");
+      document.body.prepend(bar);
+      if (document.body.dataset.topBar === "off") {
+        document.body.classList.add("has-top-bar-overlay");
+      } else {
+        document.body.classList.add("has-top-bar");
+      }
 
       wireThemeButton(theme);
     } catch (error) {

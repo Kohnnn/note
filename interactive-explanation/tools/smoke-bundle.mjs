@@ -717,11 +717,15 @@ async function assertManifestRouteBaseline(context, route) {
             main.getAttribute("aria-labelledby") ||
             main.querySelector("iframe[title], canvas, svg, [role='application']")
           )),
+          topBarAtlas: document.querySelector(".top-bar__back")?.href || "",
+          topBarDocs: document.querySelector(".top-bar__docs")?.href || "",
         };
       });
       assert(mainState.count === 1, `${route.slug} ${viewport.name} baseline expected one main landmark, found ${mainState.count}`);
       assert(mainState.visible, `${route.slug} ${viewport.name} baseline main landmark was hidden`);
       assert(mainState.meaningful, `${route.slug} ${viewport.name} baseline main landmark was empty and unnamed`);
+      assert(new URL(mainState.topBarAtlas).pathname === `${mountPath}index.html`, `${route.slug} ${viewport.name} baseline top bar exposed an unexpected Atlas exit: ${mainState.topBarAtlas}`);
+      assert(new URL(mainState.topBarDocs).pathname === `${mountPath}docs/${route.slug}/`, `${route.slug} ${viewport.name} baseline top bar exposed an unexpected Docs exit: ${mainState.topBarDocs}`);
       await assertViewportUsable(page, `${route.slug} ${viewport.name} baseline`);
       assertRuntimeClean(`${route.slug} ${viewport.name} baseline`);
       console.log(`OK ${route.slug} ${viewport.name} baseline`);
@@ -2743,7 +2747,7 @@ async function smokeOrdinaryLeastSquaresRegression(context) {
   );
 
   const pointNob = page.locator(".point-nobs .nob").first();
-  await page.locator(".myApp").scrollIntoViewIfNeeded();
+  await pointNob.evaluate((element) => element.scrollIntoView({ block: "center", inline: "center" }));
   const pointBox = await pointNob.boundingBox();
   assert(pointBox, "ordinary-least-squares-regression did not expose a draggable point control");
   await page.mouse.move(pointBox.x + pointBox.width / 2, pointBox.y + pointBox.height / 2);
@@ -5018,7 +5022,7 @@ async function smokeInteractiveMechanicalWatch(context) {
   assert(reducedState.runningDrawerCount === 0, `${label} reduced-motion startup left ${reducedState.runningDrawerCount} drawers running`);
   await reducedPage.waitForSelector(canvasSelector, { timeout: 30000 });
   assert(await reducedPage.locator("[data-exploded-play]").getAttribute("aria-pressed") === "false", `${label} reduced motion should pause the exploded mechanism at startup`);
-  assert(await reducedPage.locator(canvasSelector).getAttribute("data-playing") === "false", `${label} reduced motion left the Three.js mechanism running`);
+  await reducedPage.waitForFunction(() => document.querySelector("[data-exploded-canvas] canvas")?.dataset.playing === "false", null, { timeout: 5000 });
   await reducedPage.locator("[data-exploded-play]").click();
   await reducedPage.waitForFunction(() => document.querySelector("[data-exploded-canvas] canvas")?.dataset.playing === "true", null, { timeout: 5000 });
   const reducedPlay = reducedPage.locator("#hero .play_pause_button").first();
@@ -6369,9 +6373,11 @@ async function smokeWayfinding(context) {
   const sandboxLinks = await page.evaluate(() => ({
     atlas: document.querySelector("[data-story-wayfinding='atlas']")?.href || "",
     docs: document.querySelector("[data-story-wayfinding='docs']")?.href || "",
-    topBar: Boolean(document.querySelector("#top-bar")),
+    topBarAtlas: document.querySelector(".top-bar__back")?.href || "",
+    topBarDocs: document.querySelector(".top-bar__docs")?.href || "",
   }));
-  assert(!sandboxLinks.topBar, "formula-1-racing unexpectedly received fixed top-bar chrome");
+  assert(new URL(sandboxLinks.topBarAtlas).pathname === `${mountPath}index.html`, `formula-1-racing top bar exposed an unexpected Atlas exit: ${sandboxLinks.topBarAtlas}`);
+  assert(new URL(sandboxLinks.topBarDocs).pathname === `${mountPath}docs/formula-1-racing/`, `formula-1-racing top bar exposed an unexpected Docs exit: ${sandboxLinks.topBarDocs}`);
   assert(new URL(sandboxLinks.atlas).pathname === mountPath, `formula-1-racing exposed an unexpected Atlas exit: ${sandboxLinks.atlas}`);
   assert(new URL(sandboxLinks.docs).pathname === `${mountPath}docs/formula-1-racing/`, `formula-1-racing exposed an unexpected Docs exit: ${sandboxLinks.docs}`);
   await assertViewportUsable(page, "formula-1-racing wayfinding");
@@ -7294,10 +7300,7 @@ async function smokeBiasVariance(context) {
   }, null, { timeout: 10000 });
   console.log("OK bias-variance decomposition scene");
 
-  for (const y of [7200, 8200, 9200, 10200]) {
-    await page.evaluate((nextY) => window.scrollTo(0, nextY), y);
-    await page.waitForTimeout(350);
-  }
+  await page.locator("[data-step='10']").evaluate((element) => element.scrollIntoView({ block: "center" }));
   await page.waitForFunction(() => {
     const text = Array.from(document.querySelectorAll("#errorBarSvg text"))
       .map((node) => node.textContent || "")

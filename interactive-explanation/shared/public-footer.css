@@ -4,6 +4,10 @@ body.has-top-bar {
   padding-top: var(--topbar-height);
 }
 
+body.has-top-bar[data-story-shell="engineering-sandbox"] .story-rail {
+  top: calc(var(--topbar-height) + 2.25rem);
+}
+
 .top-bar {
   position: fixed;
   top: 0;
@@ -15,6 +19,16 @@ body.has-top-bar {
   color: var(--topbar-ink);
   border-bottom: 1px solid var(--topbar-line);
   backdrop-filter: blur(12px) saturate(1.08);
+}
+
+.top-bar--overlay {
+  top: 0.5rem;
+  left: 50%;
+  width: min(34rem, calc(100vw - 1rem));
+  border: 1px solid var(--topbar-line);
+  border-radius: 999px;
+  box-shadow: 0 12px 34px rgba(15, 20, 30, 0.18);
+  transform: translateX(-50%);
 }
 
 .top-bar__inner {
@@ -163,6 +177,11 @@ body.has-top-bar {
 }
 
 @media (max-width: 720px) {
+  .top-bar--overlay {
+    top: max(0.35rem, env(safe-area-inset-top));
+    width: calc(100vw - 0.7rem);
+  }
+
   .top-bar__inner {
     max-width: calc(100vw - 20px);
     padding: 8px 10px;
