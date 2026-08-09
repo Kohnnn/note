@@ -2,18 +2,20 @@
   {
     "moduleId": "lesson-shell-and-oscillator-runtime",
     "originalBehavior": "The published lesson boots the Learning Synths shell and walks through oscillator changes with a slider-driven synth visualization.",
-    "localStatus": "The local route keeps that lesson shell and oscillator runtime from shared scripts with route-local lesson assets while moving provenance to the shared footer.",
+    "localStatus": "The local route keeps that lesson shell and oscillator runtime from shared scripts with route-local lesson assets while adding a family-scoped field-guide boundary and shared Atlas chrome.",
     "sourceFiles": [
       "../../ableton-learning-synths-how-synths-make-sound/index.html",
+      "../../shared/prototype-visual.css",
       "../../shared/ableton-learning-synths-musiclab.js",
       "../../shared/ableton-learning-synths-archive.js"
     ],
     "notes": [
       "The archive stays on the published runtime instead of rebuilding the oscillator examples in a custom synth UI.",
-      "Local chapter links are rewritten after mount so the lesson can stay within the shipped synth family."
+      "Local chapter links are rewritten after mount so the lesson can stay within the shipped synth family.",
+      "The additive family treatment changes only the outer lesson boundary and shared chrome; the archived oscillator controls remain runtime-owned."
     ],
     "evidence": [
-      "Music smoke coverage verifies local script loading and the slider update path on the shipped oscillator scene.",
+      "Music smoke coverage verifies local script loading, family metadata, chrome alignment, and the slider update path on the shipped oscillator scene.",
       "The public route keeps footer-only provenance and strips the upstream lesson shell from the body."
     ]
   },

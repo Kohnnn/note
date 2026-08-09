@@ -2,18 +2,20 @@
   {
     "moduleId": "lesson-shell-and-envelope-runtime",
     "originalBehavior": "The published lesson boots the Learning Synths shell and introduces ADSR shaping through a press-and-hold envelope scene.",
-    "localStatus": "The local route keeps that envelope lesson shell and ADSR runtime from shared scripts with route-local lesson assets while moving provenance to the shared footer.",
+    "localStatus": "The local route keeps that envelope lesson shell and ADSR runtime from shared scripts with route-local lesson assets while adding a family-scoped field-guide boundary and shared Atlas chrome.",
     "sourceFiles": [
       "../../ableton-learning-synths-modulating-amplitude-with-envelopes/index.html",
+      "../../shared/prototype-visual.css",
       "../../shared/ableton-learning-synths-musiclab.js",
       "../../shared/ableton-learning-synths-archive.js"
     ],
     "notes": [
       "The archive preserves the published envelope scenes instead of rebuilding them in a custom synth teaching page.",
-      "Local chapter links are rewritten after mount so the shipped synth family stays internally navigable."
+      "Local chapter links are rewritten after mount so the shipped synth family stays internally navigable.",
+      "The additive family treatment changes only the outer lesson boundary and shared chrome; the archived ADSR controls remain runtime-owned."
     ],
     "evidence": [
-      "Music smoke coverage verifies local script loading and the ADSR interaction path on the shipped route.",
+      "Music smoke coverage verifies local script loading, family metadata, chrome alignment, and the ADSR interaction path on the shipped route.",
       "The public route keeps footer-only provenance and strips the upstream lesson shell from the body."
     ]
   },

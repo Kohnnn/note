@@ -5858,6 +5858,35 @@ async function smokeAbletonLearningSynthLesson(context, config) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, `${slug}/`, "#reference-footer");
+  const familyTreatment = await page.evaluate(() => {
+    const body = document.body;
+    const app = document.querySelector("main[data-ableton-synth-lesson]");
+    const topBar = document.querySelector(".top-bar");
+    const bodyStyle = window.getComputedStyle(body);
+    const appStyle = window.getComputedStyle(app);
+    return {
+      family: body.dataset.storyFamily,
+      route: body.dataset.storyRoute,
+      hasStylesheet: Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some((link) => {
+        return link.getAttribute("href") === "../shared/prototype-visual.css";
+      }),
+      bodyPaddingTop: Number.parseFloat(bodyStyle.paddingTop),
+      appTop: app.getBoundingClientRect().top,
+      appBorderTopWidth: Number.parseFloat(appStyle.borderTopWidth),
+      appShadow: appStyle.boxShadow,
+      topBarHeight: topBar.getBoundingClientRect().height,
+    };
+  });
+  assert(familyTreatment.family === "ableton-synths", `${label} did not declare the synth family`);
+  assert(familyTreatment.route === slug, `${label} did not declare its route slug`);
+  assert(familyTreatment.hasStylesheet, `${label} did not load the shared synth treatment`);
+  assert(
+    Math.abs(familyTreatment.topBarHeight - familyTreatment.bodyPaddingTop) <= 1 &&
+      Math.abs(familyTreatment.appTop - familyTreatment.bodyPaddingTop) <= 1,
+    `${label} did not align the shared chrome with the archived lesson`,
+  );
+  assert(familyTreatment.appBorderTopWidth >= 2, `${label} did not expose the synth family marker`);
+  assert(familyTreatment.appShadow !== "none", `${label} did not frame the archived lesson surface`);
   await assertLocalScriptSources(
     page,
     [

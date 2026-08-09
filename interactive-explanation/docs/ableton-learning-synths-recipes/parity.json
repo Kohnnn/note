@@ -2,18 +2,20 @@
   {
     "moduleId": "lesson-shell-and-subtractive-runtime",
     "originalBehavior": "The published Recipes chapter boots the Learning Synths shell and exposes a fuller subtractive-synth panel with multiple controls and preset-style text guidance.",
-    "localStatus": "The local route keeps that chapter shell and subtractive-synth runtime from shared scripts with route-local lesson assets while moving provenance to the shared footer.",
+    "localStatus": "The local route keeps that chapter shell and subtractive-synth runtime from shared scripts with route-local lesson assets while adding a family-scoped field-guide boundary and shared Atlas chrome.",
     "sourceFiles": [
       "../../ableton-learning-synths-recipes/index.html",
+      "../../shared/prototype-visual.css",
       "../../shared/ableton-learning-synths-musiclab.js",
       "../../shared/ableton-learning-synths-archive.js"
     ],
     "notes": [
       "The archive preserves the published Recipes chapter instead of recasting it as a single custom synth widget.",
-      "Local chapter links are rewritten after mount so the shipped synth family stays internally navigable."
+      "Local chapter links are rewritten after mount so the shipped synth family stays internally navigable.",
+      "The additive family treatment changes only the outer lesson boundary and shared chrome; the archived recipe controls remain runtime-owned."
     ],
     "evidence": [
-      "Music smoke coverage verifies local script loading and the Recipes playback and slider paths on the shipped route.",
+      "Music smoke coverage verifies local script loading, family metadata, chrome alignment, and the Recipes playback and slider paths on the shipped route.",
       "The public route keeps footer-only provenance and strips the upstream lesson shell from the body."
     ]
   },

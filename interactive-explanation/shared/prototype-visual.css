@@ -26,6 +26,39 @@ body[data-story-route="ableton-learning-music-play-with-beats"] .story-callout {
   box-shadow: 0 16px 34px rgba(18, 32, 42, 0.1);
 }
 
+body[data-story-family="ableton-synths"] {
+  --synth-field-guide-accent: #b85c38;
+  background: var(--paper);
+}
+
+:root[saved-theme="dark"] body[data-story-family="ableton-synths"] {
+  --synth-field-guide-accent: #e6a17f;
+}
+
+body[data-story-family="ableton-synths"] .top-bar {
+  line-height: 1.2;
+}
+
+body[data-story-family="ableton-synths"] .top-bar__inner {
+  min-height: calc(var(--topbar-height) - 1px);
+  padding-block: 0;
+}
+
+body[data-story-family="ableton-synths"] #app[data-ableton-synth-lesson] {
+  position: relative;
+  border-top: 3px solid var(--synth-field-guide-accent);
+  border-bottom: 1px solid var(--line);
+  background: var(--color-background);
+  box-shadow: 0 20px 44px rgba(15, 20, 30, 0.14);
+}
+
+@media (max-width: 720px) {
+  body[data-story-family="ableton-synths"] #app[data-ableton-synth-lesson] {
+    border-top-width: 2px;
+    box-shadow: 0 12px 28px rgba(15, 20, 30, 0.12);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   body[data-story-route="ableton-learning-music-play-with-beats"] .story-callout {
     box-shadow: none;
