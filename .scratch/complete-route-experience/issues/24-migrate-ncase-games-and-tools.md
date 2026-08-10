@@ -1,0 +1,9 @@
+# Migrate NCase games and tools
+
+Type: task
+Status: open
+Blocked by: 15
+
+## Question
+
+Complete and verify `trust`, `crowds`, `loopy`, `anxiety`, `wbwwb`, `coming-out-simulator-2014`, and `sim`. Preserve slideshow/game/editor state, native runtime controls, drawing and pointer coordinates, timing, audio, persistence, export/share behavior, and intrinsic canvas/image output. Add the missing deterministic `crowds` scenario. Update parity records and leave one atomic family commit after focused and full gates.
