@@ -15,6 +15,14 @@ function makeRootWithManifest(manifest) {
     ? manifest
     : [...manifest, nextRoute];
   fs.writeFileSync(path.join(root, "routes.manifest.json"), JSON.stringify(completeManifest, null, 2));
+  completeManifest.forEach((route) => {
+    const routeDir = path.join(root, route.slug);
+    fs.mkdirSync(routeDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(routeDir, "index.html"),
+      "<!doctype html><html><head><title>Fixture</title></head><body><main>Fixture</main></body></html>",
+    );
+  });
   return root;
 }
 
@@ -206,6 +214,27 @@ test("duplicate slug fails validation", () => {
   const result = runSync(root);
   assert.equal(result.status, 1);
   assert.match(result.stderr, /duplicate slug/i);
+});
+
+test("route slugs cannot escape the synchronization root", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "manifest-test-"));
+  const escapedSlug = `../${path.basename(root)}-outside`;
+  const escapedPath = path.resolve(root, escapedSlug);
+  const manifest = [
+    {
+      ...validRoute,
+      slug: escapedSlug,
+      docsUrl: `./docs/${escapedSlug}/`,
+    },
+    nextRoute,
+  ];
+  fs.writeFileSync(path.join(root, "routes.manifest.json"), JSON.stringify(manifest, null, 2));
+  assert.equal(fs.existsSync(escapedPath), false);
+  const result = runSync(root);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /kebab-case slug/i);
+  assert.equal(fs.existsSync(escapedPath), false);
+  assert.equal(fs.existsSync(path.join(root, "pages.json")), false);
 });
 
 test("missing title fails validation", () => {

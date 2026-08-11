@@ -711,6 +711,10 @@ body[data-story-shell="engineering-sandbox"][data-story-variant="lab"][data-stor
   padding-top: 4.25rem;
 }
 
+body[data-story-shell="engineering-sandbox"][data-story-family="ableton-synths"][data-story-nav="native"] {
+  padding-top: var(--topbar-height);
+}
+
 body[data-story-shell="engineering-sandbox"][data-story-variant="lab"] .story-rail,
 body[data-story-shell="engineering-sandbox"][data-story-variant="lab"] .story-mobile-bar {
   display: none !important;
@@ -1431,6 +1435,7 @@ body[data-story-shell="engineering-sandbox"][data-reference-text="Double Descent
 
 @media (min-width: 1380px) {
   body[data-story-shell="engineering-sandbox"][data-story-nav="generated"] {
+    box-sizing: border-box;
     padding-left: var(--story-rail-offset);
     padding-bottom: 0;
   }

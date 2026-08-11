@@ -879,7 +879,7 @@
   }
 
   function prepareLongformEngineeringArticle(body) {
-    if (body.dataset.storyFamily !== "engineering-longform") {
+    if (body.dataset.storyNav !== "generated") {
       return;
     }
 

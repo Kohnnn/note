@@ -943,6 +943,7 @@ async function setSelectControlByLabel(page, scopeSelector, labelText, value) {
 
 async function assertLongformResponsiveShell(context, page, relativePath, readySelector, label, options = {}) {
   const {
+    expectedFamily = "engineering-longform",
     expectedRoute = null,
     minimumChapters = 4,
     playHref = null,
@@ -952,7 +953,7 @@ async function assertLongformResponsiveShell(context, page, relativePath, readyS
     await assertEngineeringSandboxShell(page, label, {
       minimumChapters,
       navMode: "generated",
-      expectedFamily: "engineering-longform",
+      expectedFamily,
       expectedRoute,
     });
 
@@ -4720,6 +4721,7 @@ async function smokeInteractiveMechanicalWatch(context) {
     canvasSelector,
     label,
     {
+      expectedFamily: "runtime",
       expectedRoute: "interactive-mechanical-watch",
       minimumChapters: 10,
       playHref: "#hero",
@@ -7722,7 +7724,7 @@ async function smokeFormula1Racing(context) {
   });
   await assertRoute(page, "formula-1-racing/", "#reference-footer");
   await assertEngineeringSandboxShell(page, "formula-1-racing route", {
-    expectedFamily: "engineering-longform",
+    expectedFamily: "runtime",
     expectedRoute: "formula-1-racing",
   });
   await page.waitForFunction(() => document.querySelectorAll(".drawer_container canvas").length >= 5, null, { timeout: 30000 });

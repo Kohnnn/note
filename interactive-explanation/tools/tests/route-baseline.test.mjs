@@ -198,6 +198,56 @@ test("all route experience assignments match the approved contract", () => {
   assert.deepEqual(actualNativeControlBySlug, expectedNativeControlBySlug);
 });
 
+test("all route HTML files carry canonical Engineering Sandbox seams", () => {
+  for (const route of manifest) {
+    const routePath = path.join(root, route.slug, "index.html");
+    const source = fs.readFileSync(routePath, "utf8");
+    const head = source.match(/<head\b[^>]*>([\s\S]*?)(?:<\/head\s*>|<body\b)/i)?.[1];
+    const body = source.match(/<body\b([^>]*)>/i)?.[1];
+    assert.ok(head, `${route.slug} must have a head seam`);
+    assert.ok(body !== undefined, `${route.slug} must have a body seam`);
+    const expectedAttributes = {
+      "data-story-shell": "engineering-sandbox",
+      "data-story-route": route.slug,
+      "data-story-family": route.shell.family,
+      "data-story-variant": route.shell.variant,
+      "data-story-nav": route.shell.navigation,
+    };
+    for (const [name, value] of Object.entries(expectedAttributes)) {
+      assert.equal((body.match(new RegExp(`\\b${name}\\s*=`, "gi")) || []).length, 1, `${route.slug} must declare ${name} once`);
+      assert.match(body, new RegExp(`\\b${name}\\s*=\\s*["']${value}["']`, "i"), `${route.slug} must declare ${name}=${value}`);
+    }
+    assert.equal((head.match(/<meta\b[^>]*\bname\s*=\s*["']color-scheme["'][^>]*>/gi) || []).length, 1, `${route.slug} must have one color-scheme meta`);
+    assert.match(head, /<meta\b(?=[^>]*\bname\s*=\s*["']color-scheme["'])(?=[^>]*\bcontent\s*=\s*["']light dark["'])[^>]*>/i, `${route.slug} must declare light and dark color schemes`);
+    const baseHref = head.match(/<base\b[^>]*\bhref\s*=\s*["']([^"']+)["'][^>]*>/i)?.[1];
+    const documentUrl = new URL(`https://route.local/${route.slug}/index.html`);
+    const base = baseHref ? new URL(baseHref, documentUrl) : documentUrl;
+    const resolve = (href) => new URL(href, base).pathname;
+    const theme = head.match(/<script\b[^>]*\bsrc\s*=\s*["']([^"']*shared\/theme-init\.js)["'][^>]*><\/script>/i);
+    const sandboxCss = head.match(/<link\b[^>]*\bhref\s*=\s*["']([^"']*shared\/engineering-sandbox\.css)["'][^>]*>/i);
+    const sandboxScript = source.match(/<script\b(?=[^>]*\bdefer\b)(?=[^>]*\bsrc\s*=\s*["']([^"']*shared\/engineering-sandbox\.js)["'])[^>]*><\/script>/i);
+    assert.ok(theme, `${route.slug} must synchronously load theme init`);
+    assert.ok(sandboxCss, `${route.slug} must load Engineering Sandbox CSS`);
+    assert.ok(sandboxScript, `${route.slug} must defer Engineering Sandbox runtime`);
+    assert.equal((source.match(/shared\/theme-init\.js/g) || []).length, 1, `${route.slug} must load theme init once`);
+    assert.equal((source.match(/shared\/engineering-sandbox\.css/g) || []).length, 1, `${route.slug} must load sandbox CSS once`);
+    assert.equal((source.match(/shared\/engineering-sandbox\.js/g) || []).length, 1, `${route.slug} must load sandbox runtime once`);
+    assert.equal(resolve(theme[1]), "/shared/theme-init.js", `${route.slug} theme init must resolve through base`);
+    assert.equal(resolve(sandboxCss[1]), "/shared/engineering-sandbox.css", `${route.slug} sandbox CSS must resolve through base`);
+    assert.equal(resolve(sandboxScript[1]), "/shared/engineering-sandbox.js", `${route.slug} sandbox runtime must resolve through base`);
+    const stylePositions = [...head.matchAll(/<(?:style\b|link\b[^>]*\brel\s*=\s*["'][^"']*\bstylesheet\b[^"']*["'])/gi)]
+      .map((match) => match.index)
+      .filter((position) => position !== sandboxCss.index);
+    assert.ok(stylePositions.every((position) => theme.index < position), `${route.slug} must load theme init before route styles`);
+    assert.ok(stylePositions.every((position) => sandboxCss.index > position), `${route.slug} must load sandbox CSS after route styles`);
+    const modules = JSON.parse(fs.readFileSync(path.join(root, "docs", route.slug, "parity.json"), "utf8"));
+    const module = modules.find((entry) => entry.moduleId === "universal-route-html-seams");
+    assert.ok(module, `${route.slug} parity must include universal Route seam evidence`);
+    assert.ok(module.notes.includes("Ticket 12 synchronizes the manifest-owned Engineering Sandbox body contract and shared head seams without moving existing Route runtimes or scripts."), `${route.slug} parity notes Ticket 12`);
+    assert.ok(module.evidence.includes("Route HTML declares canonical data-story metadata plus one color-scheme meta, synchronous theme init before Route styles, Sandbox CSS after Route styles, and one deferred Sandbox runtime whose existing position is preserved."), `${route.slug} parity evidence Ticket 12`);
+  }
+});
+
 test("sim emoji fallback resolves to its shipped font asset", () => {
   const scriptPath = path.join(root, "sim", "scripts", "libraries", "emojiFallback.js");
   const source = fs.readFileSync(scriptPath, "utf8");
