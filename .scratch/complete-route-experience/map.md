@@ -32,6 +32,7 @@ Behavior, content, URLs, assets, accessibility, and runtime dimensions remain in
 - [Lock the acceptance and rollback contract](issues/08-lock-acceptance-and-rollback-contract.md) — require exact per-family and 83-Route static, viewport, theme, interaction, geometry, accessibility, network, performance, and full-suite gates with atomic rollback.
 - [Lock the Suggested Next Route contract](issues/09-lock-suggested-next-route-contract.md) — adopt one manifest-owned continuation per Route, preserve the published Music edge, remove the undocumented engineering loop, and keep ordinary continuations separate from Progress.
 - [Sequence family execution and graduate implementation tickets](issues/10-sequence-family-execution.md) — establish four foundation commits followed by 14 complete family slices from authored HTML to opaque runtimes and one repository-wide close gate.
+- [Encode the manifest experience contract](issues/11-encode-manifest-experience-contract.md) — make the manifest authoritative for all 83 Route shell, theme, surface, interaction, network, and Suggested Next Route declarations; validate exact schema and cross-Route invariants while preserving generated `pages.json` parity.
 
 ## Not yet specified
 

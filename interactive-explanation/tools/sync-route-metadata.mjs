@@ -5,6 +5,65 @@ import { fileURLToPath } from "node:url";
 const defaultRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const VALID_INTENTS = new Set(["explainer", "simulation", "practice", "create", "guided-path"]);
 const VALID_LEARNING_DIFFICULTIES = new Set(["beginner", "intermediate", "advanced"]);
+const VALID_SHELL_VARIANTS = new Set(["essay", "lab", "practice"]);
+const VALID_NAVIGATION_MODES = new Set(["generated", "native", "none"]);
+const VALID_THEME_OWNERSHIP = new Set(["shell-only", "runtime-hook", "fixed-runtime"]);
+const VALID_NATIVE_CONTROL_KINDS = new Set(["link", "state"]);
+const VALID_INTERACTION_PROBES = new Set(["read-only"]);
+const ALLOWED_ROUTE_KEYS = new Set([
+  "slug",
+  "title",
+  "summary",
+  "referenceUrl",
+  "topicTags",
+  "addedDate",
+  "intent",
+  "docsUrl",
+  "learning",
+  "referenceMode",
+  "familyKey",
+  "shell",
+  "suggestedNextSlug",
+  "experience",
+]);
+const ALLOWED_LEARNING_KEYS = new Set(["difficulty", "durationMinutes", "order", "prerequisites"]);
+const ALLOWED_SHELL_KEYS = new Set(["family", "variant", "navigation", "chapters", "nativeControl"]);
+const ALLOWED_CHAPTER_KEYS = new Set(["selector", "title", "id", "closest"]);
+const ALLOWED_NATIVE_CONTROL_KEYS = new Set([
+  "selector",
+  "minimum",
+  "kind",
+  "fragmentOnly",
+  "childSelector",
+  "peerSelectors",
+]);
+const ALLOWED_EXPERIENCE_KEYS = new Set([
+  "themeOwnership",
+  "primarySurface",
+  "runtimeSurface",
+  "interactionProbe",
+  "networkPolicy",
+  "themeRoot",
+]);
+const ALLOWED_NETWORK_POLICY_KEYS = new Set(["mode", "actions"]);
+const ALLOWED_NETWORK_ACTION_KEYS = new Set(["selector", "hosts"]);
+const CHAPTER_ROUTE_SLUGS = new Set([
+  "rigid-body-collisions",
+  "linear-regression",
+  "logistic-regression",
+  "precision-recall",
+  "roc-auc",
+]);
+const MUSICMAP_DEFERRED_ACTIONS = [
+  {
+    selector: "#youtube-playlist-link",
+    hosts: ["youtube.com", "youtube-nocookie.com", "ytimg.com", "googlevideo.com"],
+  },
+  {
+    selector: "#spotify-playlist-link",
+    hosts: ["open.spotify.com", "embed-cdn.spotifycdn.com"],
+  },
+];
 
 const cliArgs = process.argv.slice(2);
 
@@ -79,6 +138,147 @@ function escapeAttribute(value) {
   return escapeHtml(value).replace(/"/g, "&quot;");
 }
 
+function assertNonEmptyString(value, message) {
+  assertManifest(
+    typeof value === "string" && value.length > 0 && value === value.trim(),
+    message,
+  );
+}
+
+function assertAllowedKeys(value, allowedKeys, label) {
+  const unknownKeys = Object.keys(value).filter((key) => !allowedKeys.has(key));
+  assertManifest(
+    unknownKeys.length === 0,
+    `${label} has unknown key${unknownKeys.length === 1 ? "" : "s"} ${unknownKeys.map((key) => `"${key}"`).join(", ")}`,
+  );
+}
+
+function isValidHostname(hostname) {
+  return hostname.length <= 253 && hostname.split(".").every((label) => {
+    return label.length > 0
+      && label.length <= 63
+      && /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i.test(label);
+  });
+}
+
+function parseReferenceUrl(slug, referenceUrl) {
+  let parsed;
+  try {
+    parsed = new URL(referenceUrl);
+  } catch {
+    assertManifest(false, `route "${slug}" must include an absolute referenceUrl or use referenceMode "neutral"`);
+  }
+  assertManifest(
+    (parsed.protocol === "http:" || parsed.protocol === "https:")
+      && !parsed.username
+      && !parsed.password
+      && isValidHostname(parsed.hostname),
+    `route "${slug}" must include an absolute referenceUrl or use referenceMode "neutral"`,
+  );
+}
+
+function normalizePolicyHost(slug, index, host) {
+  assertNonEmptyString(host, `route "${slug}" deferred action ${index} has invalid host`);
+  const normalized = host.toLowerCase().replace(/\.$/, "");
+  assertManifest(
+    isValidHostname(normalized),
+    `route "${slug}" deferred action ${index} has invalid host "${host}"`,
+  );
+  return normalized;
+}
+
+function validateChapters(slug, chapters) {
+  assertManifest(Array.isArray(chapters) && chapters.length > 0, `route "${slug}" chapters must be a non-empty array`);
+  const selectors = new Set();
+  const ids = new Set();
+  chapters.forEach((chapter, index) => {
+    assertManifest(chapter && typeof chapter === "object" && !Array.isArray(chapter), `route "${slug}" chapter ${index} must be an object`);
+    assertAllowedKeys(chapter, ALLOWED_CHAPTER_KEYS, `route "${slug}" chapter ${index}`);
+    assertNonEmptyString(chapter.selector, `route "${slug}" chapter ${index} selector must be a non-empty trimmed string`);
+    assertNonEmptyString(chapter.title, `route "${slug}" chapter ${index} title must be a non-empty string`);
+    assertManifest(!selectors.has(chapter.selector), `route "${slug}" has duplicate chapter selector "${chapter.selector}"`);
+    selectors.add(chapter.selector);
+    if (chapter.id !== undefined) {
+      assertNonEmptyString(chapter.id, `route "${slug}" chapter ${index} id must be a non-empty string`);
+      assertManifest(!ids.has(chapter.id), `route "${slug}" has duplicate chapter id "${chapter.id}"`);
+      ids.add(chapter.id);
+    }
+    if (chapter.closest !== undefined) {
+      assertNonEmptyString(chapter.closest, `route "${slug}" chapter ${index} closest must be a non-empty string`);
+    }
+  });
+}
+
+function validateNativeControl(slug, nativeControl) {
+  assertManifest(nativeControl && typeof nativeControl === "object" && !Array.isArray(nativeControl), `route "${slug}" nativeControl must be an object`);
+  assertAllowedKeys(nativeControl, ALLOWED_NATIVE_CONTROL_KEYS, `route "${slug}" nativeControl`);
+  assertNonEmptyString(nativeControl.selector, `route "${slug}" nativeControl selector must be a non-empty trimmed string`);
+  assertManifest(Number.isInteger(nativeControl.minimum) && nativeControl.minimum > 0, `route "${slug}" nativeControl minimum must be a positive integer`);
+  assertManifest(VALID_NATIVE_CONTROL_KINDS.has(nativeControl.kind), `route "${slug}" nativeControl uses invalid kind "${nativeControl.kind}"`);
+  assertManifest(
+    nativeControl.fragmentOnly === undefined || typeof nativeControl.fragmentOnly === "boolean",
+    `route "${slug}" nativeControl fragmentOnly must be a boolean`,
+  );
+  if (nativeControl.kind === "link") {
+    assertManifest(nativeControl.childSelector === undefined, `route "${slug}" link nativeControl cannot declare childSelector`);
+    assertManifest(nativeControl.peerSelectors === undefined, `route "${slug}" link nativeControl cannot declare peerSelectors`);
+  } else {
+    assertManifest(nativeControl.fragmentOnly === undefined, `route "${slug}" state nativeControl cannot declare fragmentOnly`);
+  }
+  if (nativeControl.childSelector !== undefined) {
+    assertNonEmptyString(nativeControl.childSelector, `route "${slug}" nativeControl childSelector must be a non-empty trimmed string`);
+  }
+  if (nativeControl.peerSelectors !== undefined) {
+    assertManifest(Array.isArray(nativeControl.peerSelectors) && nativeControl.peerSelectors.length > 0, `route "${slug}" nativeControl peerSelectors must be a non-empty array`);
+    const selectors = new Set([nativeControl.selector]);
+    nativeControl.peerSelectors.forEach((selector) => {
+      assertNonEmptyString(selector, `route "${slug}" nativeControl peerSelector must be a non-empty trimmed string`);
+      assertManifest(!selectors.has(selector), `route "${slug}" nativeControl has duplicate peer selector "${selector}"`);
+      selectors.add(selector);
+    });
+  }
+}
+
+function validateNetworkPolicy(slug, networkPolicy) {
+  assertManifest(networkPolicy && typeof networkPolicy === "object" && !Array.isArray(networkPolicy), `route "${slug}" networkPolicy must be an object`);
+  assertAllowedKeys(networkPolicy, ALLOWED_NETWORK_POLICY_KEYS, `route "${slug}" networkPolicy`);
+  assertManifest(
+    networkPolicy.mode === "local-only" || networkPolicy.mode === "deferred-remote",
+    `route "${slug}" networkPolicy uses invalid mode "${networkPolicy.mode}"`,
+  );
+
+  if (networkPolicy.mode === "local-only") {
+    assertManifest(networkPolicy.actions === undefined, `route "${slug}" local-only networkPolicy cannot declare actions`);
+    return;
+  }
+
+  assertManifest(Array.isArray(networkPolicy.actions) && networkPolicy.actions.length > 0, `route "${slug}" deferred-remote networkPolicy requires actions`);
+  const selectors = new Set();
+  networkPolicy.actions.forEach((action, index) => {
+    assertManifest(action && typeof action === "object" && !Array.isArray(action), `route "${slug}" deferred action ${index} must be an object`);
+    assertAllowedKeys(action, ALLOWED_NETWORK_ACTION_KEYS, `route "${slug}" deferred action ${index}`);
+    assertNonEmptyString(action.selector, `route "${slug}" deferred action ${index} selector must be a non-empty trimmed string`);
+    assertManifest(!selectors.has(action.selector), `route "${slug}" has duplicate deferred action selector "${action.selector}"`);
+    selectors.add(action.selector);
+    assertManifest(Array.isArray(action.hosts) && action.hosts.length > 0, `route "${slug}" deferred action ${index} requires hosts`);
+    const hosts = new Set();
+    action.hosts.forEach((host) => {
+      const normalized = normalizePolicyHost(slug, index, host);
+      assertManifest(!hosts.has(normalized), `route "${slug}" deferred action ${index} has duplicate host "${host}"`);
+      hosts.add(normalized);
+    });
+  });
+
+  if (slug === "musicmap") {
+    assertManifest(
+      JSON.stringify(networkPolicy.actions) === JSON.stringify(MUSICMAP_DEFERRED_ACTIONS),
+      "route \"musicmap\" must declare the approved deferred embed actions",
+    );
+  } else {
+    assertManifest(false, `route "${slug}" cannot declare deferred-remote network access`);
+  }
+}
+
 function validateManifest(manifest) {
   assertManifest(Array.isArray(manifest), "routes.manifest.json must contain an array");
 
@@ -87,15 +287,16 @@ function validateManifest(manifest) {
 
   manifest.forEach((route, index) => {
     assertManifest(route && typeof route === "object" && !Array.isArray(route), `entry ${index} must be an object`);
+    assertAllowedKeys(route, ALLOWED_ROUTE_KEYS, `entry ${index}`);
 
-    const { slug, title, summary, intent, referenceUrl, referenceMode, docsUrl, learning } = route;
-    assertManifest(typeof slug === "string" && slug.trim().length > 0, `entry ${index} is missing slug`);
+    const { slug, title, summary, intent, referenceUrl, referenceMode, docsUrl, learning, shell, experience, suggestedNextSlug } = route;
+    assertNonEmptyString(slug, `entry ${index} is missing slug`);
     assertManifest(!slugs.has(slug), `duplicate slug "${slug}"`);
     slugs.add(slug);
 
-    assertManifest(typeof title === "string" && title.trim().length > 0, `route "${slug}" is missing title`);
-    assertManifest(typeof summary === "string" && summary.trim().length > 0, `route "${slug}" is missing summary`);
-    assertManifest(typeof intent === "string" && intent.trim().length > 0, `route "${slug}" is missing intent`);
+    assertNonEmptyString(title, `route "${slug}" is missing title`);
+    assertNonEmptyString(summary, `route "${slug}" is missing summary`);
+    assertNonEmptyString(intent, `route "${slug}" is missing intent`);
     assertManifest(VALID_INTENTS.has(intent), `route "${slug}" uses invalid intent "${intent}"`);
     assertManifest(
       referenceMode === undefined || referenceMode === "neutral",
@@ -103,59 +304,77 @@ function validateManifest(manifest) {
     );
 
     if (referenceMode === "neutral") {
-      assertManifest(
-        referenceUrl === undefined,
-        `route "${slug}" cannot combine referenceMode "neutral" with referenceUrl`,
-      );
+      assertManifest(referenceUrl === undefined, `route "${slug}" cannot combine referenceMode "neutral" with referenceUrl`);
     } else {
-      assertManifest(
-        typeof referenceUrl === "string" && /^https?:\/\//i.test(referenceUrl),
-        `route "${slug}" must include an absolute referenceUrl or use referenceMode "neutral"`,
-      );
+      assertNonEmptyString(referenceUrl, `route "${slug}" must include an absolute referenceUrl or use referenceMode "neutral"`);
+      parseReferenceUrl(slug, referenceUrl);
       assertManifest(!referenceUrls.has(referenceUrl), `duplicate referenceUrl "${referenceUrl}"`);
       referenceUrls.add(referenceUrl);
     }
 
+    assertManifest(docsUrl === `./docs/${slug}/`, `route "${slug}" must use docsUrl "./docs/${slug}/"`);
+    assertManifest(shell && typeof shell === "object" && !Array.isArray(shell), `route "${slug}" shell must be an object`);
+    assertAllowedKeys(shell, ALLOWED_SHELL_KEYS, `route "${slug}" shell`);
+    assertNonEmptyString(shell.family, `route "${slug}" shell family must be a non-empty trimmed string`);
+    assertManifest(VALID_SHELL_VARIANTS.has(shell.variant), `route "${slug}" shell uses invalid variant "${shell.variant}"`);
+    assertManifest(VALID_NAVIGATION_MODES.has(shell.navigation), `route "${slug}" shell uses invalid navigation "${shell.navigation}"`);
+
+    if (shell.chapters !== undefined) {
+      assertManifest(shell.navigation === "generated", `route "${slug}" chapters require generated navigation`);
+      validateChapters(slug, shell.chapters);
+    }
+    if (shell.navigation === "generated") {
+      assertManifest(
+        shell.chapters !== undefined || !CHAPTER_ROUTE_SLUGS.has(slug),
+        `route "${slug}" generated navigation requires chapters`,
+      );
+    }
+    if (CHAPTER_ROUTE_SLUGS.has(slug)) {
+      assertManifest(shell.navigation === "generated" && shell.chapters !== undefined, `route "${slug}" requires manifest-owned chapters`);
+    }
+    if (shell.navigation === "native") {
+      validateNativeControl(slug, shell.nativeControl);
+    } else {
+      assertManifest(shell.nativeControl === undefined, `route "${slug}" nativeControl requires native navigation`);
+    }
+
+    assertNonEmptyString(suggestedNextSlug, `route "${slug}" suggestedNextSlug must be a non-empty slug`);
+    assertManifest(experience && typeof experience === "object" && !Array.isArray(experience), `route "${slug}" experience must be an object`);
+    assertAllowedKeys(experience, ALLOWED_EXPERIENCE_KEYS, `route "${slug}" experience`);
+    assertManifest(VALID_THEME_OWNERSHIP.has(experience.themeOwnership), `route "${slug}" uses invalid themeOwnership "${experience.themeOwnership}"`);
+    assertNonEmptyString(experience.primarySurface, `route "${slug}" primarySurface must be a non-empty trimmed string`);
+    assertNonEmptyString(experience.runtimeSurface, `route "${slug}" runtimeSurface must be a non-empty trimmed string`);
     assertManifest(
-      docsUrl === `./docs/${slug}/`,
-      `route "${slug}" must use docsUrl "./docs/${slug}/"`,
+      VALID_INTERACTION_PROBES.has(experience.interactionProbe),
+      `route "${slug}" uses invalid interactionProbe "${experience.interactionProbe}"`,
     );
+    if (experience.themeOwnership === "runtime-hook") {
+      assertNonEmptyString(experience.themeRoot, `route "${slug}" runtime-hook themeOwnership requires themeRoot`);
+    } else {
+      assertManifest(experience.themeRoot === undefined, `route "${slug}" themeRoot requires runtime-hook themeOwnership`);
+    }
+    validateNetworkPolicy(slug, experience.networkPolicy);
 
     if (learning !== undefined) {
-      assertManifest(
-        learning && typeof learning === "object" && !Array.isArray(learning),
-        `route "${slug}" learning metadata must be an object`,
-      );
-      assertManifest(
-        learning.difficulty === undefined || VALID_LEARNING_DIFFICULTIES.has(learning.difficulty),
-        `route "${slug}" uses invalid learning difficulty "${learning.difficulty}"`,
-      );
-      assertManifest(
-        learning.durationMinutes === undefined || Number.isInteger(learning.durationMinutes) && learning.durationMinutes > 0,
-        `route "${slug}" learning durationMinutes must be a positive integer`,
-      );
-      assertManifest(
-        learning.order === undefined || Number.isInteger(learning.order) && learning.order > 0,
-        `route "${slug}" learning order must be a positive integer`,
-      );
-      assertManifest(
-        learning.prerequisites === undefined || Array.isArray(learning.prerequisites),
-        `route "${slug}" learning prerequisites must be an array`,
-      );
+      assertManifest(learning && typeof learning === "object" && !Array.isArray(learning), `route "${slug}" learning metadata must be an object`);
+      assertAllowedKeys(learning, ALLOWED_LEARNING_KEYS, `route "${slug}" learning metadata`);
+      assertManifest(learning.difficulty === undefined || VALID_LEARNING_DIFFICULTIES.has(learning.difficulty), `route "${slug}" uses invalid learning difficulty "${learning.difficulty}"`);
+      assertManifest(learning.durationMinutes === undefined || Number.isInteger(learning.durationMinutes) && learning.durationMinutes > 0, `route "${slug}" learning durationMinutes must be a positive integer`);
+      assertManifest(learning.order === undefined || Number.isInteger(learning.order) && learning.order > 0, `route "${slug}" learning order must be a positive integer`);
+      assertManifest(learning.prerequisites === undefined || Array.isArray(learning.prerequisites), `route "${slug}" learning prerequisites must be an array`);
     }
   });
 
-  manifest.forEach(({ slug, learning }) => {
+  manifest.forEach(({ slug, learning, suggestedNextSlug }) => {
+    assertManifest(suggestedNextSlug !== slug, `route "${slug}" cannot suggest itself`);
+    assertManifest(slugs.has(suggestedNextSlug), `route "${slug}" has unknown suggested next route "${suggestedNextSlug}"`);
     if (!learning?.prerequisites) {
       return;
     }
 
     const prerequisites = new Set();
     learning.prerequisites.forEach((prerequisite) => {
-      assertManifest(
-        typeof prerequisite === "string" && prerequisite.trim().length > 0,
-        `route "${slug}" learning prerequisite must be a non-empty slug`,
-      );
+      assertNonEmptyString(prerequisite, `route "${slug}" learning prerequisite must be a non-empty slug`);
       assertManifest(prerequisite !== slug, `route "${slug}" cannot require itself`);
       assertManifest(!prerequisites.has(prerequisite), `route "${slug}" has duplicate prerequisite "${prerequisite}"`);
       assertManifest(slugs.has(prerequisite), `route "${slug}" has unknown prerequisite "${prerequisite}"`);

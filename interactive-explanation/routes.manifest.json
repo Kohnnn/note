@@ -11,7 +11,27 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "simulation",
-    "docsUrl": "./docs/trust/"
+    "docsUrl": "./docs/trust/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "#select .dot",
+        "minimum": 10,
+        "kind": "state"
+      }
+    },
+    "suggestedNextSlug": "polygons",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "polygons",
@@ -25,7 +45,22 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "simulation",
-    "docsUrl": "./docs/polygons/"
+    "docsUrl": "./docs/polygons/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "ballot",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "ballot",
@@ -39,7 +74,22 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "simulation",
-    "docsUrl": "./docs/ballot/"
+    "docsUrl": "./docs/ballot/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "crowds",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "crowds",
@@ -53,7 +103,27 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "simulation",
-    "docsUrl": "./docs/crowds/"
+    "docsUrl": "./docs/crowds/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "#navigation > div[chapter]",
+        "minimum": 9,
+        "kind": "state"
+      }
+    },
+    "suggestedNextSlug": "loopy",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "loopy",
@@ -67,7 +137,22 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "create",
-    "docsUrl": "./docs/loopy/"
+    "docsUrl": "./docs/loopy/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "simulating",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "neurons",
@@ -81,7 +166,28 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "simulation",
-    "docsUrl": "./docs/neurons/"
+    "docsUrl": "./docs/neurons/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "iframe[title=\"Neurotic Neurons interactive\"]",
+        "minimum": 1,
+        "kind": "state",
+        "childSelector": "#control_play, #control_volume, #control_captions"
+      }
+    },
+    "suggestedNextSlug": "anxiety",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "remember",
@@ -95,7 +201,22 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "practice",
-    "docsUrl": "./docs/remember/"
+    "docsUrl": "./docs/remember/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "primary-interactive-hub",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "anxiety",
@@ -109,7 +230,27 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "simulation",
-    "docsUrl": "./docs/anxiety/"
+    "docsUrl": "./docs/anxiety/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "#game_choices > button",
+        "minimum": 1,
+        "kind": "state"
+      }
+    },
+    "suggestedNextSlug": "remember",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "wbwwb",
@@ -123,7 +264,22 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "simulation",
-    "docsUrl": "./docs/wbwwb/"
+    "docsUrl": "./docs/wbwwb/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "crowds",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "coming-out-simulator-2014",
@@ -137,7 +293,22 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "simulation",
-    "docsUrl": "./docs/coming-out-simulator-2014/"
+    "docsUrl": "./docs/coming-out-simulator-2014/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "anxiety",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "covid-19",
@@ -151,7 +322,22 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "simulation",
-    "docsUrl": "./docs/covid-19/"
+    "docsUrl": "./docs/covid-19/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "crowds",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "simulating",
@@ -165,7 +351,28 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "create",
-    "docsUrl": "./docs/simulating/"
+    "docsUrl": "./docs/simulating/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": ".links a[href=\"../sim/\"], .links a[href=\"./original/\"]",
+        "minimum": 2,
+        "kind": "link",
+        "fragmentOnly": false
+      }
+    },
+    "suggestedNextSlug": "sim",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "sim",
@@ -179,7 +386,22 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "create",
-    "docsUrl": "./docs/sim/"
+    "docsUrl": "./docs/sim/",
+    "shell": {
+      "family": "ncase",
+      "variant": "essay",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "primary-interactive-hub",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "decision-tree",
@@ -193,7 +415,22 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "explainer",
-    "docsUrl": "./docs/decision-tree/"
+    "docsUrl": "./docs/decision-tree/",
+    "shell": {
+      "family": "mlu-pilot",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "random-forest",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "random-forest",
@@ -207,7 +444,22 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "explainer",
-    "docsUrl": "./docs/random-forest/"
+    "docsUrl": "./docs/random-forest/",
+    "shell": {
+      "family": "mlu-pilot",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "linear-regression",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "conditional-probability",
@@ -221,7 +473,22 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "explainer",
-    "docsUrl": "./docs/conditional-probability/"
+    "docsUrl": "./docs/conditional-probability/",
+    "shell": {
+      "family": "ev-essay",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "logistic-regression",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "markov-chains",
@@ -235,7 +502,22 @@
     ],
     "addedDate": "2026-03-10",
     "intent": "simulation",
-    "docsUrl": "./docs/markov-chains/"
+    "docsUrl": "./docs/markov-chains/",
+    "shell": {
+      "family": "ev-essay",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "eigenvectors-and-eigenvalues",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "principal-component-analysis",
@@ -249,7 +531,22 @@
     ],
     "addedDate": "2026-03-14",
     "intent": "explainer",
-    "docsUrl": "./docs/principal-component-analysis/"
+    "docsUrl": "./docs/principal-component-analysis/",
+    "shell": {
+      "family": "ev-essay",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "eigenvectors-and-eigenvalues",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "exponentiation",
@@ -263,7 +560,22 @@
     ],
     "addedDate": "2026-03-14",
     "intent": "explainer",
-    "docsUrl": "./docs/exponentiation/"
+    "docsUrl": "./docs/exponentiation/",
+    "shell": {
+      "family": "ev-essay",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "conditional-probability",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "pi",
@@ -277,7 +589,22 @@
     ],
     "addedDate": "2026-03-14",
     "intent": "explainer",
-    "docsUrl": "./docs/pi/"
+    "docsUrl": "./docs/pi/",
+    "shell": {
+      "family": "ev-essay",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "sine-and-cosine",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "sine-and-cosine",
@@ -291,7 +618,22 @@
     ],
     "addedDate": "2026-03-14",
     "intent": "explainer",
-    "docsUrl": "./docs/sine-and-cosine/"
+    "docsUrl": "./docs/sine-and-cosine/",
+    "shell": {
+      "family": "ev-essay",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "eigenvectors-and-eigenvalues",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "eigenvectors-and-eigenvalues",
@@ -305,7 +647,22 @@
     ],
     "addedDate": "2026-03-14",
     "intent": "explainer",
-    "docsUrl": "./docs/eigenvectors-and-eigenvalues/"
+    "docsUrl": "./docs/eigenvectors-and-eigenvalues/",
+    "shell": {
+      "family": "ev-essay",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "tesseract",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "image-kernels",
@@ -319,7 +676,22 @@
     ],
     "addedDate": "2026-03-14",
     "intent": "simulation",
-    "docsUrl": "./docs/image-kernels/"
+    "docsUrl": "./docs/image-kernels/",
+    "shell": {
+      "family": "ev-essay",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "alpha-compositing",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "ordinary-least-squares-regression",
@@ -333,7 +705,22 @@
     ],
     "addedDate": "2026-03-18",
     "intent": "explainer",
-    "docsUrl": "./docs/ordinary-least-squares-regression/"
+    "docsUrl": "./docs/ordinary-least-squares-regression/",
+    "shell": {
+      "family": "ev-essay",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "linear-regression",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "blockchain",
@@ -353,6 +740,27 @@
       "durationMinutes": 8,
       "order": 1,
       "prerequisites": []
+    },
+    "shell": {
+      "family": "anders-lab",
+      "variant": "lab",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "nav a",
+        "minimum": 6,
+        "kind": "link",
+        "fragmentOnly": false
+      }
+    },
+    "suggestedNextSlug": "public-private-keys",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
     }
   },
   {
@@ -375,6 +783,27 @@
       "prerequisites": [
         "blockchain"
       ]
+    },
+    "shell": {
+      "family": "anders-lab",
+      "variant": "lab",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "nav a",
+        "minimum": 4,
+        "kind": "link",
+        "fragmentOnly": false
+      }
+    },
+    "suggestedNextSlug": "zero-knowledge-proof-demo",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
     }
   },
   {
@@ -397,6 +826,21 @@
       "prerequisites": [
         "public-private-keys"
       ]
+    },
+    "shell": {
+      "family": "anders-lab",
+      "variant": "lab",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "blockchain-101-combined-flow",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
     }
   },
   {
@@ -411,7 +855,22 @@
     ],
     "addedDate": "2026-03-20",
     "intent": "explainer",
-    "docsUrl": "./docs/alpha-compositing/"
+    "docsUrl": "./docs/alpha-compositing/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "color-spaces",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "color-spaces",
@@ -425,7 +884,22 @@
     ],
     "addedDate": "2026-03-20",
     "intent": "explainer",
-    "docsUrl": "./docs/color-spaces/"
+    "docsUrl": "./docs/color-spaces/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "lights-and-shadows",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "sound",
@@ -439,7 +913,22 @@
     ],
     "addedDate": "2026-03-20",
     "intent": "explainer",
-    "docsUrl": "./docs/sound/"
+    "docsUrl": "./docs/sound/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "ableton-learning-synths-get-started",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "cameras-and-lenses",
@@ -453,7 +942,22 @@
     ],
     "addedDate": "2026-03-20",
     "intent": "explainer",
-    "docsUrl": "./docs/cameras-and-lenses/"
+    "docsUrl": "./docs/cameras-and-lenses/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "lights-and-shadows",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "lights-and-shadows",
@@ -467,7 +971,22 @@
     ],
     "addedDate": "2026-03-20",
     "intent": "explainer",
-    "docsUrl": "./docs/lights-and-shadows/"
+    "docsUrl": "./docs/lights-and-shadows/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "primary-interactive-hub",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "tesseract",
@@ -481,7 +1000,22 @@
     ],
     "addedDate": "2026-03-20",
     "intent": "explainer",
-    "docsUrl": "./docs/tesseract/"
+    "docsUrl": "./docs/tesseract/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "curves-and-surfaces",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "gears",
@@ -495,7 +1029,22 @@
     ],
     "addedDate": "2026-03-20",
     "intent": "explainer",
-    "docsUrl": "./docs/gears/"
+    "docsUrl": "./docs/gears/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "bicycle",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "gps",
@@ -509,7 +1058,22 @@
     ],
     "addedDate": "2026-03-20",
     "intent": "explainer",
-    "docsUrl": "./docs/gps/"
+    "docsUrl": "./docs/gps/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "stargazing-dashboard",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "earth-and-sun",
@@ -523,7 +1087,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "explainer",
-    "docsUrl": "./docs/earth-and-sun/"
+    "docsUrl": "./docs/earth-and-sun/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "stargazing-dashboard",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "bicycle",
@@ -537,7 +1116,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "explainer",
-    "docsUrl": "./docs/bicycle/"
+    "docsUrl": "./docs/bicycle/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "airfoil",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "airfoil",
@@ -551,7 +1145,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "explainer",
-    "docsUrl": "./docs/airfoil/"
+    "docsUrl": "./docs/airfoil/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "formula-1-racing",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "curves-and-surfaces",
@@ -565,7 +1174,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "explainer",
-    "docsUrl": "./docs/curves-and-surfaces/"
+    "docsUrl": "./docs/curves-and-surfaces/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "image-kernels",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "internal-combustion-engine",
@@ -579,7 +1203,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "explainer",
-    "docsUrl": "./docs/internal-combustion-engine/"
+    "docsUrl": "./docs/internal-combustion-engine/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "gears",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "mechanical-watch",
@@ -593,7 +1232,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "explainer",
-    "docsUrl": "./docs/mechanical-watch/"
+    "docsUrl": "./docs/mechanical-watch/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "interactive-mechanical-watch",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "naval-architecture",
@@ -607,7 +1261,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "explainer",
-    "docsUrl": "./docs/naval-architecture/"
+    "docsUrl": "./docs/naval-architecture/",
+    "shell": {
+      "family": "engineering-longform",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "airfoil",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "formula-1-racing",
@@ -622,7 +1291,22 @@
     "intent": "simulation",
     "docsUrl": "./docs/formula-1-racing/",
     "referenceMode": "neutral",
-    "familyKey": "engineering-longform"
+    "familyKey": "engineering-longform",
+    "shell": {
+      "family": "runtime",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "stargazing-dashboard",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "interactive-mechanical-watch",
@@ -637,7 +1321,22 @@
     "intent": "simulation",
     "docsUrl": "./docs/interactive-mechanical-watch/",
     "referenceMode": "neutral",
-    "familyKey": "engineering-longform"
+    "familyKey": "engineering-longform",
+    "shell": {
+      "family": "runtime",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "watch-mesh-explorer",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "reading-qr-codes-without-a-computer",
@@ -651,7 +1350,22 @@
     ],
     "addedDate": "2026-03-20",
     "intent": "explainer",
-    "docsUrl": "./docs/reading-qr-codes-without-a-computer/"
+    "docsUrl": "./docs/reading-qr-codes-without-a-computer/",
+    "shell": {
+      "family": "runtime",
+      "variant": "essay",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "blockchain",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "teoria-interval-ear-training",
@@ -671,6 +1385,21 @@
       "durationMinutes": 8,
       "order": 1,
       "prerequisites": []
+    },
+    "shell": {
+      "family": "teoria-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "ableton-learning-music-play-with-beats",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
     }
   },
   {
@@ -685,7 +1414,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "practice",
-    "docsUrl": "./docs/teoria-note-ear-training/"
+    "docsUrl": "./docs/teoria-note-ear-training/",
+    "shell": {
+      "family": "teoria-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "teoria-key-and-note-ear-training",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "teoria-key-and-note-ear-training",
@@ -699,7 +1443,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "practice",
-    "docsUrl": "./docs/teoria-key-and-note-ear-training/"
+    "docsUrl": "./docs/teoria-key-and-note-ear-training/",
+    "shell": {
+      "family": "teoria-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "teoria-random-key-and-note-ear-training",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "teoria-random-key-and-note-ear-training",
@@ -713,7 +1472,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "practice",
-    "docsUrl": "./docs/teoria-random-key-and-note-ear-training/"
+    "docsUrl": "./docs/teoria-random-key-and-note-ear-training/",
+    "shell": {
+      "family": "teoria-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "teoria-scale-construction",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "teoria-scale-construction",
@@ -727,7 +1501,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "practice",
-    "docsUrl": "./docs/teoria-scale-construction/"
+    "docsUrl": "./docs/teoria-scale-construction/",
+    "shell": {
+      "family": "teoria-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "teoria-interval-identification-and-inversion",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "teoria-interval-identification-and-inversion",
@@ -741,7 +1530,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "practice",
-    "docsUrl": "./docs/teoria-interval-identification-and-inversion/"
+    "docsUrl": "./docs/teoria-interval-identification-and-inversion/",
+    "shell": {
+      "family": "teoria-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "ableton-learning-music-play-with-beats",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "ableton-learning-music-playground",
@@ -763,6 +1567,21 @@
       "prerequisites": [
         "ableton-learning-music-play-with-beats"
       ]
+    },
+    "shell": {
+      "family": "ableton-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "ableton-learning-synths-get-started",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
     }
   },
   {
@@ -785,6 +1604,21 @@
       "prerequisites": [
         "teoria-interval-ear-training"
       ]
+    },
+    "shell": {
+      "family": "ableton-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "ableton-learning-music-playground",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
     }
   },
   {
@@ -799,7 +1633,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "create",
-    "docsUrl": "./docs/ableton-learning-music-play-with-notes-and-scales/"
+    "docsUrl": "./docs/ableton-learning-music-play-with-notes-and-scales/",
+    "shell": {
+      "family": "ableton-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "ableton-learning-music-play-with-chords",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "ableton-learning-music-play-with-chords",
@@ -813,7 +1662,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "create",
-    "docsUrl": "./docs/ableton-learning-music-play-with-chords/"
+    "docsUrl": "./docs/ableton-learning-music-play-with-chords/",
+    "shell": {
+      "family": "ableton-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "ableton-learning-music-play-with-basslines",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "ableton-learning-music-play-with-basslines",
@@ -827,7 +1691,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "create",
-    "docsUrl": "./docs/ableton-learning-music-play-with-basslines/"
+    "docsUrl": "./docs/ableton-learning-music-play-with-basslines/",
+    "shell": {
+      "family": "ableton-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "ableton-learning-music-play-with-melodies",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "ableton-learning-music-play-with-melodies",
@@ -841,7 +1720,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "create",
-    "docsUrl": "./docs/ableton-learning-music-play-with-melodies/"
+    "docsUrl": "./docs/ableton-learning-music-play-with-melodies/",
+    "shell": {
+      "family": "ableton-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "ableton-learning-music-play-with-song-structures",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "ableton-learning-music-play-with-song-structures",
@@ -855,7 +1749,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "create",
-    "docsUrl": "./docs/ableton-learning-music-play-with-song-structures/"
+    "docsUrl": "./docs/ableton-learning-music-play-with-song-structures/",
+    "shell": {
+      "family": "ableton-practice",
+      "variant": "practice",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "chrome-music-lab-song-maker",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "ableton-learning-synths-get-started",
@@ -877,6 +1786,28 @@
       "prerequisites": [
         "ableton-learning-music-playground"
       ]
+    },
+    "shell": {
+      "family": "ableton-synths",
+      "variant": "lab",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "main[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]",
+        "minimum": 2,
+        "kind": "link",
+        "fragmentOnly": false
+      }
+    },
+    "suggestedNextSlug": "musicmap",
+    "experience": {
+      "themeOwnership": "runtime-hook",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      },
+      "themeRoot": "main[data-ableton-synth-lesson]"
     }
   },
   {
@@ -891,7 +1822,29 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "create",
-    "docsUrl": "./docs/ableton-learning-synths-how-synths-make-sound/"
+    "docsUrl": "./docs/ableton-learning-synths-how-synths-make-sound/",
+    "shell": {
+      "family": "ableton-synths",
+      "variant": "lab",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "main[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]",
+        "minimum": 2,
+        "kind": "link",
+        "fragmentOnly": false
+      }
+    },
+    "suggestedNextSlug": "ableton-learning-synths-filter-resonance",
+    "experience": {
+      "themeOwnership": "runtime-hook",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      },
+      "themeRoot": "main[data-ableton-synth-lesson]"
+    }
   },
   {
     "slug": "ableton-learning-synths-filter-resonance",
@@ -905,7 +1858,29 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "create",
-    "docsUrl": "./docs/ableton-learning-synths-filter-resonance/"
+    "docsUrl": "./docs/ableton-learning-synths-filter-resonance/",
+    "shell": {
+      "family": "ableton-synths",
+      "variant": "lab",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "main[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]",
+        "minimum": 2,
+        "kind": "link",
+        "fragmentOnly": false
+      }
+    },
+    "suggestedNextSlug": "ableton-learning-synths-modulating-amplitude-with-envelopes",
+    "experience": {
+      "themeOwnership": "runtime-hook",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      },
+      "themeRoot": "main[data-ableton-synth-lesson]"
+    }
   },
   {
     "slug": "ableton-learning-synths-modulating-amplitude-with-envelopes",
@@ -919,7 +1894,29 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "create",
-    "docsUrl": "./docs/ableton-learning-synths-modulating-amplitude-with-envelopes/"
+    "docsUrl": "./docs/ableton-learning-synths-modulating-amplitude-with-envelopes/",
+    "shell": {
+      "family": "ableton-synths",
+      "variant": "lab",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "main[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]",
+        "minimum": 2,
+        "kind": "link",
+        "fragmentOnly": false
+      }
+    },
+    "suggestedNextSlug": "ableton-learning-synths-matching-envelopes",
+    "experience": {
+      "themeOwnership": "runtime-hook",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      },
+      "themeRoot": "main[data-ableton-synth-lesson]"
+    }
   },
   {
     "slug": "ableton-learning-synths-matching-envelopes",
@@ -933,7 +1930,29 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "create",
-    "docsUrl": "./docs/ableton-learning-synths-matching-envelopes/"
+    "docsUrl": "./docs/ableton-learning-synths-matching-envelopes/",
+    "shell": {
+      "family": "ableton-synths",
+      "variant": "lab",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "main[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]",
+        "minimum": 2,
+        "kind": "link",
+        "fragmentOnly": false
+      }
+    },
+    "suggestedNextSlug": "ableton-learning-synths-recipes",
+    "experience": {
+      "themeOwnership": "runtime-hook",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      },
+      "themeRoot": "main[data-ableton-synth-lesson]"
+    }
   },
   {
     "slug": "ableton-learning-synths-recipes",
@@ -947,7 +1966,29 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "create",
-    "docsUrl": "./docs/ableton-learning-synths-recipes/"
+    "docsUrl": "./docs/ableton-learning-synths-recipes/",
+    "shell": {
+      "family": "ableton-synths",
+      "variant": "lab",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "main[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]",
+        "minimum": 2,
+        "kind": "link",
+        "fragmentOnly": false
+      }
+    },
+    "suggestedNextSlug": "musicmap",
+    "experience": {
+      "themeOwnership": "runtime-hook",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      },
+      "themeRoot": "main[data-ableton-synth-lesson]"
+    }
   },
   {
     "slug": "chrome-music-lab-song-maker",
@@ -961,7 +2002,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "create",
-    "docsUrl": "./docs/chrome-music-lab-song-maker/"
+    "docsUrl": "./docs/chrome-music-lab-song-maker/",
+    "shell": {
+      "family": "runtime",
+      "variant": "essay",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "music-interactive-hub",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "musicmap",
@@ -983,6 +2039,39 @@
       "prerequisites": [
         "ableton-learning-synths-get-started"
       ]
+    },
+    "shell": {
+      "family": "runtime",
+      "variant": "essay",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "music-interactive-hub",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "deferred-remote",
+        "actions": [
+          {
+            "selector": "#youtube-playlist-link",
+            "hosts": [
+              "youtube.com",
+              "youtube-nocookie.com",
+              "ytimg.com",
+              "googlevideo.com"
+            ]
+          },
+          {
+            "selector": "#spotify-playlist-link",
+            "hosts": [
+              "open.spotify.com",
+              "embed-cdn.spotifycdn.com"
+            ]
+          }
+        ]
+      }
     }
   },
   {
@@ -997,7 +2086,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "guided-path",
-    "docsUrl": "./docs/music-interactive-hub/"
+    "docsUrl": "./docs/music-interactive-hub/",
+    "shell": {
+      "family": "local-hub",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "teoria-interval-ear-training",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "linear-regression",
@@ -1011,7 +2115,54 @@
     ],
     "addedDate": "2026-03-14",
     "intent": "explainer",
-    "docsUrl": "./docs/linear-regression/"
+    "docsUrl": "./docs/linear-regression/",
+    "shell": {
+      "family": "mlu-pilot",
+      "variant": "essay",
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#intro",
+          "title": "Meet linear regression"
+        },
+        {
+          "selector": "#scrolly",
+          "title": "Fit the line"
+        },
+        {
+          "selector": "#mse-container",
+          "title": "Read model fit",
+          "closest": "section",
+          "id": "model-evaluation"
+        },
+        {
+          "selector": "#gd-container",
+          "title": "Watch gradient descent",
+          "closest": "div",
+          "id": "gradient-descent"
+        },
+        {
+          "selector": "#tab-container",
+          "title": "Interpret the coefficients",
+          "closest": "div",
+          "id": "interpretation"
+        },
+        {
+          "selector": "#resources",
+          "title": "References"
+        }
+      ]
+    },
+    "suggestedNextSlug": "logistic-regression",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "logistic-regression",
@@ -1025,7 +2176,56 @@
     ],
     "addedDate": "2026-03-14",
     "intent": "explainer",
-    "docsUrl": "./docs/logistic-regression/"
+    "docsUrl": "./docs/logistic-regression/",
+    "shell": {
+      "family": "mlu-pilot",
+      "variant": "essay",
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#intro",
+          "title": "Meet logistic regression"
+        },
+        {
+          "selector": "#tempSlider",
+          "title": "Move the boundary",
+          "closest": "section",
+          "id": "boundary-scene"
+        },
+        {
+          "selector": "#ll-container",
+          "title": "Evaluate the model",
+          "closest": "section",
+          "id": "model-evaluation"
+        },
+        {
+          "selector": "#gd-container",
+          "title": "Estimate coefficients",
+          "closest": "section",
+          "id": "estimating-coefficients"
+        },
+        {
+          "selector": "#tab-container",
+          "title": "Interpret the model",
+          "closest": "div",
+          "id": "interpreting-the-model"
+        },
+        {
+          "selector": "#resources",
+          "title": "References"
+        }
+      ]
+    },
+    "suggestedNextSlug": "train-test-validation",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "precision-recall",
@@ -1039,7 +2239,50 @@
     ],
     "addedDate": "2026-03-17",
     "intent": "explainer",
-    "docsUrl": "./docs/precision-recall/"
+    "docsUrl": "./docs/precision-recall/",
+    "shell": {
+      "family": "mlu-pilot",
+      "variant": "essay",
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#intro",
+          "title": "Meet precision and recall"
+        },
+        {
+          "selector": "#heatmap-container",
+          "title": "Read the confusion matrix",
+          "closest": "div",
+          "id": "confusion-matrix"
+        },
+        {
+          "selector": "#f1-container",
+          "title": "Balance the metrics",
+          "closest": "div",
+          "id": "f1-balance"
+        },
+        {
+          "selector": "#error-chart",
+          "title": "Move the threshold",
+          "closest": "div",
+          "id": "threshold-tradeoff"
+        },
+        {
+          "selector": "#resources",
+          "title": "References"
+        }
+      ]
+    },
+    "suggestedNextSlug": "roc-auc",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "roc-auc",
@@ -1053,7 +2296,52 @@
     ],
     "addedDate": "2026-03-17",
     "intent": "explainer",
-    "docsUrl": "./docs/roc-auc/"
+    "docsUrl": "./docs/roc-auc/",
+    "shell": {
+      "family": "mlu-pilot",
+      "variant": "essay",
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#intro",
+          "title": "Meet ROC and AUC"
+        },
+        {
+          "selector": "#roc-scatter-chart",
+          "title": "Move the threshold",
+          "closest": "section",
+          "id": "first-threshold"
+        },
+        {
+          "selector": "#roc-section",
+          "title": "Read the ROC curve"
+        },
+        {
+          "selector": "#auc-chart",
+          "title": "Interpret AUC",
+          "closest": "section",
+          "id": "auc-section"
+        },
+        {
+          "selector": "#conclusion",
+          "title": "Considerations"
+        },
+        {
+          "selector": "#resources",
+          "title": "References"
+        }
+      ]
+    },
+    "suggestedNextSlug": "bias-variance",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "bias-variance",
@@ -1067,7 +2355,22 @@
     ],
     "addedDate": "2026-03-17",
     "intent": "explainer",
-    "docsUrl": "./docs/bias-variance/"
+    "docsUrl": "./docs/bias-variance/",
+    "shell": {
+      "family": "mlu-pilot",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "double-descent",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "train-test-validation",
@@ -1081,7 +2384,28 @@
     ],
     "addedDate": "2026-03-17",
     "intent": "explainer",
-    "docsUrl": "./docs/train-test-validation/"
+    "docsUrl": "./docs/train-test-validation/",
+    "shell": {
+      "family": "mlu-pilot",
+      "variant": "essay",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "#toc a[href^=\"#\"]",
+        "minimum": 6,
+        "kind": "link",
+        "fragmentOnly": true
+      }
+    },
+    "suggestedNextSlug": "precision-recall",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "double-descent",
@@ -1095,7 +2419,22 @@
     ],
     "addedDate": "2026-03-18",
     "intent": "explainer",
-    "docsUrl": "./docs/double-descent/"
+    "docsUrl": "./docs/double-descent/",
+    "shell": {
+      "family": "mlu-pilot",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "double-descent2",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "double-descent2",
@@ -1109,7 +2448,22 @@
     ],
     "addedDate": "2026-03-18",
     "intent": "explainer",
-    "docsUrl": "./docs/double-descent2/"
+    "docsUrl": "./docs/double-descent2/",
+    "shell": {
+      "family": "mlu-pilot",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "decision-tree",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "memory-allocation",
@@ -1123,7 +2477,23 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "simulation",
-    "docsUrl": "./docs/memory-allocation/"
+    "docsUrl": "./docs/memory-allocation/",
+    "shell": {
+      "family": "samwho-essay",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "load-balancing",
+    "experience": {
+      "themeOwnership": "runtime-hook",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      },
+      "themeRoot": "main#content"
+    }
   },
   {
     "slug": "load-balancing",
@@ -1137,7 +2507,23 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "simulation",
-    "docsUrl": "./docs/load-balancing/"
+    "docsUrl": "./docs/load-balancing/",
+    "shell": {
+      "family": "samwho-essay",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "primary-interactive-hub",
+    "experience": {
+      "themeOwnership": "runtime-hook",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      },
+      "themeRoot": "main#content"
+    }
   },
   {
     "slug": "hysteresis-slack",
@@ -1151,7 +2537,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "simulation",
-    "docsUrl": "./docs/hysteresis-slack/"
+    "docsUrl": "./docs/hysteresis-slack/",
+    "shell": {
+      "family": "systems-essay",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "rigid-body-collisions",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "rigid-body-collisions",
@@ -1165,7 +2566,40 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "simulation",
-    "docsUrl": "./docs/rigid-body-collisions/"
+    "docsUrl": "./docs/rigid-body-collisions/",
+    "shell": {
+      "family": "systems-essay",
+      "variant": "essay",
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#before-we-start",
+          "title": "Set the frame"
+        },
+        {
+          "selector": "#what-are-we-trying-to-do",
+          "title": "Define the motion problem"
+        },
+        {
+          "selector": "#what-is-a-collision",
+          "title": "Formalize collision"
+        },
+        {
+          "selector": "#conclusion",
+          "title": "Wrap the intuition"
+        }
+      ]
+    },
+    "suggestedNextSlug": "bicycle",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "blockchain-101-combined-flow",
@@ -1179,7 +2613,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "guided-path",
-    "docsUrl": "./docs/blockchain-101-combined-flow/"
+    "docsUrl": "./docs/blockchain-101-combined-flow/",
+    "shell": {
+      "family": "anders-lab",
+      "variant": "lab",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "primary-interactive-hub",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "primary-interactive-hub",
@@ -1193,7 +2642,22 @@
     ],
     "addedDate": "2026-03-21",
     "intent": "guided-path",
-    "docsUrl": "./docs/primary-interactive-hub/"
+    "docsUrl": "./docs/primary-interactive-hub/",
+    "shell": {
+      "family": "local-hub",
+      "variant": "essay",
+      "navigation": "generated"
+    },
+    "suggestedNextSlug": "trust",
+    "experience": {
+      "themeOwnership": "shell-only",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "stargazing-dashboard",
@@ -1208,7 +2672,22 @@
     "intent": "simulation",
     "docsUrl": "./docs/stargazing-dashboard/",
     "referenceMode": "neutral",
-    "familyKey": "engineering-longform"
+    "familyKey": "engineering-longform",
+    "shell": {
+      "family": "runtime",
+      "variant": "lab",
+      "navigation": "none"
+    },
+    "suggestedNextSlug": "primary-interactive-hub",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   },
   {
     "slug": "watch-mesh-explorer",
@@ -1223,6 +2702,30 @@
     "intent": "explainer",
     "docsUrl": "./docs/watch-mesh-explorer/",
     "referenceMode": "neutral",
-    "familyKey": "engineering-longform"
+    "familyKey": "engineering-longform",
+    "shell": {
+      "family": "runtime",
+      "variant": "lab",
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "[data-lesson-list] button",
+        "minimum": 10,
+        "kind": "state",
+        "peerSelectors": [
+          "[data-prev-lesson]",
+          "[data-next-lesson]"
+        ]
+      }
+    },
+    "suggestedNextSlug": "primary-interactive-hub",
+    "experience": {
+      "themeOwnership": "fixed-runtime",
+      "primarySurface": "main",
+      "runtimeSurface": "[data-runtime-main], main",
+      "interactionProbe": "read-only",
+      "networkPolicy": {
+        "mode": "local-only"
+      }
+    }
   }
 ]
