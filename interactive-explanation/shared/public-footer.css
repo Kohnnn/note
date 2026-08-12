@@ -108,6 +108,72 @@ body.has-top-bar[data-story-shell="engineering-sandbox"] .story-rail {
   color: var(--topbar-hover);
 }
 
+.route-continuation {
+  box-sizing: border-box;
+  width: min(1100px, calc(100% - 32px));
+  margin: 32px auto 0;
+  padding: 20px 16px;
+  border-block: 1px solid var(--footer-line);
+  background: color-mix(in srgb, var(--footer-bg) 92%, transparent);
+  color: var(--footer-ink);
+  font-family: "Be Vietnam Pro", sans-serif;
+}
+
+.route-continuation__heading {
+  margin: 0;
+  color: var(--footer-label);
+  font: 700 0.78rem/1.4 "IBM Plex Mono", monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.route-continuation__status {
+  margin: 8px 0 0;
+  color: var(--footer-note);
+  line-height: 1.5;
+}
+
+.route-continuation__link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  margin-top: 8px;
+  color: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.route-continuation__link:hover,
+.route-continuation__link:focus,
+.route-continuation__link:focus-visible {
+  color: var(--footer-hover);
+}
+
+.route-continuation__link:focus,
+.route-continuation__link:focus-visible {
+  outline: 2px solid var(--footer-hover);
+  outline-offset: 3px;
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-variant="lab"] .route-continuation {
+  width: min(var(--story-shell-max), calc(100% - 2rem));
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-variant="practice"] .route-continuation {
+  width: min(var(--story-practice-max), calc(100vw - 2rem));
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ableton-practice"] .route-continuation {
+  width: min(64rem, calc(100vw - 2rem));
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"] .route-continuation {
+  width: min(var(--story-shell-max), calc(100% - 2rem));
+}
+
 .public-footer {
   display: block !important;
   visibility: visible !important;

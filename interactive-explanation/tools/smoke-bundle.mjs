@@ -106,6 +106,7 @@ const routeManifest = fs.existsSync(routeManifestPath)
   ? JSON.parse(fs.readFileSync(routeManifestPath, "utf8"))
   : [];
 const routeGroupsBySlug = new Map(routeManifest.map((route) => [route.slug, inferRouteGroups(route)]));
+const routeManifestBySlug = new Map(routeManifest.map((route) => [route.slug, route]));
 const selectedGroups = new Set(getArgValues("--group"));
 const selectedRoutes = new Set(getArgValues("--route"));
 const manifestSlugs = new Set(routeManifest.map((route) => route.slug));
@@ -231,6 +232,81 @@ async function clickWithoutNavigation(page, selector) {
     element.addEventListener("click", (event) => event.preventDefault(), { once: true });
     element.click();
   });
+}
+
+async function assertRouteContinuation(page, route, label) {
+  const target = routeManifestBySlug.get(route.suggestedNextSlug);
+  assert(target, `${label} referenced missing Suggested Next Route ${route.suggestedNextSlug}`);
+  await page.waitForSelector("[data-route-continuation]", { timeout: 15000 });
+  const state = await page.locator("[data-route-continuation]").evaluate((section, expected) => {
+    const heading = section.querySelector("[data-route-continuation-heading]");
+    const links = section.querySelectorAll("[data-route-continuation-link]");
+    const link = links[0];
+    const main = document.querySelector("main");
+    const footer = document.querySelector("#reference-footer");
+    const autoFocused = window.__routeContinuationAutoFocused === true;
+    const urlBefore = window.location.href;
+    const progressSnapshot = () => Object.keys(window.localStorage)
+      .filter((key) => key.startsWith("ie-learning-progress:v1:"))
+      .sort()
+      .map((key) => [key, window.localStorage.getItem(key)]);
+    const progressBefore = progressSnapshot();
+    if (link) {
+      link.focus();
+      link.addEventListener("click", (event) => event.preventDefault(), { once: true });
+      link.click();
+    }
+    const style = link ? getComputedStyle(link) : null;
+    const rect = link?.getBoundingClientRect();
+    const sectionRect = section.getBoundingClientRect();
+    const footerRect = footer?.getBoundingClientRect();
+    const labelledBy = section.getAttribute("aria-labelledby");
+    const dataLearningAttributes = [section, link].filter(Boolean).flatMap((element) =>
+      Array.from(element.attributes).map((attribute) => attribute.name).filter((name) => name.startsWith("data-learning-"))
+    );
+    return {
+      sectionCount: document.querySelectorAll("[data-route-continuation]").length,
+      bodyChild: section.parentElement === document.body,
+      followsMain: Boolean(main && (main.compareDocumentPosition(section) & 4)),
+      precedesFooter: Boolean(footer && (section.compareDocumentPosition(footer) & 4)),
+      headingCount: section.querySelectorAll("h2").length,
+      headingText: (heading?.textContent || "").replace(/\s+/g, " ").trim(),
+      labelledBy,
+      labelResolves: Boolean(labelledBy && heading?.id === labelledBy),
+      linkCount: links.length,
+      linkText: (link?.textContent || "").replace(/\s+/g, " ").trim(),
+      linkOrigin: link ? new URL(link.href).origin : "",
+      linkPathname: link ? new URL(link.href).pathname : "",
+      target: link?.getAttribute("target"),
+      rel: link?.getAttribute("rel"),
+      onclick: link?.getAttribute("onclick"),
+      dataLearningAttributes,
+      autoFocused,
+      focused: document.activeElement === link,
+      visible: Boolean(rect && rect.width > 0 && rect.height > 0 && style?.display !== "none" && style?.visibility !== "hidden"),
+      focusOutline: Boolean(style && style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0),
+      navigationPrevented: window.location.href === urlBefore,
+      progressUnchanged: JSON.stringify(progressSnapshot()) === JSON.stringify(progressBefore),
+      withinViewport: sectionRect.left >= -2 && sectionRect.right <= window.innerWidth + 2,
+      centeredWithFooter: Boolean(footerRect && Math.abs((sectionRect.left + sectionRect.right) - (footerRect.left + footerRect.right)) <= 4),
+      expected,
+    };
+  }, {
+    title: target.title,
+    origin: baseOrigin,
+    pathname: `${mountPath}${target.slug}/`,
+  });
+  assert(state.sectionCount === 1, `${label} expected one Suggested Next Route block, found ${state.sectionCount}`);
+  assert(state.bodyChild && state.followsMain && state.precedesFooter, `${label} Suggested Next Route was not between main and #reference-footer`);
+  assert(state.headingCount === 1 && state.headingText === "Suggested Next Route", `${label} exposed an unexpected continuation heading: ${state.headingText}`);
+  assert(state.labelResolves, `${label} Suggested Next Route aria-labelledby did not resolve to its heading`);
+  assert(state.linkCount === 1 && state.linkText === target.title, `${label} exposed an unexpected continuation link: ${state.linkText}`);
+  assert(state.linkOrigin === baseOrigin && state.linkPathname === `${mountPath}${target.slug}/`, `${label} continuation escaped its local target: ${state.linkOrigin}${state.linkPathname}`);
+  assert(state.target === null && state.rel === null && state.onclick === null && state.navigationPrevented, `${label} continuation was not an ordinary local link`);
+  assert(!state.autoFocused, `${label} continuation moved focus while mounting`);
+  assert(state.dataLearningAttributes.length === 0 && state.progressUnchanged, `${label} continuation leaked into Guided Path Progress`);
+  assert(state.visible && state.focused && state.focusOutline, `${label} continuation link was not visibly keyboard focusable`);
+  assert(state.withinViewport && state.centeredWithFooter, `${label} continuation did not preserve shared footer geometry`);
 }
 
 async function assertLearningPathControls(context, relativePath, slug, stepCount, selectedStep) {
@@ -697,6 +773,13 @@ async function assertManifestRouteBaseline(context, route) {
   for (const viewport of viewports) {
     const page = await context.newPage();
     const assertRuntimeClean = createRuntimeMonitor(page, { rejectOffOriginRequests: true });
+    await page.addInitScript(() => {
+      document.addEventListener("focusin", (event) => {
+        if (event.target?.closest?.("[data-route-continuation]")) {
+          window.__routeContinuationAutoFocused = true;
+        }
+      }, true);
+    });
     try {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await assertRoute(page, relativePath, "#reference-footer");
@@ -726,6 +809,7 @@ async function assertManifestRouteBaseline(context, route) {
       assert(mainState.meaningful, `${route.slug} ${viewport.name} baseline main landmark was empty and unnamed`);
       assert(new URL(mainState.topBarAtlas).pathname === `${mountPath}index.html`, `${route.slug} ${viewport.name} baseline top bar exposed an unexpected Atlas exit: ${mainState.topBarAtlas}`);
       assert(new URL(mainState.topBarDocs).pathname === `${mountPath}docs/${route.slug}/`, `${route.slug} ${viewport.name} baseline top bar exposed an unexpected Docs exit: ${mainState.topBarDocs}`);
+      await assertRouteContinuation(page, route, `${route.slug} ${viewport.name} baseline`);
       await assertViewportUsable(page, `${route.slug} ${viewport.name} baseline`);
       assertRuntimeClean(`${route.slug} ${viewport.name} baseline`);
       console.log(`OK ${route.slug} ${viewport.name} baseline`);
@@ -6446,6 +6530,63 @@ async function smokeWayfinding(context) {
   await page.close();
 }
 
+async function assertAtlasContinuations(page, selector, label) {
+  const expectedBySlug = Object.fromEntries(routeManifest.map((route) => {
+    const target = routeManifestBySlug.get(route.suggestedNextSlug);
+    return [route.slug, {
+      title: target?.title || "",
+      href: `./${target?.slug || ""}/`,
+    }];
+  }));
+  const state = await page.locator(selector).evaluateAll((cards, expected) => cards.map((card) => {
+    const slug = card.dataset.slug || "";
+    const links = card.querySelectorAll("[data-page-card-continuation]");
+    const link = links[0];
+    return {
+      slug,
+      count: links.length,
+      separate: Boolean(link && !link.closest("[data-page-card-actions]")),
+      text: (link?.textContent || "").replace(/\s+/g, " ").trim(),
+      href: link?.getAttribute("href") || "",
+      target: link?.getAttribute("target"),
+      rel: link?.getAttribute("rel"),
+      onclick: link?.getAttribute("onclick"),
+      expected: expected[slug],
+    };
+  }), expectedBySlug);
+  assert(state.length > 0, `${label} did not render any Atlas cards`);
+  state.forEach((card) => {
+    assert(card.expected?.title, `${label} card ${card.slug} referenced a missing Suggested Next Route`);
+    assert(card.count === 1 && card.separate, `${label} card ${card.slug} expected one separate continuation link`);
+    assert(card.text === `Suggested next: ${card.expected.title}`, `${label} card ${card.slug} exposed unexpected continuation text: ${card.text}`);
+    assert(card.href === card.expected.href, `${label} card ${card.slug} exposed unexpected continuation href: ${card.href}`);
+    assert(card.target === null && card.rel === null && card.onclick === null, `${label} card ${card.slug} continuation was not an ordinary local link`);
+  });
+
+  const firstLink = page.locator(`${selector} [data-page-card-continuation]`).first();
+  const focusState = await firstLink.evaluate((link) => {
+    const progressBefore = Object.keys(window.localStorage)
+      .filter((key) => key.startsWith("ie-learning-progress:v1:"))
+      .sort()
+      .map((key) => [key, window.localStorage.getItem(key)]);
+    link.focus();
+    link.addEventListener("click", (event) => event.preventDefault(), { once: true });
+    link.click();
+    const style = getComputedStyle(link);
+    const progressAfter = Object.keys(window.localStorage)
+      .filter((key) => key.startsWith("ie-learning-progress:v1:"))
+      .sort()
+      .map((key) => [key, window.localStorage.getItem(key)]);
+    return {
+      focused: document.activeElement === link,
+      outlined: style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0,
+      progressUnchanged: JSON.stringify(progressAfter) === JSON.stringify(progressBefore),
+    };
+  });
+  assert(focusState.focused && focusState.outlined, `${label} continuation did not retain visible keyboard focus`);
+  assert(focusState.progressUnchanged, `${label} continuation wrote Guided Path Progress`);
+}
+
 async function smokeAtlas(context) {
   const page = await context.newPage();
   await assertRoute(page, "", "[data-page-list]");
@@ -6471,6 +6612,8 @@ async function smokeAtlas(context) {
   assert(initialState.docsHref === "./docs/trust/", `atlas exposed unexpected docs href: ${initialState.docsHref}`);
   assert(initialState.clearHidden, "atlas clear filters control was visible without active filters");
   assert(initialState.url === "", `atlas exposed default URL state: ${initialState.url}`);
+  await assertAtlasContinuations(page, "[data-page-list] [data-slug]", "atlas inventory");
+  await assertAtlasContinuations(page, "[data-guided-path-list] [data-slug]", "atlas Guided Paths");
 
   await page.locator("[data-atlas-intent='guided-path']").focus();
   await page.keyboard.press("Enter");
@@ -6493,6 +6636,7 @@ async function smokeAtlas(context) {
   assert(topicState.topic === "music", "atlas did not sync topic state to the URL");
   assert(topicState.summary.includes("Topic: Music."), `atlas summary omitted the active topic: ${topicState.summary}`);
   assert(topicState.clearVisible, "atlas clear filters control did not become visible after filtering");
+  await assertAtlasContinuations(page, "[data-page-list] [data-slug]", "filtered Atlas inventory");
 
   await page.goBack({ waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => document.querySelector("[data-topic-select]")?.value === "all");
@@ -6500,6 +6644,7 @@ async function smokeAtlas(context) {
   await page.goForward({ waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => document.querySelector("[data-topic-select]")?.value === "music");
   assert(await page.locator("[data-atlas-intent='guided-path']").getAttribute("aria-pressed") === "true", "atlas Forward did not restore combined filters");
+  await assertAtlasContinuations(page, "[data-page-list] [data-slug]", "history-restored Atlas inventory");
 
   await page.locator("[data-clear-filters]").click();
   await page.waitForFunction((total) => document.querySelectorAll("[data-page-list] [data-intent]").length === total, routeManifest.length, { timeout: 5000 });
@@ -6509,6 +6654,7 @@ async function smokeAtlas(context) {
   }));
   assert(resetState.clearHidden, "atlas clear filters control remained visible after reset");
   assert(resetState.url === "", `atlas retained URL state after reset: ${resetState.url}`);
+  await assertAtlasContinuations(page, "[data-page-list] [data-slug]", "reset Atlas inventory");
 
   await page.goto(new URL("?intent=explainer&topic=machine-learning&sort=title", baseUrl).href, { waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => {

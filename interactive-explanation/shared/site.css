@@ -386,6 +386,28 @@ body[data-page-type="home"] .inventory-section {
   padding-top: 18px;
 }
 
+.page-card__continuation {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  margin-top: 12px;
+  color: var(--accent-deep);
+  font: 600 0.82rem/1.45 var(--font-mono);
+  text-underline-offset: 0.18em;
+}
+
+.page-card__continuation:hover,
+.page-card__continuation:focus,
+.page-card__continuation:focus-visible {
+  color: var(--accent);
+}
+
+.page-card__continuation:focus,
+.page-card__continuation:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .note-section,
 .module-card {
   padding: 22px 0;
