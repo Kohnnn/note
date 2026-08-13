@@ -98,11 +98,13 @@ const expectedContractBySlug = new Map([
 ]);
 
 const expectedChaptersBySlug = new Map([
+  ["music-interactive-hub", [{ selector: "#recommended-path", title: "Recommended path" }, { selector: "#ear-training-cluster", title: "Ear training and notation" }, { selector: "#sequencing-cluster", title: "Sequencing and composition" }, { selector: "#synthesis-cluster", title: "Synthesis and sound design" }, { selector: "#history-cluster", title: "History and genre context" }]],
   ["linear-regression", [{ selector: "#intro", title: "Meet linear regression" }, { selector: "#scrolly", title: "Fit the line" }, { selector: "#mse-container", title: "Read model fit", closest: "section", id: "model-evaluation" }, { selector: "#gd-container", title: "Watch gradient descent", closest: "div", id: "gradient-descent" }, { selector: "#tab-container", title: "Interpret the coefficients", closest: "div", id: "interpretation" }, { selector: "#resources", title: "References" }]],
   ["logistic-regression", [{ selector: "#intro", title: "Meet logistic regression" }, { selector: "#tempSlider", title: "Move the boundary", closest: "section", id: "boundary-scene" }, { selector: "#ll-container", title: "Evaluate the model", closest: "section", id: "model-evaluation" }, { selector: "#gd-container", title: "Estimate coefficients", closest: "section", id: "estimating-coefficients" }, { selector: "#tab-container", title: "Interpret the model", closest: "div", id: "interpreting-the-model" }, { selector: "#resources", title: "References" }]],
   ["precision-recall", [{ selector: "#intro", title: "Meet precision and recall" }, { selector: "#heatmap-container", title: "Read the confusion matrix", closest: "div", id: "confusion-matrix" }, { selector: "#f1-container", title: "Balance the metrics", closest: "div", id: "f1-balance" }, { selector: "#error-chart", title: "Move the threshold", closest: "div", id: "threshold-tradeoff" }, { selector: "#resources", title: "References" }]],
   ["roc-auc", [{ selector: "#intro", title: "Meet ROC and AUC" }, { selector: "#roc-scatter-chart", title: "Move the threshold", closest: "section", id: "first-threshold" }, { selector: "#roc-section", title: "Read the ROC curve" }, { selector: "#auc-chart", title: "Interpret AUC", closest: "section", id: "auc-section" }, { selector: "#conclusion", title: "Considerations" }, { selector: "#resources", title: "References" }]],
   ["rigid-body-collisions", [{ selector: "#before-we-start", title: "Set the frame" }, { selector: "#what-are-we-trying-to-do", title: "Define the motion problem" }, { selector: "#what-is-a-collision", title: "Formalize collision" }, { selector: "#conclusion", title: "Wrap the intuition" }]],
+  ["primary-interactive-hub", [{ selector: "#systems-cluster", title: "Systems and society" }, { selector: "#stories-cluster", title: "Stories and games" }, { selector: "#playgrounds-cluster", title: "Editable playgrounds" }]],
 ]);
 
 const expectedNativeControlBySlug = new Map([
@@ -196,6 +198,27 @@ test("all route experience assignments match the approved contract", () => {
   assert.deepEqual(actualContractBySlug, expectedContractBySlug);
   assert.deepEqual(actualChaptersBySlug, expectedChaptersBySlug);
   assert.deepEqual(actualNativeControlBySlug, expectedNativeControlBySlug);
+});
+
+test("numbered Progress remains exclusive to the Music and Blockchain Guided Paths", () => {
+  const expectedProgressBySlug = new Map([
+    ["music-interactive-hub", 5],
+    ["blockchain-101-combined-flow", 3],
+  ]);
+
+  for (const slug of ["music-interactive-hub", "blockchain-101-combined-flow", "primary-interactive-hub"]) {
+    const source = fs.readFileSync(path.join(root, slug, "index.html"), "utf8");
+    const progressSlug = source.match(/\bdata-learning-progress-slug=["']([^"']+)["']/)?.[1];
+    const stepCount = Number(source.match(/\bdata-learning-step-count=["'](\d+)["']/)?.[1] || 0);
+    const numberedSteps = (source.match(/\bdata-learning-step=["']\d+["']/g) || []).length;
+    const controlCount = (source.match(/\bdata-learning-(?:start|resume)(?:\s|=|>)/g) || []).length;
+    const expectedStepCount = expectedProgressBySlug.get(slug) || 0;
+
+    assert.equal(progressSlug, expectedStepCount ? slug : undefined, `${slug} Progress slug`);
+    assert.equal(stepCount, expectedStepCount, `${slug} Progress step count`);
+    assert.equal(numberedSteps, expectedStepCount, `${slug} numbered Progress steps`);
+    assert.equal(controlCount, expectedStepCount ? 2 : 0, `${slug} Start/Resume controls`);
+  }
 });
 
 test("all route HTML files carry canonical Engineering Sandbox seams", () => {

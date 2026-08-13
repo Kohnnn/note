@@ -2090,7 +2090,29 @@
     "shell": {
       "family": "local-hub",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#recommended-path",
+          "title": "Recommended path"
+        },
+        {
+          "selector": "#ear-training-cluster",
+          "title": "Ear training and notation"
+        },
+        {
+          "selector": "#sequencing-cluster",
+          "title": "Sequencing and composition"
+        },
+        {
+          "selector": "#synthesis-cluster",
+          "title": "Synthesis and sound design"
+        },
+        {
+          "selector": "#history-cluster",
+          "title": "History and genre context"
+        }
+      ]
     },
     "suggestedNextSlug": "teoria-interval-ear-training",
     "experience": {
@@ -2646,7 +2668,21 @@
     "shell": {
       "family": "local-hub",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#systems-cluster",
+          "title": "Systems and society"
+        },
+        {
+          "selector": "#stories-cluster",
+          "title": "Stories and games"
+        },
+        {
+          "selector": "#playgrounds-cluster",
+          "title": "Editable playgrounds"
+        }
+      ]
     },
     "suggestedNextSlug": "trust",
     "experience": {

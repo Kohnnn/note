@@ -5,15 +5,19 @@
     "localStatus": "The local route creates one curated hub page that surfaces the already-shipped replicas through grouped local cards and local docs links.",
     "sourceFiles": [
       "../../primary-interactive-hub/index.html",
+      "../../routes.manifest.json",
+      "../../shared/engineering-sandbox.css",
       "../../shared/public-footer.js"
     ],
     "notes": [
       "The route is intentionally a local curation page rather than a replica of one repository listing view.",
-      "The public body links only to local routes and local docs pages."
+      "The public body links only to local routes and local docs pages.",
+      "Ticket 15 keeps this guided-path hub editorial and unnumbered: it has no data-learning-progress-slug, Start/Resume controls, numbered steps, or Progress write."
     ],
     "evidence": [
       "The route exposes grouped cards for systems, stories, and playgrounds.",
-      "Shared smoke coverage checks the local card count, local route hrefs, and responsive shell."
+      "Shared smoke coverage checks the local card count, local route hrefs, and responsive shell.",
+      "Complete-experience coverage verifies the three manifest-owned generated chapters, light/dark authored shell, local card links, and absence of the Progress contract."
     ]
   },
   {

@@ -36,6 +36,7 @@ Behavior, content, URLs, assets, accessibility, and runtime dimensions remain in
 - [Synchronize universal Route HTML seams](issues/12-synchronize-universal-route-html-seams.md) — deterministically synchronize canonical body metadata and shared theme/Sandbox assets across all 83 top-level Routes while preserving authored main/runtime placement, script order, child documents, and parity evidence.
 - [Render shared Route and Atlas continuation UI](issues/13-render-shared-continuation-ui.md) — consume the canonical manifest to render one accessible local continuation on every Route and Atlas card while preserving subpath URLs, footer geometry, focus behavior, and Guided Path Progress isolation.
 - [Enforce complete-experience acceptance gates](issues/14-enforce-complete-experience-gates.md) — freeze manifest-driven viewport, theme, navigation, continuation, surface, accessibility, network, persisted geometry, and comparative performance gates; keep strict `--experience` checks scoped to migrated Routes and baseline recording explicit and atomic.
+- [Migrate local hubs and Guided Paths](issues/15-migrate-local-hubs-and-guided-paths.md) — theme authored Music, Primary, and Blockchain bridge surfaces; preserve numbered Music and Blockchain Progress, keep Primary unnumbered, and verify manifest navigation, continuation, parity, and complete-experience gates.
 
 ## Not yet specified
 

@@ -7918,6 +7918,16 @@ async function smokeBlockchain101CombinedFlow(context) {
 async function smokePrimaryInteractiveHub(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
+  await page.addInitScript(() => {
+    window.__primaryLearningProgressWrites = [];
+    const setItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function primaryProgressSetItem(key, value) {
+      if (String(key).startsWith("ie-learning-progress:")) {
+        window.__primaryLearningProgressWrites.push(String(key));
+      }
+      return setItem.call(this, key, value);
+    };
+  });
   await assertRoute(page, "primary-interactive-hub/", "#reference-footer");
   await page.waitForFunction(() => {
     return document.querySelector("#systems-cluster") &&
@@ -7929,15 +7939,25 @@ async function smokePrimaryInteractiveHub(context) {
   const hubState = await page.evaluate(() => {
     const hrefs = Array.from(document.querySelectorAll(".route-card a[href]"))
       .map((node) => node.getAttribute("href") || "");
-     return {
-       hrefs,
-       countText: document.querySelector("[data-hub-count]")?.textContent || "",
-       hasProgressContract: Boolean(
-         document.body.dataset.learningProgressSlug ||
-         document.querySelector("[data-learning-start], [data-learning-resume], [data-learning-step]"),
-       ),
-     };
-   });
+    const progressChrome = document.querySelectorAll([
+      ".story-rail__meta",
+      ".story-mobile-bar__status",
+      ".story-mobile-sheet__status",
+      ".story-progress",
+      ".story-progress__value",
+    ].join(", "));
+    return {
+      hrefs,
+      countText: document.querySelector("[data-hub-count]")?.textContent || "",
+      hasProgressContract: Boolean(
+        document.body.dataset.learningProgressSlug ||
+        document.body.dataset.learningStepCount ||
+        document.querySelector("[data-learning-start], [data-learning-resume], [data-learning-step], [data-learning-progress-status]"),
+      ),
+      progressChromeHidden: Array.from(progressChrome).every((node) => getComputedStyle(node).display === "none"),
+      progressWrites: window.__primaryLearningProgressWrites || [],
+    };
+  });
   for (const expectedHref of [
     "../trust/",
     "../docs/trust/",
@@ -7953,14 +7973,20 @@ async function smokePrimaryInteractiveHub(context) {
     );
   }
   assert(/12 local routes/i.test(hubState.countText), "primary-interactive-hub count summary did not render");
-  assert(!hubState.hasProgressContract, "primary-interactive-hub incorrectly exposed a strict progress contract");
-  console.log("OK primary-interactive-hub local route grid");
+  assert(!hubState.hasProgressContract, "primary-interactive-hub incorrectly exposed a strict Progress contract");
+  assert(hubState.progressChromeHidden, "primary-interactive-hub exposed numbered or Progress chapter chrome");
+  assert(hubState.progressWrites.length === 0, "primary-interactive-hub wrote Progress while mounting");
+  console.log("OK primary-interactive-hub local route grid and unnumbered navigation");
 
   await page.locator("a[href='./#stories-cluster']").click();
   await page.waitForTimeout(250);
-  const storiesVisible = await page.locator("#stories-cluster").isVisible();
-  assert(storiesVisible, "primary-interactive-hub cluster anchor navigation failed");
-  console.log("OK primary-interactive-hub cluster anchor");
+  const storiesState = await page.evaluate(() => ({
+    visible: Boolean(document.querySelector("#stories-cluster")?.getClientRects().length),
+    progressWrites: window.__primaryLearningProgressWrites || [],
+  }));
+  assert(storiesState.visible, "primary-interactive-hub cluster anchor navigation failed");
+  assert(storiesState.progressWrites.length === 0, "primary-interactive-hub wrote Progress while navigating");
+  console.log("OK primary-interactive-hub cluster anchor without Progress");
 
   await assertViewportUsable(page, "primary-interactive-hub route");
   await assertRouteViewportUsable(

@@ -1556,6 +1556,174 @@ body[data-story-shell="engineering-sandbox"] .story-mobile-bar__link {
   }
 }
 
+body[data-story-route="music-interactive-hub"],
+body[data-story-route="primary-interactive-hub"],
+body[data-story-route="blockchain-101-combined-flow"] {
+  --story-paper: var(--paper);
+  --story-paper-deep: var(--body-grad-to);
+  --story-paper-strong: var(--paper-strong);
+  --story-ink: var(--ink);
+  --story-ink-soft: var(--ink);
+  --story-border: var(--line);
+  --story-border-strong: var(--focus-border);
+  --story-steel: var(--accent);
+  --story-steel-bright: var(--accent);
+  --story-accent: var(--accent-deep);
+  --story-mint: var(--accent-soft);
+  --story-shadow: var(--shadow);
+  background:
+    radial-gradient(circle at top left, var(--body-grad-1), transparent 28%),
+    radial-gradient(circle at 82% 10%, var(--body-grad-2), transparent 22%),
+    linear-gradient(180deg, var(--body-grad-from) 0%, var(--paper) 18%, var(--body-grad-to) 100%);
+  color: var(--ink);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"],
+  [data-story-route="blockchain-101-combined-flow"]
+) :is(.story-chip, .story-callout, .story-rail__panel, .story-mobile-sheet__panel) {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"],
+  [data-story-route="blockchain-101-combined-flow"]
+) .story-hero::before {
+  background: linear-gradient(90deg, transparent, var(--line), transparent);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"],
+  [data-story-route="blockchain-101-combined-flow"]
+) .story-button {
+  border-color: var(--line);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"],
+  [data-story-route="blockchain-101-combined-flow"]
+) .story-button:hover,
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"],
+  [data-story-route="blockchain-101-combined-flow"]
+) .story-button:focus-visible {
+  background: var(--accent-deep);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"],
+  [data-story-route="blockchain-101-combined-flow"]
+) .story-button--secondary,
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"],
+  [data-story-route="blockchain-101-combined-flow"]
+) .story-button--secondary:hover,
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"],
+  [data-story-route="blockchain-101-combined-flow"]
+) .story-button--secondary:focus-visible {
+  background: var(--surface-card-strong);
+  color: var(--accent);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"]
+) .story-mobile-bar {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  box-shadow: 0 -10px 22px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"]
+) :is(.story-mobile-bar__toggle, .story-mobile-sheet__close) {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  color: var(--accent);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"]
+) .story-progress {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"]
+) .story-progress__bar {
+  background: linear-gradient(90deg, var(--accent), var(--accent-deep));
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"]
+) :is(.story-rail__link, .story-mobile-bar__link, .story-mobile-sheet__link)::before {
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"]
+) :is(.story-rail__link, .story-mobile-bar__link, .story-mobile-sheet__link):is(:hover, :focus-visible, .is-active) {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--ink);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"]
+) :is(.story-rail__link, .story-mobile-bar__link, .story-mobile-sheet__link).is-complete {
+  color: var(--accent);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"]
+) :is(.story-rail__link, .story-mobile-bar__link, .story-mobile-sheet__link).is-active::before {
+  border-color: var(--accent-deep);
+  background: var(--accent-deep);
+}
+
+body:is(
+  [data-story-route="music-interactive-hub"],
+  [data-story-route="primary-interactive-hub"]
+) :is(.story-rail__link, .story-mobile-bar__link, .story-mobile-sheet__link).is-complete::before {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 34%, transparent);
+}
+
+body[data-story-route="primary-interactive-hub"] :is(
+  .story-rail__meta,
+  .story-mobile-bar__status,
+  .story-mobile-sheet__status,
+  .story-progress,
+  .story-progress__value
+) {
+  display: none;
+}
+
+body[data-story-route="blockchain-101-combined-flow"] .story-callout[data-story-callout="play"] {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+}
+
 body[data-story-family="engineering-longform"] .segmented_control_on,
 body[data-story-family="engineering-longform"] .segmented_control_off {
   border: 0;
