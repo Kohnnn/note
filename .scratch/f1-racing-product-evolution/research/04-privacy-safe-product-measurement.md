@@ -1,0 +1,85 @@
+# Privacy-safe product measurement
+
+**Research question:** smallest realistic measurement for the static-exported Next.js F1 Racing site, sufficient to evaluate Dashboard activation and learning across Replay, Modelview, and Learn.
+
+**Accessed:** 2026-08-11. **Scope:** technical product research, not legal advice or a determination that any configuration does or does not require consent.
+
+## Current product evidence
+
+- The product is a static-first Next.js export and currently deploys `apps/web/out` on Netlify (`f1-racing/README.md:3`, `f1-racing/README.md:17`, `f1-racing/README.md:61-65`; `f1-racing/apps/web/next.config.mjs:6-13`; `f1-racing/netlify.toml:1-8`). Cloudflare Pages is documented as a later option, not the current host (`f1-racing/README.md:70`).
+- The root layout contains the shell and no analytics loader or provider integration (`f1-racing/apps/web/src/app/layout.tsx:33-49`). The web package declares no analytics dependency (`f1-racing/apps/web/package.json:11-30`). Repository searches found no analytics client calls or provider packages; current `fetch` calls load product packs, models, and data, not measurement (`f1-racing/apps/web/src/components/replay/replay-route-client.tsx:80-105`; `f1-racing/apps/web/src/components/model-viewer/car-model-browser.tsx:32`; `f1-racing/apps/web/src/components/telemetry/session-route-client.tsx:85`).
+- Learn completion is currently browser-local only: it persists a `{slug: boolean}` map in `localStorage` and makes no network call (`f1-racing/apps/web/src/components/story/learn-module-progress.tsx:5-25`, `:45-50`; `f1-racing/apps/web/src/app/learn/learn-index.tsx:6-25`, `:42-48`). This is a product preference, not analytics; do not repurpose or upload it.
+- The landing page positions Replay/Race Desk as the core loop and Modelview/Learn as supporting surfaces (`f1-racing/apps/web/src/app/page.tsx:40-42`, `:97-112`). It exposes links to each surface (`:46-70`, `:105-112`), while navigation defines the six top-level surfaces (`f1-racing/apps/web/src/components/shell/site-nav.tsx:12-22`).
+- The meaningful activation action on the Replay dashboard is Play/Pause (`f1-racing/apps/web/src/components/replay/PlaybackControls.tsx:263-275`). Other high-signal actions already exist: user-initiated full-race loading (`:290-309`), interactive 3D loading (`f1-racing/apps/web/src/components/story/landing-stage.tsx:49-54`, `:86-95`), and Learn completion (`f1-racing/apps/web/src/components/story/learn-module-progress.tsx:45-65`). None are measured now.
+
+## What needs measurement
+
+### Minimum questions
+
+1. **Dashboard activation:** Of visits that reach `/race-desk` or a `/replay/...` route, what share begins replay playback? Use `replay_played` once per page load, on the first transition to playing. Pageview-only tools can measure route reach but not this activation.
+2. **Cross-surface learning:** After Replay/Race Desk, do people reach Learn or Modelview, and do they complete a learning action? Pageview paths can answer reach; `learn_marked_read` supplies the current explicit completion action.
+3. **Performance guardrail:** Are the model/replay routes materially worse in field data? Measure LCP, INP, and CLS where the host/tool supports field Core Web Vitals.
+
+### Minimum event contract, if an event-capable tool is selected
+
+| Event | Fire once | Allowed properties | Do not send |
+|---|---|---|---|
+| `replay_played` | first Play after a Replay/Race Desk pageview | `surface: "replay"` | driver, lap, timestamp, query string, session/visitor ID |
+| `learn_marked_read` | every explicit Mark as read action | `module: "car" | "aero" | "tyres" | "braking" | "setup" | "strategy"` | stored progress map, user-entered text, identifiers |
+| `modelview_loaded` | successful interactive-3D load | `surface: "modelview"` | model asset URL, camera state, device ID |
+
+Use server/provider-managed pageviews for surface entry. Do not add a universal click tracker, scroll tracker, heatmap, recording, query-string capture, local-storage upload, cookie, fingerprint, distinct ID, or an event for every replay control. Event names and property values must remain a finite, reviewed allowlist.
+
+**Operational definitions:** report Dashboard activation as unique `replay_played` / unique pageviews to `/race-desk` and `/replay/*`, separately. Report cross-surface learning as the ordered path `Replay or Race Desk pageview` → `/learn/*` pageview → `learn_marked_read`; report Modelview as a parallel branch, not as a required funnel step. Do not label route/pageview counts as people unless the provider defines its unique-visitor method.
+
+## Comparison
+
+| Approach | What it collects and supports | Return measurement, state, and privacy-relevant technical facts | Static integration, performance, cost, and burden | Fit |
+|---|---|---|---|---|
+| **No third-party behavioral analytics; first-party aggregate host/CDN logs** | Aggregate requests/pageviews, paths, referrers, status, bandwidth, and host-defined unique counts. No product events or native product funnels without separate instrumentation and aggregation. | No deliberate browser identifier is needed. Actual log fields, access control, retention, residency, export, and deletion are host/account settings that must be verified before use. Aggregate logs cannot prove the same person returned unless the host provides a documented bounded unique method. | No site JS. Works with static export because collection is at the edge/host. Lowest code and runtime burden; analysis is manual unless the host dashboard supplies it. Current Netlify deployment can use its server-side Web Analytics variant below. | **Best zero-code baseline** for demand, route reach, 404s, and bandwidth; insufficient alone for activation. |
+| **Netlify Web Analytics (current host, applicable now)** | CDN server logs produce pageviews, unique visitors, locations, pages, 404 resources, sources, and bandwidth. It records only HTML `200`, `201`, and `304` responses as pageviews. No custom events/funnels or field CWV are documented. | Netlify says collection is anonymous, without cookies or PII; unique visitors are distinct IP addresses within its selected day/hour/time window. This does not establish a persistent returning person. Netlify's cited docs expose 30 days of chart history and filters; no export/deletion/residency detail was found in the cited Web Analytics docs, so verify contract/account controls before choosing it. | Dashboard enablement; no client code, no added JS, not blocked by ad blockers, and works for static output. Data updates hourly. Current published pricing lists 30-day analytics/metrics on Pro; billing and plan terms must be checked at purchase. Operational burden is minimal. | **Recommended first production baseline.** Answers route demand and cross-surface page sequences only; cannot answer replay-play activation. |
+| **Cloudflare Web Analytics (only after Cloudflare Pages/proxy or manual snippet, so not current-host-native)** | Page/performance analytics with filtering by path, referrer, device, browser, OS, country, navigation type, and bot exclusion. It collects Navigation Timing and field CWV; Core Web Vitals docs list LCP, INP, and CLS. No official custom-event/funnel feature is documented in the cited Web Analytics material. | Cloudflare says it does not track individuals across customers' properties. CWV uses no cookies or `localStorage` and does not fingerprint via IP, User-Agent, or other data. This supports aggregate traffic, not documented anonymous return cohorts. The cited limits page does not state a retention period; data export/deletion/residency controls require account/product review. | Cloudflare Pages can inject the beacon on next deploy; proxied sites can auto-enable; gray-clouded/non-proxied sites require a snippet. It adds Cloudflare's lightweight beacon and a RUM request; exact byte size is not stated in cited docs. Available on all plans; unproxied site limit is 10. Requires migration or Cloudflare config work, so more operational burden than Netlify now. | **Best host-level option after a Cloudflare move** for traffic plus field CWV; still needs a separate event tool to answer activation. |
+| **Plausible Analytics (managed, privacy-oriented event tool)** | Automatic pageviews plus custom events/goals, properties, linear funnels, and journeys. Funnels accept pageviews/events, 2–8 steps, and sequential or strict order. This can express both minimum questions. | Plausible states it uses no cookies, persistent IDs, browser cache, or `localStorage`; its daily unique identifier is derived from daily salt, site domain, IP, and User-Agent, then the salt is rotated/deleted every 24 hours. It explicitly cannot identify the same person across days/devices, so no long-lived return metric. Its data policy states visitor data is processed/stored in the EU, account/site deletion permanently removes data, and dashboard/API/CSV access is available; full raw event export is Enterprise. Event-link `href` is stored in full automatically, so avoid tagging links that can contain sensitive data or configure the documented transform. | Add the provider snippet in the document head; static export is compatible. Custom events can use a CSS class or `plausible()` call; only the three allowlisted interactions need calls/classes. The official docs do not give an exact current script byte size or fixed price in the retrieved material; the provider describes a lightweight script, and pricing should be confirmed at selection. Custom events count toward billable monthly pageviews. Low-to-medium burden: vendor account, event schema, dashboard goals, and review. | **Smallest managed option that answers activation and the learning funnel without persistent IDs.** Prefer it if one paid third-party measurement service is acceptable. |
+| **Umami (self-hosted or Umami Cloud, privacy-oriented event tool)** | Pageviews, events with properties, ordered funnels, and retention insights. Events work through data attributes or `umami.track()`. Funnels support URLs, events, and URL wildcards; retention shows daily cohorts returning on later days. | Base Umami documentation says no cookies, fingerprinting, or personal data, but its optional Distinct ID explicitly associates actions across sessions and can use an ID such as an email. Do **not** call `umami.identify`, send a Distinct ID, session data, or user-derived property for this product. Without these, review the actual deployment/version configuration before making anonymity claims. Self-hosting keeps data on selected infrastructure; Cloud exports all collected pageviews/events/sessions/event data as gzipped CSV, and account deletion permanently removes data. Residency, retention, backup deletion, and access controls are deployment/account decisions; cited docs do not provide a Cloud retention duration. | Add tracker code to `<head>` with Next's `next/script`; Umami says SPA navigation is automatic. Its tracker is documented as under 2 KB. Self-hosting requires a Node server plus PostgreSQL or Docker/Compose; Cloud is managed and usage-priced, with price to verify at selection. Higher burden than Plausible, especially self-hosted. | **Use only if retention cohorts are a later, explicit product need and the team accepts hosting/configuration ownership.** It is overkill for the proposed baseline. |
+
+### Technical facts versus policy decisions
+
+**Technical facts from official documentation**
+
+- Netlify Web Analytics is CDN-log based, has no client code, updates hourly, and counts unique visitors by distinct IP addresses in its reporting window. [Netlify Web Analytics overview](https://docs.netlify.com/monitor-sites/analytics/) and [how it works](https://docs.netlify.com/manage/monitoring/web-analytics/how-web-analytics-works/) (accessed 2026-08-11).
+- Cloudflare Web Analytics can run on all plans; Pages supports one-click enablement. Its beacon gathers navigation timing and sends data to the documented RUM endpoints. Its CWV explorer uses no cookies, `localStorage`, or fingerprinting. [Get started](https://developers.cloudflare.com/web-analytics/get-started/), [data origin](https://developers.cloudflare.com/web-analytics/data-metrics/data-origin-and-collection/), [Core Web Vitals](https://developers.cloudflare.com/web-analytics/data-metrics/core-web-vitals/), [dimensions](https://developers.cloudflare.com/web-analytics/data-metrics/dimensions/), and [limits](https://developers.cloudflare.com/web-analytics/limits/) (accessed 2026-08-11).
+- Plausible documents cookie-free, daily-bounded unique measurement; goals/events/funnels; EU visitor-data processing/storage; account/site-data deletion; and dashboard/API/CSV access. [Data policy](https://plausible.io/data-policy), [script installation](https://plausible.io/docs/plausible-script), [custom events](https://plausible.io/docs/custom-event-goals), [goals](https://plausible.io/docs/goal-conversions), [funnels](https://plausible.io/docs/funnel-analysis), [data access](https://plausible.io/docs/data-access), and [compliance overview](https://plausible.io/docs/compliance) (accessed 2026-08-11).
+- Umami documents a cookie-free base tracker under 2 KB, static/Next.js installation, events, funnels, optional Distinct IDs, retention insights, self-hosted Node/PostgreSQL or Docker deployment, and Cloud export/account deletion. [Introduction](https://umami.is/docs), [collect data](https://umami.is/docs/collect-data), [events](https://umami.is/docs/track-events), [funnel](https://umami.is/docs/funnel), [Distinct IDs](https://umami.is/docs/distinct-ids), [retention](https://umami.is/docs/retention), [installation](https://umami.is/docs/install), [Cloud](https://umami.is/docs/cloud), [export](https://umami.is/docs/cloud/export-data), and [delete account](https://umami.is/docs/cloud/delete-account) (accessed 2026-08-11).
+
+**Policy decisions for the owner, not conclusions from this research**
+
+- Whether host/CDN logs, IP-derived daily uniques, country/city dimensions, third-party processing, or any analytics script are permitted for the product and audiences.
+- Whether consent, notice, opt-out, a data-processing agreement, a privacy-policy update, or a particular lawful basis is required in applicable jurisdictions.
+- Allowed retention, residency, deletion-SLA, backup handling, access roles, aggregation threshold, export destination, and incident/vendor review requirements.
+- Whether the chosen provider's current contract, plan, subprocessor list, price, and feature availability satisfy those decisions. Confirm these at procurement/configuration time rather than relying on provider marketing claims.
+
+## Recommended staged baseline
+
+### Stage 0 — no product code
+
+Enable **Netlify Web Analytics** for the existing deploy. Review only weekly aggregate route/page, referrer, 404, bandwidth, device, and country reports. Segment top-level routes: `/race-desk`, `/replay/*`, `/learn/*`, and `/cars/*`. This costs no client JS and establishes whether there is enough traffic to justify event instrumentation.
+
+This cannot measure Dashboard activation. Do not infer it from a replay pageview.
+
+### Stage 1 — smallest event addition, only if Stage 0 shows enough traffic and the policy owner accepts it
+
+Choose **Plausible**, not both event tools. Add its static head snippet and the three allowlisted events above. Configure two sequential funnels:
+
+1. `Replay/Race Desk pageview` → `replay_played`.
+2. `Replay/Race Desk pageview` → `/learn/*` pageview → `learn_marked_read`.
+
+Review monthly, not per visitor. Keep event properties as enumerations. Do not enable optional auto-measurements or send IDs. Validate in the browser network panel and in the provider dashboard before relying on results. Remove Netlify only if duplicate pageview reporting creates operational confusion; it remains the no-JS source for host traffic and 404/bandwidth context.
+
+### Stage 2 — only when the hosting decision changes or an explicit cohort requirement appears
+
+- If migrating to Cloudflare Pages/proxy, enable **Cloudflare Web Analytics** for no-code field CWV and host-level route monitoring. Do not add it alongside Plausible unless a documented decision says why two pageview systems are needed.
+- If the product later needs return/cohort analysis and policy permits it, evaluate Umami with **no Distinct ID** first. Add a persistent identifier only through a separately approved identity/consent/data-lifecycle design; it is not required for the current activation question.
+
+## Decision
+
+Start with Netlify Web Analytics now. Add Plausible only after route-level traffic warrants answering the one question logs cannot answer: whether Dashboard visitors actually start a replay and then complete a Learn module. Keep the event contract to three allowlisted events, no cookies, no persistent/device identifier, no uploaded `localStorage`, and no custom data warehouse. Use Cloudflare Web Analytics only with a future Cloudflare hosting move; do not introduce Umami unless return cohorts become an explicit, approved requirement.
