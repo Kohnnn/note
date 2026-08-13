@@ -46,6 +46,7 @@ This map is complete when every release in the train has shipped to the canonica
 - [Define product measurement and privacy](issues/18-define-product-measurement-and-privacy.md) — use existing Netlify aggregate reports only for a 30-day pilot; no custom events or client telemetry until a separate procurement, notice, consent, lifecycle, and allowlist decision approves them.
 - [Lock accessibility, performance, resilience, and release gates](issues/19-lock-quality-and-release-gates.md) — block promotion on executable source, artifact, data, browser, security, parity, rollback, and truthfulness gates; warnings require named, expiring release evidence.
 - [Sequence the release train and graduate implementation tickets](issues/20-sequence-release-train.md) — ship a hardened immutable baseline before the three-brief Dashboard pilot, with tickets 21–32 as atomic, dependency-ordered, independently verified slices.
+- [Make Modelview self-contained and accessible](issues/21-make-modelview-self-contained-and-accessible.md) — local Draco delivery, correct keyboard and pressed-state controls, reduced-motion behavior, recovery fallbacks, and strict production-artifact browser acceptance now pass.
 - [Produce and audit one releasable pack tree](issues/23-produce-and-audit-releasable-pack-tree.md) — marker-owned isolated candidates now fail closed across provenance, freshness, pack, replay, mirror, model, and artifact identity checks; production inputs remain blocked until their missing evidence is regenerated truthfully.
 
 ## Not yet specified
