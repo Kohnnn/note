@@ -1,7 +1,7 @@
 # 24 — Retire duplicate full-replay delivery
 
 Type: task
-Status: open
+Status: claimed
 Blocked by: 23
 
 **What to build:** Replay and Historical Race Desk preserve their current initial load, full-race playback, analysis, sharing, and recovery behavior using replay metadata and bounded frame chunks, while public releases stop shipping a second full-session frame payload.
