@@ -3,6 +3,15 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import "../shared/route-families.js";
+import {
+  EXPERIENCE_BASELINE_VERSION,
+  contrastRatio,
+  mergeExperienceBaseline,
+  performanceRegressions,
+  serializeExperienceBaseline,
+  summarizePerformanceRuns,
+  validateExperienceBaseline,
+} from "./experience-baseline.mjs";
 import { createSmokeServer } from "./smoke/server.mjs";
 
 const RouteFamilies = globalThis.RouteFamilies;
@@ -54,6 +63,10 @@ const mountPath = "/interactive-explanation/";
 const baseUrl = `http://${host}:${port}${mountPath}`;
 const baseOrigin = new URL(baseUrl).origin;
 const verbose = hasFlag("--verbose") || process.env.SMOKE_VERBOSE === "1";
+const experience = hasFlag("--experience");
+const recordBaseline = hasFlag("--record-baseline");
+const baselineArgs = getArgValues("--baseline");
+const baselinePath = path.resolve(rootDir, baselineArgs[0] || "tools/experience-baselines.json");
 const rawConsoleLog = console.log.bind(console);
 
 console.log = (...args) => {
@@ -152,14 +165,53 @@ function validateSelections() {
   const unknownRoutes = Array.from(selectedRoutes).filter((slug) => !manifestSlugs.has(slug));
   assert(unknownRoutes.length === 0, `Unknown --route slug(s): ${unknownRoutes.join(", ")}`);
   assert(routeManifest.length > 0, `Missing or empty routes.manifest.json at ${routeManifestPath}`);
+  assert(baselineArgs.length <= 1, "Pass --baseline at most once");
   assert(
     routeManifest.some((route) => shouldRunSlug(route.slug)),
     `Route/group filters selected no manifest routes: routes=${Array.from(selectedRoutes).join(", ") || "(none)"}; groups=${Array.from(selectedGroups).join(", ") || "(none)"}`,
   );
+  if (recordBaseline) {
+    assert(selectedRoutes.size > 0 || selectedGroups.size > 0, "--record-baseline requires an explicit --route or --group filter");
+    if (!fs.existsSync(baselinePath)) {
+      assert(selectedManifestRoutes().length === routeManifest.length, "Initial experience baseline recording must select all manifest routes");
+    }
+  } else {
+    assert(fs.existsSync(baselinePath), `Approved experience baseline missing at ${baselinePath}; record it explicitly with --record-baseline and a route/group filter`);
+  }
 }
 
 function selectedManifestRoutes() {
   return routeManifest.filter((route) => shouldRunSlug(route.slug));
+}
+
+function loadExperienceBaseline() {
+  if (!fs.existsSync(baselinePath)) {
+    return null;
+  }
+  const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
+  if (baseline.version !== EXPERIENCE_BASELINE_VERSION) {
+    assert(recordBaseline, `Experience baseline version ${baseline.version} is obsolete; record version ${EXPERIENCE_BASELINE_VERSION} explicitly`);
+    assert(selectedManifestRoutes().length === routeManifest.length, `Experience baseline version ${EXPERIENCE_BASELINE_VERSION} must initially record all manifest routes`);
+    return null;
+  }
+  validateExperienceBaseline(baseline, Array.from(manifestSlugs));
+  const unknownSlugs = Object.keys(baseline.routes).filter((slug) => !manifestSlugs.has(slug));
+  assert(unknownSlugs.length === 0, `Experience baseline has unknown route(s): ${unknownSlugs.join(", ")}`);
+  return baseline;
+}
+
+function writeExperienceBaseline(baseline) {
+  const directory = path.dirname(baselinePath);
+  assert(fs.existsSync(directory), `Experience baseline directory missing at ${directory}`);
+  const temporaryPath = `${baselinePath}.${process.pid}.tmp`;
+  try {
+    fs.writeFileSync(temporaryPath, serializeExperienceBaseline(baseline), "utf8");
+    fs.renameSync(temporaryPath, baselinePath);
+  } finally {
+    if (fs.existsSync(temporaryPath)) {
+      fs.rmSync(temporaryPath);
+    }
+  }
 }
 
 const { start: startServer } = createSmokeServer({ rootDir, host, port, mountPath });
@@ -723,7 +775,11 @@ async function assertEngineeringSandboxLayout(context, relativePath, label, opti
 }
 
 function createRuntimeMonitor(page, options = {}) {
-  const { rejectOffOriginRequests = false } = options;
+  const { rejectOffOriginRequests = false, networkPolicy = null } = options;
+  if (networkPolicy) {
+    assert(networkPolicy.mode === "local-only" || networkPolicy.mode === "deferred-remote", `Invalid network policy mode ${networkPolicy.mode}`);
+  }
+  const rejectInitialOffOriginRequests = rejectOffOriginRequests || Boolean(networkPolicy);
   const issues = [];
 
   page.on("pageerror", (error) => {
@@ -733,7 +789,7 @@ function createRuntimeMonitor(page, options = {}) {
   page.on("request", (request) => {
     const requestUrl = request.url();
     const isLocalBlob = requestUrl.startsWith(`blob:${baseOrigin}/`);
-    if (rejectOffOriginRequests && !requestUrl.startsWith(baseUrl) && !isLocalBlob) {
+    if (rejectInitialOffOriginRequests && !requestUrl.startsWith(baseUrl) && !isLocalBlob) {
       issues.push(`off-origin request: ${requestUrl}`);
     }
   });
@@ -763,7 +819,8 @@ function createRuntimeMonitor(page, options = {}) {
   };
 }
 
-async function assertManifestRouteBaseline(context, route) {
+async function assertManifestRouteCompatibility(context, route, options = {}) {
+  const { enforceViewportFit = true } = options;
   const relativePath = `${route.slug}/`;
   const viewports = [
     { name: "desktop", width: 1400, height: 1000 },
@@ -787,35 +844,795 @@ async function assertManifestRouteBaseline(context, route) {
         const main = document.querySelector("main[data-runtime-main]");
         return !main || main.getAttribute("aria-busy") !== "true";
       }, null, { timeout: 30000 });
-      const mainState = await page.evaluate(() => {
-        const mains = Array.from(document.querySelectorAll("main"));
-        const main = mains[0];
-        const style = main ? getComputedStyle(main) : null;
-        return {
-          count: mains.length,
-          visible: Boolean(main && !main.hidden && main.getAttribute("aria-hidden") !== "true" && !main.hasAttribute("inert") && style?.display !== "none" && style?.visibility !== "hidden"),
-          meaningful: Boolean(main && (
-            (main.textContent || "").trim() ||
-            main.getAttribute("aria-label") ||
-            main.getAttribute("aria-labelledby") ||
-            main.querySelector("iframe[title], canvas, svg, [role='application']")
-          )),
-          topBarAtlas: document.querySelector(".top-bar__back")?.href || "",
-          topBarDocs: document.querySelector(".top-bar__docs")?.href || "",
-        };
-      });
-      assert(mainState.count === 1, `${route.slug} ${viewport.name} baseline expected one main landmark, found ${mainState.count}`);
-      assert(mainState.visible, `${route.slug} ${viewport.name} baseline main landmark was hidden`);
-      assert(mainState.meaningful, `${route.slug} ${viewport.name} baseline main landmark was empty and unnamed`);
-      assert(new URL(mainState.topBarAtlas).pathname === `${mountPath}index.html`, `${route.slug} ${viewport.name} baseline top bar exposed an unexpected Atlas exit: ${mainState.topBarAtlas}`);
-      assert(new URL(mainState.topBarDocs).pathname === `${mountPath}docs/${route.slug}/`, `${route.slug} ${viewport.name} baseline top bar exposed an unexpected Docs exit: ${mainState.topBarDocs}`);
+      await assertMainLandmark(page, route, `${route.slug} ${viewport.name} baseline`);
       await assertRouteContinuation(page, route, `${route.slug} ${viewport.name} baseline`);
-      await assertViewportUsable(page, `${route.slug} ${viewport.name} baseline`);
+      if (enforceViewportFit) {
+        await assertViewportUsable(page, `${route.slug} ${viewport.name} baseline`);
+      }
       assertRuntimeClean(`${route.slug} ${viewport.name} baseline`);
       console.log(`OK ${route.slug} ${viewport.name} baseline`);
     } finally {
       await page.close();
     }
+  }
+}
+
+const experienceViewports = [
+  { name: "desktop", width: 1400, height: 1000 },
+  { name: "mobile", width: 390, height: 844 },
+  { name: "narrow", width: 320, height: 844 },
+];
+const experienceThemes = ["light", "dark"];
+
+async function createThemeContext(browser, options) {
+  const { theme, stored, viewport = experienceViewports[0] } = options;
+  const context = await browser.newContext({
+    acceptDownloads: true,
+    colorScheme: theme,
+    viewport: { width: viewport.width, height: viewport.height },
+  });
+  await context.addInitScript(({ expectedTheme, useStoredTheme }) => {
+    window.__smokeThemeAssignments = [];
+    const originalSetAttribute = Element.prototype.setAttribute;
+    Element.prototype.setAttribute = function smokeSetAttribute(name, value) {
+      if (this === document.documentElement && name === "saved-theme") {
+        window.__smokeThemeAssignments.push({
+          theme: String(value),
+          readyState: document.readyState,
+        });
+      }
+      return originalSetAttribute.call(this, name, value);
+    };
+    if (useStoredTheme) {
+      window.localStorage.setItem("theme", expectedTheme);
+    } else {
+      window.localStorage.removeItem("theme");
+    }
+    document.addEventListener("focusin", (event) => {
+      if (event.target?.closest?.("[data-route-continuation]")) {
+        window.__routeContinuationAutoFocused = true;
+      }
+    }, true);
+  }, { expectedTheme: theme, useStoredTheme: stored });
+  return context;
+}
+
+async function waitForManifestRouteReady(page, route) {
+  await page.waitForFunction((runtimeSelector) => {
+    const runtime = document.querySelector(runtimeSelector);
+    return document.body?.dataset.storyManifest === "ready" &&
+      runtime &&
+      runtime.getAttribute("aria-busy") !== "true";
+  }, route.experience.runtimeSurface, { timeout: 30000 });
+  await page.evaluate(async () => {
+    await document.fonts?.ready;
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+}
+
+async function assertDocumentTheme(page, expectedTheme, label) {
+  const state = await page.evaluate(() => ({
+    applied: document.documentElement.getAttribute("saved-theme") || "",
+    stored: window.localStorage.getItem("theme"),
+    assignments: window.__smokeThemeAssignments || [],
+  }));
+  assert(state.applied === expectedTheme, `${label} applied ${state.applied || "no theme"} instead of ${expectedTheme}`);
+  assert(state.assignments.length > 0, `${label} did not synchronously assign html[saved-theme]`);
+  assert(state.assignments[0].theme === expectedTheme, `${label} first assigned ${state.assignments[0].theme} instead of ${expectedTheme}`);
+  assert(state.assignments[0].readyState === "loading", `${label} assigned the theme after parsing (${state.assignments[0].readyState})`);
+  return state;
+}
+
+async function readThemeTokens(page, label) {
+  const tokens = await page.evaluate(() => {
+    const style = getComputedStyle(document.documentElement);
+    return {
+      background: style.getPropertyValue("--paper").trim(),
+      foreground: style.getPropertyValue("--ink").trim(),
+      interactive: style.getPropertyValue("--topbar-hover").trim(),
+    };
+  });
+  assert(tokens.background && tokens.foreground && tokens.interactive, `${label} did not expose shared theme tokens`);
+  assert(contrastRatio(tokens.foreground, tokens.background) >= 4.5, `${label} shared foreground contrast fell below 4.5:1`);
+  assert(contrastRatio(tokens.interactive, tokens.background) >= 3, `${label} shared interactive contrast fell below 3:1`);
+  return tokens;
+}
+
+function assertThemePair(light, dark, label) {
+  assert(light.background !== dark.background, `${label} light and dark shell backgrounds were identical`);
+  assert(light.foreground !== dark.foreground, `${label} light and dark shell foregrounds were identical`);
+  assert(light.interactive !== dark.interactive, `${label} light and dark interactive chrome was identical`);
+}
+
+async function assertMainLandmark(page, route, label) {
+  const state = await page.evaluate(() => {
+    const mains = Array.from(document.querySelectorAll("main"));
+    const main = mains[0];
+    const style = main ? getComputedStyle(main) : null;
+    return {
+      count: mains.length,
+      visible: Boolean(main && !main.hidden && main.getAttribute("aria-hidden") !== "true" && !main.hasAttribute("inert") && style?.display !== "none" && style?.visibility !== "hidden"),
+      meaningful: Boolean(main && (
+        (main.textContent || "").trim() ||
+        main.getAttribute("aria-label") ||
+        main.getAttribute("aria-labelledby") ||
+        main.querySelector("iframe[title], canvas, svg, [role='application']")
+      )),
+      topBarAtlas: document.querySelector(".top-bar__back")?.href || "",
+      topBarDocs: document.querySelector(".top-bar__docs")?.href || "",
+    };
+  });
+  assert(state.count === 1, `${label} expected one main landmark, found ${state.count}`);
+  assert(state.visible, `${label} main landmark was hidden`);
+  assert(state.meaningful, `${label} main landmark was empty and unnamed`);
+  assert(new URL(state.topBarAtlas).pathname === `${mountPath}index.html`, `${label} exposed an unexpected Atlas exit: ${state.topBarAtlas}`);
+  assert(new URL(state.topBarDocs).pathname === `${mountPath}docs/${route.slug}/`, `${label} exposed an unexpected Docs exit: ${state.topBarDocs}`);
+}
+
+async function assertDocsBaseline(page, route, label) {
+  await assertRoute(page, `docs/${route.slug}/`, "[data-parity-list]");
+  const state = await page.evaluate((slug) => {
+    const mains = Array.from(document.querySelectorAll("main"));
+    const atlas = Array.from(document.querySelectorAll("a[href]")).find((link) => {
+      const pathname = new URL(link.href).pathname;
+      return pathname === "/interactive-explanation/" || pathname === "/interactive-explanation/index.html";
+    });
+    const routeLink = Array.from(document.querySelectorAll("a[href]")).find((link) => {
+      return new URL(link.href).pathname === `/interactive-explanation/${slug}/`;
+    });
+    return {
+      mainCount: mains.length,
+      mainVisible: Boolean(mains[0] && getComputedStyle(mains[0]).display !== "none"),
+      atlasHref: atlas?.href || "",
+      routeHref: routeLink?.href || "",
+    };
+  }, route.slug);
+  assert(state.mainCount === 1 && state.mainVisible, `${label} did not expose one visible main landmark`);
+  assert(state.atlasHref && new URL(state.atlasHref).origin === baseOrigin, `${label} did not expose a local Atlas exit`);
+  assert(state.routeHref && new URL(state.routeHref).origin === baseOrigin, `${label} did not expose a local Route exit`);
+}
+
+async function measureRuntimeSurface(page, route, label) {
+  const state = await page.evaluate((runtimeSelector) => {
+    const surfaces = Array.from(document.querySelectorAll(runtimeSelector));
+    if (surfaces.length !== 1) {
+      return { count: surfaces.length };
+    }
+    const surface = surfaces[0];
+    const style = getComputedStyle(surface);
+    const rect = surface.getBoundingClientRect();
+    const intrinsicElements = [surface, ...surface.querySelectorAll("canvas, iframe, svg, img, video")]
+      .filter((element, index, elements) => elements.indexOf(element) === index)
+      .filter((element) => element.matches("canvas, iframe, svg, img, video"));
+    return {
+      count: 1,
+      rect: {
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      },
+      css: {
+        width: style.width,
+        height: style.height,
+        transform: style.transform,
+        touchAction: style.touchAction,
+        pointerEvents: style.pointerEvents,
+      },
+      aspectRatio: rect.height > 0 ? rect.width / rect.height : null,
+      intrinsic: intrinsicElements.map((element, index) => {
+        const elementRect = element.getBoundingClientRect();
+        const tag = element.tagName.toLowerCase();
+        return {
+          key: `${tag}:${element.id || index}`,
+          tag,
+          rect: {
+            top: elementRect.top,
+            right: elementRect.right,
+            bottom: elementRect.bottom,
+            left: elementRect.left,
+            width: elementRect.width,
+            height: elementRect.height,
+          },
+          width: tag === "canvas" ? element.width : (tag === "img" ? element.naturalWidth : (tag === "video" ? element.videoWidth : null)),
+          height: tag === "canvas" ? element.height : (tag === "img" ? element.naturalHeight : (tag === "video" ? element.videoHeight : null)),
+          viewBox: tag === "svg" ? element.getAttribute("viewBox") : null,
+          title: tag === "iframe" ? element.getAttribute("title") : null,
+        };
+      }),
+    };
+  }, route.experience.runtimeSurface);
+  assert(state.count === 1, `${label} expected one runtime surface for ${route.experience.runtimeSurface}, found ${state.count}`);
+  assert(state.rect.width > 0 && state.rect.height > 0, `${label} runtime surface collapsed`);
+  assert(state.aspectRatio > 0, `${label} runtime surface lost its aspect ratio`);
+  const { count, ...geometry } = state;
+  return geometry;
+}
+
+function assertRuntimeGeometry(actual, expected, label) {
+  const rectKeys = ["top", "right", "bottom", "left", "width", "height"];
+  for (const key of rectKeys) {
+    assert(Math.abs(actual.rect[key] - expected.rect[key]) <= 1, `${label} runtime ${key} shifted by more than 1 CSS px`);
+  }
+  assert(actual.css.width === expected.css.width && actual.css.height === expected.css.height, `${label} runtime CSS dimensions changed`);
+  assert(actual.css.transform === expected.css.transform, `${label} runtime transform changed`);
+  assert(actual.css.touchAction === expected.css.touchAction, `${label} runtime touch ownership changed`);
+  assert(actual.css.pointerEvents === expected.css.pointerEvents, `${label} runtime pointer ownership changed`);
+  assert(Math.abs(actual.aspectRatio - expected.aspectRatio) <= 0.000001, `${label} runtime aspect ratio changed`);
+  assert(actual.intrinsic.length === expected.intrinsic.length, `${label} intrinsic surface count changed`);
+  actual.intrinsic.forEach((surface, index) => {
+    const baseline = expected.intrinsic[index];
+    assert(surface.key === baseline.key && surface.tag === baseline.tag, `${label} intrinsic surface order changed`);
+    for (const key of rectKeys) {
+      assert(Math.abs(surface.rect[key] - baseline.rect[key]) <= 1, `${label} ${surface.key} ${key} shifted by more than 1 CSS px`);
+    }
+    assert(surface.width === baseline.width && surface.height === baseline.height, `${label} ${surface.key} backing dimensions changed`);
+    assert(surface.viewBox === baseline.viewBox, `${label} ${surface.key} viewBox changed`);
+    assert(surface.title === baseline.title, `${label} ${surface.key} title changed`);
+  });
+}
+
+async function measureRouteGeometry(browser, route, approvedGeometry, enforceGeometry) {
+  const context = await createThemeContext(browser, { theme: "light", stored: true });
+  const measured = {};
+  try {
+    for (const viewport of experienceViewports) {
+      const label = `${route.slug} ${viewport.name} geometry baseline`;
+      const page = await context.newPage();
+      const assertRuntimeClean = createRuntimeMonitor(page, { networkPolicy: route.experience.networkPolicy });
+      try {
+        await page.setViewportSize({ width: viewport.width, height: viewport.height });
+        await assertRoute(page, `${route.slug}/`, "#reference-footer");
+        await waitForManifestRouteReady(page, route);
+        await page.waitForLoadState("networkidle", { timeout: 30000 });
+        await assertDocumentTheme(page, "light", label);
+        await scrollPrimarySurfaceIntoView(page, label, route.experience.primarySurface);
+        measured[viewport.name] = await measureRuntimeSurface(page, route, label);
+        if (enforceGeometry) {
+          assertRuntimeGeometry(measured[viewport.name], approvedGeometry[viewport.name], label);
+        }
+        assertRuntimeClean(label);
+      } finally {
+        await page.close();
+      }
+    }
+  } finally {
+    await context.close();
+  }
+  return measured;
+}
+
+async function assertFocusVisible(locator, label) {
+  await locator.focus();
+  const state = await locator.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      focused: document.activeElement === element,
+      indicator: (style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0) ||
+        (style.boxShadow !== "none" && style.boxShadow !== "") ||
+        (style.textDecorationLine || "").includes("underline"),
+    };
+  });
+  assert(state.focused && state.indicator, `${label} did not expose visible keyboard focus`);
+}
+
+async function renderedControlCount(locator) {
+  return locator.evaluateAll((elements) => elements.filter((element) => {
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return !element.hidden &&
+      element.getAttribute("aria-hidden") !== "true" &&
+      !element.hasAttribute("inert") &&
+      style.display !== "none" &&
+      style.visibility !== "hidden" &&
+      Number(style.opacity) > 0 &&
+      rect.width > 0 &&
+      rect.height > 0;
+  }).length);
+}
+
+async function assertPointerTargets(locator, label) {
+  const failures = await locator.evaluateAll((elements) => elements.reduce((issues, element, index) => {
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    if (style.display === "none" || style.visibility === "hidden" || rect.width === 0 || rect.height === 0) {
+      return issues;
+    }
+    if (rect.width >= 24 && rect.height >= 24) {
+      return issues;
+    }
+    const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    const peerDistance = elements.reduce((minimum, peer) => {
+      if (peer === element) {
+        return minimum;
+      }
+      const peerRect = peer.getBoundingClientRect();
+      if (peerRect.width === 0 || peerRect.height === 0) {
+        return minimum;
+      }
+      const peerCenter = { x: peerRect.left + peerRect.width / 2, y: peerRect.top + peerRect.height / 2 };
+      return Math.min(minimum, Math.hypot(center.x - peerCenter.x, center.y - peerCenter.y));
+    }, Number.POSITIVE_INFINITY);
+    if (peerDistance < 24) {
+      issues.push(`${index} (${Math.round(rect.width)}x${Math.round(rect.height)}, ${Math.round(peerDistance)}px spacing)`);
+    }
+    return issues;
+  }, []));
+  assert(failures.length === 0, `${label} exposed pointer targets below 24 CSS px without spacing: ${failures.join(", ")}`);
+}
+
+async function assertFrameTitles(page, label) {
+  const titles = await page.locator("iframe").evaluateAll((frames) => frames.map((frame) => (frame.getAttribute("title") || "").trim()));
+  assert(titles.every(Boolean), `${label} exposed an iframe without a title`);
+  assert(new Set(titles).size === titles.length, `${label} exposed duplicate iframe titles`);
+}
+
+async function assertGeneratedNavigation(page, route, viewport, label) {
+  const expectedMinimum = route.shell.chapters?.length || 1;
+  if (viewport.name === "desktop") {
+    await page.waitForSelector(".story-rail__nav a", { timeout: 15000 });
+    const state = await page.evaluate(() => {
+      const rail = document.querySelector(".story-rail");
+      const mobile = document.querySelector(".story-mobile-bar");
+      const firstChapter = document.querySelector("[data-story-chapter]");
+      const railRect = rail?.getBoundingClientRect();
+      const mobileRect = mobile?.getBoundingClientRect();
+      const chapterRect = firstChapter?.getBoundingClientRect();
+      const links = Array.from(document.querySelectorAll(".story-rail__nav a"));
+      return {
+        railVisible: Boolean(railRect && railRect.width > 0 && railRect.height > 0),
+        mobileHidden: !mobileRect || mobileRect.width === 0 || mobileRect.height === 0,
+        noOverlap: Boolean(railRect && chapterRect && railRect.right <= chapterRect.left - 12),
+        linkCount: links.length,
+        linksValid: links.every((link) => {
+          const url = new URL(link.href);
+          return url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash.length > 1 && document.getElementById(url.hash.slice(1));
+        }),
+      };
+    });
+    assert(state.railVisible && state.mobileHidden, `${label} did not fit generated desktop navigation`);
+    assert(state.noOverlap, `${label} generated desktop rail overlapped the first chapter`);
+    assert(state.linkCount >= expectedMinimum && state.linksValid, `${label} generated desktop chapter links did not resolve locally`);
+    await assertFocusVisible(page.locator(".story-rail__nav a").first(), `${label} first generated chapter link`);
+    await assertPointerTargets(page.locator(".story-rail__nav a"), `${label} generated chapter links`);
+    return;
+  }
+
+  await page.waitForSelector(".story-mobile-bar__toggle", { state: "visible", timeout: 15000 });
+  const state = await page.evaluate(() => {
+    const bar = document.querySelector(".story-mobile-bar");
+    const rail = document.querySelector(".story-rail");
+    const toggle = document.querySelector(".story-mobile-bar__toggle");
+    const barRect = bar?.getBoundingClientRect();
+    const railRect = rail?.getBoundingClientRect();
+    const toggleRect = toggle?.getBoundingClientRect();
+    const links = Array.from(document.querySelectorAll(".story-mobile-bar__nav a"));
+    return {
+      barVisible: Boolean(barRect && barRect.width > 0 && barRect.height > 0),
+      railHidden: !railRect || railRect.width === 0 || railRect.height === 0,
+      barFitted: Boolean(barRect && barRect.left >= -1 && barRect.right <= window.innerWidth + 1),
+      toggleFitted: Boolean(toggleRect && toggleRect.left >= -1 && toggleRect.right <= window.innerWidth + 1),
+      linkCount: links.length,
+      linksValid: links.every((link) => {
+        const url = new URL(link.href);
+        return url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash.length > 1 && document.getElementById(url.hash.slice(1));
+      }),
+    };
+  });
+  assert(state.barVisible && state.railHidden && state.barFitted && state.toggleFitted, `${label} did not fit generated mobile navigation`);
+  assert(state.linkCount >= expectedMinimum && state.linksValid, `${label} generated mobile chapter links did not resolve locally`);
+  const toggle = page.locator(".story-mobile-bar__toggle");
+  await assertFocusVisible(toggle, `${label} mobile chapter tray toggle`);
+  await assertPointerTargets(toggle, `${label} mobile chapter tray toggle`);
+  await toggle.click();
+  await page.waitForFunction(() => document.querySelector(".story-mobile-sheet")?.open, null, { timeout: 5000 });
+  const dialogState = await page.evaluate(() => {
+    const dialog = document.querySelector(".story-mobile-sheet");
+    const links = Array.from(document.querySelectorAll(".story-mobile-sheet__nav a"));
+    return {
+      tagName: dialog?.tagName,
+      labelled: Boolean(dialog?.getAttribute("aria-labelledby") && document.getElementById(dialog.getAttribute("aria-labelledby"))),
+      linkCount: links.length,
+      linksValid: links.every((link) => {
+        const url = new URL(link.href);
+        return url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash.length > 1 && document.getElementById(url.hash.slice(1));
+      }),
+    };
+  });
+  assert(dialogState.tagName === "DIALOG" && dialogState.labelled, `${label} mobile chapter tray was not a labelled dialog`);
+  assert(dialogState.linkCount >= expectedMinimum && dialogState.linksValid, `${label} mobile chapter tray links did not resolve locally`);
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector(".story-mobile-sheet")?.open, null, { timeout: 5000 });
+  assert(await page.evaluate(() => document.activeElement?.classList.contains("story-mobile-bar__toggle")), `${label} did not restore focus after Escape`);
+}
+
+async function assertNativeNavigation(page, route, label) {
+  const contract = route.shell.nativeControl;
+  const controls = page.locator(contract.selector);
+  await page.waitForFunction(({ selector, minimum }) => document.querySelectorAll(selector).length >= minimum, {
+    selector: contract.selector,
+    minimum: contract.minimum,
+  }, { timeout: 15000 });
+  const state = await controls.evaluateAll((elements, expected) => {
+    function nameState(element) {
+      const labelledBy = element.getAttribute("aria-labelledby");
+      const labelledText = labelledBy
+        ? labelledBy.split(/\s+/).map((id) => document.getElementById(id)?.textContent || "").join(" ").trim()
+        : "";
+      const accessibleName = (
+        element.getAttribute("aria-label") ||
+        labelledText ||
+        element.getAttribute("alt") ||
+        element.getAttribute("title") ||
+        element.textContent ||
+        ""
+      ).replace(/\s+/g, " ").trim();
+      const authoredName = accessibleName || element.getAttribute("data-balloon") || element.getAttribute("chapter") || "";
+      const keyboardOperable = element.matches("a[href], button, input, select, textarea") || element.tabIndex >= 0 || ["button", "link", "checkbox", "radio", "tab"].includes(element.getAttribute("role"));
+      return { accessibleName, authoredName, keyboardOperable };
+    }
+    return {
+      count: elements.length,
+      names: elements.map(nameState),
+      owners: elements.map((element) => typeof element.onclick === "function" || element.matches("a[href], button, input, select, textarea, iframe") || Boolean(element.getAttribute("role"))),
+      linksValid: expected.kind !== "link" || elements.every((element) => {
+        const href = element.getAttribute("href") || "";
+        const url = new URL(element.href);
+        if (url.origin !== window.location.origin || !url.pathname.startsWith("/interactive-explanation/")) {
+          return false;
+        }
+        if (!expected.fragmentOnly) {
+          return true;
+        }
+        return href.startsWith("#") && href.length > 1 && Boolean(document.getElementById(href.slice(1)));
+      }),
+      generatedCount: document.querySelectorAll(".story-rail, .story-mobile-bar, .story-mobile-sheet").length,
+    };
+  }, contract);
+  assert(state.count >= contract.minimum, `${label} exposed only ${state.count} native controls`);
+  const visibleCount = await renderedControlCount(controls);
+  assert(visibleCount >= contract.minimum, `${label} kept only ${visibleCount} native controls visible`);
+  assert(state.generatedCount === 0, `${label} rendered generated navigation in native mode`);
+  assert(state.linksValid, `${label} exposed a native link outside the local declared contract`);
+  assert(state.owners.every(Boolean), `${label} exposed a native control without state or link ownership`);
+  assert(state.names.every((name) => name.authoredName), `${label} exposed an unnamed native control`);
+  assert(state.names.every((name) => !name.keyboardOperable || name.accessibleName), `${label} exposed an unnamed keyboard-operable native control`);
+  await assertPointerTargets(controls, `${label} native controls`);
+  if (contract.kind === "link") {
+    await assertFocusVisible(controls.first(), `${label} first native link`);
+  }
+  if (contract.peerSelectors) {
+    const peers = page.locator(contract.peerSelectors.join(", "));
+    assert(await peers.count() >= contract.peerSelectors.length, `${label} did not expose declared peer controls`);
+    assert(await renderedControlCount(peers) >= contract.peerSelectors.length, `${label} hid declared peer controls`);
+    await assertPointerTargets(peers, `${label} native peer controls`);
+  }
+  if (contract.childSelector) {
+    const frameHandle = await controls.first().elementHandle();
+    const frame = await frameHandle?.contentFrame();
+    assert(frame, `${label} native iframe did not expose its child document`);
+    await frame.waitForSelector(contract.childSelector, { timeout: 15000 });
+    const childControls = frame.locator(contract.childSelector);
+    const childNames = await childControls.evaluateAll((elements) => elements.map((element) => (
+      element.getAttribute("aria-label") || element.getAttribute("title") || element.textContent || ""
+    ).replace(/\s+/g, " ").trim()));
+    assert(childNames.length > 0 && childNames.every(Boolean), `${label} native iframe controls were unnamed`);
+    assert(await renderedControlCount(childControls) === childNames.length, `${label} hid native iframe controls`);
+  }
+}
+
+async function assertManifestNavigation(page, route, viewport, label) {
+  const bodyState = await page.evaluate(() => ({
+    shell: document.body?.dataset.storyShell || "",
+    route: document.body?.dataset.storyRoute || "",
+    family: document.body?.dataset.storyFamily || "",
+    variant: document.body?.dataset.storyVariant || "",
+    navigation: document.body?.dataset.storyNav || "",
+  }));
+  assert(bodyState.shell === "engineering-sandbox", `${label} did not expose the Engineering Sandbox shell`);
+  assert(bodyState.route === route.slug && bodyState.family === route.shell.family && bodyState.variant === route.shell.variant, `${label} shell metadata drifted from the manifest`);
+  assert(bodyState.navigation === route.shell.navigation, `${label} navigation mode drifted from the manifest`);
+  if (route.shell.navigation === "generated") {
+    await assertGeneratedNavigation(page, route, viewport, label);
+    return;
+  }
+  if (route.shell.navigation === "native") {
+    await assertNativeNavigation(page, route, label);
+    return;
+  }
+  const state = await page.evaluate(({ primarySelector, runtimeSelector }) => {
+    function visibleArea(element) {
+      if (!element) {
+        return 0;
+      }
+      const rect = element.getBoundingClientRect();
+      const width = Math.max(0, Math.min(rect.right, window.innerWidth) - Math.max(rect.left, 0));
+      const height = Math.max(0, Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0));
+      return width * height;
+    }
+    return {
+      generatedCount: document.querySelectorAll(".story-rail, .story-mobile-bar, .story-mobile-sheet").length,
+      primaryArea: visibleArea(document.querySelector(primarySelector)),
+      runtimeArea: visibleArea(document.querySelector(runtimeSelector)),
+    };
+  }, {
+    primarySelector: route.experience.primarySurface,
+    runtimeSelector: route.experience.runtimeSurface,
+  });
+  assert(state.generatedCount === 0, `${label} rendered generated navigation in none mode`);
+  assert(state.runtimeArea > 0 && state.runtimeArea >= state.primaryArea, `${label} did not keep its primary runtime visually dominant`);
+}
+
+async function assertReadOnlyProbe(page, route, label) {
+  assert(route.experience.interactionProbe === "read-only", `${label} declared an unsupported interaction probe ${route.experience.interactionProbe}`);
+  const state = await page.evaluate(({ primarySelector, runtimeSelector }) => {
+    const primary = document.querySelector(primarySelector);
+    const runtime = document.querySelector(runtimeSelector);
+    return {
+      primaryCount: document.querySelectorAll(primarySelector).length,
+      runtimeCount: document.querySelectorAll(runtimeSelector).length,
+      ready: Boolean(runtime && runtime.getAttribute("aria-busy") !== "true"),
+      readable: Boolean(runtime && (
+        (runtime.textContent || "").trim() ||
+        runtime.getAttribute("aria-label") ||
+        runtime.getAttribute("aria-labelledby") ||
+        runtime.querySelector("canvas, iframe[title], svg, [role='application']")
+      )),
+      sameSurface: primary === runtime,
+    };
+  }, {
+    primarySelector: route.experience.primarySurface,
+    runtimeSelector: route.experience.runtimeSurface,
+  });
+  assert(state.primaryCount === 1 && state.runtimeCount === 1, `${label} read-only probe did not resolve unique primary/runtime surfaces`);
+  assert(state.ready && state.readable, `${label} read-only probe did not expose a ready readable state`);
+  return state;
+}
+
+async function assertRouteAccessibility(page, label) {
+  await assertFrameTitles(page, label);
+  const shellControls = page.locator(".top-bar a[href], .top-bar button, [data-route-continuation-link]");
+  const names = await shellControls.evaluateAll((elements) => elements.map((element) => (
+    element.getAttribute("aria-label") || element.getAttribute("title") || element.textContent || ""
+  ).replace(/\s+/g, " ").trim()));
+  assert(names.every(Boolean), `${label} exposed unnamed shell controls`);
+  await assertPointerTargets(shellControls, `${label} shell controls`);
+}
+
+async function assertRouteExperienceState(page, route, viewport, label, approvedGeometry) {
+  await assertMainLandmark(page, route, label);
+  await assertPrimarySurfaceVisible(page, label, route.experience.primarySurface);
+  assertRuntimeGeometry(await measureRuntimeSurface(page, route, label), approvedGeometry, label);
+  await assertReadOnlyProbe(page, route, label);
+  await assertManifestNavigation(page, route, viewport, label);
+  if (route.experience.themeOwnership === "runtime-hook") {
+    assert(await page.locator(route.experience.themeRoot).count() === 1, `${label} did not expose its declared runtime theme root`);
+  }
+  await assertRouteContinuation(page, route, label);
+  await assertRouteAccessibility(page, label);
+  await assertViewportUsable(page, label);
+}
+
+async function runStoredThemeGate(browser, route, theme, approvedGeometry) {
+  const context = await createThemeContext(browser, { theme, stored: true });
+  let routeTokens = null;
+  let docsTokens = null;
+  try {
+    for (const viewport of experienceViewports) {
+      const label = `${route.slug} ${viewport.name} stored ${theme}`;
+      const page = await context.newPage();
+      const assertRuntimeClean = createRuntimeMonitor(page, { networkPolicy: route.experience.networkPolicy });
+      try {
+        await page.setViewportSize({ width: viewport.width, height: viewport.height });
+        await assertRoute(page, `${route.slug}/`, "#reference-footer");
+        await waitForManifestRouteReady(page, route);
+        await page.waitForLoadState("networkidle", { timeout: 30000 });
+        await assertDocumentTheme(page, theme, label);
+        await assertRouteExperienceState(page, route, viewport, label, approvedGeometry[viewport.name]);
+        assertRuntimeClean(label);
+        routeTokens ||= await readThemeTokens(page, label);
+        console.log(`OK ${label}`);
+      } finally {
+        await page.close();
+      }
+
+      const docsLabel = `docs/${route.slug} ${viewport.name} stored ${theme}`;
+      const docsPage = await context.newPage();
+      const assertDocsRuntimeClean = createRuntimeMonitor(docsPage, { rejectOffOriginRequests: true });
+      try {
+        await docsPage.setViewportSize({ width: viewport.width, height: viewport.height });
+        await assertDocsBaseline(docsPage, route, docsLabel);
+        await assertDocumentTheme(docsPage, theme, docsLabel);
+        await assertFrameTitles(docsPage, docsLabel);
+        await assertViewportUsable(docsPage, docsLabel);
+        assertDocsRuntimeClean(docsLabel);
+        docsTokens ||= await readThemeTokens(docsPage, docsLabel);
+      } finally {
+        await docsPage.close();
+      }
+    }
+  } finally {
+    await context.close();
+  }
+  return { routeTokens, docsTokens };
+}
+
+async function runSystemThemeGate(browser, route, theme, approvedGeometry, expectedTokens) {
+  const context = await createThemeContext(browser, { theme, stored: false });
+  try {
+    for (const viewport of experienceViewports) {
+      const label = `${route.slug} ${viewport.name} system ${theme}`;
+      const page = await context.newPage();
+      const assertRuntimeClean = createRuntimeMonitor(page, { networkPolicy: route.experience.networkPolicy });
+      try {
+        await page.setViewportSize({ width: viewport.width, height: viewport.height });
+        await assertRoute(page, `${route.slug}/`, "#reference-footer");
+        await waitForManifestRouteReady(page, route);
+        await page.waitForLoadState("networkidle", { timeout: 30000 });
+        const themeState = await assertDocumentTheme(page, theme, label);
+        assert(themeState.stored === null, `${label} unexpectedly retained a stored theme`);
+        await assertRouteExperienceState(page, route, viewport, label, approvedGeometry[viewport.name]);
+        const tokens = await readThemeTokens(page, label);
+        assert(JSON.stringify(tokens) === JSON.stringify(expectedTokens.routeTokens), `${label} did not match the ${theme} stored shell state`);
+        assertRuntimeClean(label);
+      } finally {
+        await page.close();
+      }
+
+      const docsLabel = `docs/${route.slug} ${viewport.name} system ${theme}`;
+      const docsPage = await context.newPage();
+      const assertDocsRuntimeClean = createRuntimeMonitor(docsPage, { rejectOffOriginRequests: true });
+      try {
+        await docsPage.setViewportSize({ width: viewport.width, height: viewport.height });
+        await assertDocsBaseline(docsPage, route, docsLabel);
+        const themeState = await assertDocumentTheme(docsPage, theme, docsLabel);
+        assert(themeState.stored === null, `${docsLabel} unexpectedly retained a stored theme`);
+        const tokens = await readThemeTokens(docsPage, docsLabel);
+        assert(JSON.stringify(tokens) === JSON.stringify(expectedTokens.docsTokens), `${docsLabel} did not match the ${theme} stored shell state`);
+        await assertViewportUsable(docsPage, docsLabel);
+        assertDocsRuntimeClean(docsLabel);
+      } finally {
+        await docsPage.close();
+      }
+    }
+  } finally {
+    await context.close();
+  }
+}
+
+async function collectPerformanceRun(browser, route, theme, runNumber) {
+  const context = await createThemeContext(browser, {
+    theme,
+    stored: true,
+    viewport: experienceViewports[0],
+  });
+  const page = await context.newPage();
+  const label = `${route.slug} ${theme} performance run ${runNumber}`;
+  const assertRuntimeClean = createRuntimeMonitor(page, { networkPolicy: route.experience.networkPolicy });
+  try {
+    await assertRoute(page, `${route.slug}/`, "#reference-footer");
+    await page.waitForLoadState("load");
+    await waitForManifestRouteReady(page, route);
+    await page.waitForLoadState("networkidle", { timeout: 30000 });
+    const evidence = await page.evaluate((expectedMountPath) => {
+      const navigation = performance.getEntriesByType("navigation")[0];
+      const resources = performance.getEntriesByType("resource");
+      const localEntries = [navigation, ...resources].filter((entry) => {
+        if (!entry?.name) {
+          return false;
+        }
+        const url = new URL(entry.name);
+        return url.origin === window.location.origin && url.pathname.startsWith(expectedMountPath);
+      });
+      const transferSupported = localEntries.length > 0 && localEntries.every((entry) => (
+        "transferSize" in entry && Number.isFinite(entry.transferSize)
+      ));
+      const localResources = resources
+        .filter((entry) => {
+          const url = new URL(entry.name);
+          return url.origin === window.location.origin && url.pathname.startsWith(expectedMountPath);
+        })
+        .sort((left, right) => right.duration - left.duration);
+      const longest = localResources[0] || null;
+      const longestUrl = longest ? new URL(longest.name) : null;
+      return {
+        domContentLoadedMs: navigation?.domContentLoadedEventEnd,
+        loadMs: navigation?.loadEventEnd,
+        resourceCount: resources.length,
+        resourceCountDelta: 0,
+        sameOriginTransfer: transferSupported
+          ? {
+              status: "supported",
+              bytes: localEntries.reduce((total, entry) => total + entry.transferSize, 0),
+            }
+          : { status: "unsupported" },
+        longestLocalResource: longest
+          ? {
+              path: `${longestUrl.pathname.slice(expectedMountPath.length)}${longestUrl.search}`,
+              durationMs: longest.duration,
+            }
+          : null,
+      };
+    }, mountPath);
+    assertRuntimeClean(label);
+    return evidence;
+  } finally {
+    await page.close();
+    await context.close();
+  }
+}
+
+async function measureRoutePerformance(browser, route, approvedRouteBaseline, enforcePerformance) {
+  const measured = {};
+  for (const theme of experienceThemes) {
+    const runs = [];
+    for (let runNumber = 1; runNumber <= 3; runNumber += 1) {
+      runs.push(await collectPerformanceRun(browser, route, theme, runNumber));
+    }
+    const approved = approvedRouteBaseline?.[theme] || null;
+    measured[theme] = summarizePerformanceRuns(runs, approved?.resourceCountDelta || 0);
+    if (enforcePerformance) {
+      const regressions = performanceRegressions(measured[theme], approved);
+      assert(regressions.length === 0, `${route.slug} ${theme} performance regressed:\n${regressions.join("\n")}`);
+    }
+    const transfer = measured[theme].sameOriginTransfer;
+    console.log(`OK ${route.slug} ${theme} performance median (${measured[theme].domContentLoadedMs}ms DOMContentLoaded, ${measured[theme].loadMs}ms load, ${measured[theme].resourceCount} resources, ${transfer.status === "supported" ? `${transfer.bytes} bytes` : "transfer unsupported"})`);
+  }
+  return measured;
+}
+
+async function assertManifestRouteExperience(browser, route, approvedGeometry) {
+  const tokensByTheme = new Map();
+  for (const theme of experienceThemes) {
+    tokensByTheme.set(theme, await runStoredThemeGate(browser, route, theme, approvedGeometry));
+  }
+  assertThemePair(tokensByTheme.get("light").routeTokens, tokensByTheme.get("dark").routeTokens, `${route.slug} Route shell`);
+  assertThemePair(tokensByTheme.get("light").docsTokens, tokensByTheme.get("dark").docsTokens, `docs/${route.slug} shell`);
+  for (const theme of experienceThemes) {
+    await runSystemThemeGate(browser, route, theme, approvedGeometry, tokensByTheme.get(theme));
+  }
+}
+
+async function smokeCrowdsReadOnly(context) {
+  const page = await context.newPage();
+  const assertRuntimeClean = createRuntimeMonitor(page, { rejectOffOriginRequests: true });
+  try {
+    await assertRoute(page, "crowds/", "#reference-footer");
+    await page.waitForFunction(() => {
+      const play = document.querySelector("#slideshow .next_button");
+      return document.querySelector("main")?.getAttribute("aria-busy") === "false" &&
+        window.slideshow?.currentSlide?.chapter === "Preloader" &&
+        window.slideshow?.IS_TRANSITIONING === false &&
+        window.PRELOAD_PROGRESS === 1 &&
+        play &&
+        !play.hasAttribute("disabled") &&
+        /let's play/i.test(play.textContent || "");
+    }, null, { timeout: 30000 });
+    const readState = () => page.evaluate(() => ({
+      busy: document.querySelector("main")?.getAttribute("aria-busy"),
+      chapter: window.slideshow?.currentSlide?.chapter || "",
+      slideIndex: window.slideshow?.slideIndex,
+      transitioning: window.slideshow?.IS_TRANSITIONING,
+      playDisabled: document.querySelector("#slideshow .next_button")?.hasAttribute("disabled"),
+      playText: (document.querySelector("#slideshow .next_button")?.textContent || "").replace(/\s+/g, " ").trim(),
+      navigationVisible: getComputedStyle(document.querySelector("#navigation")).display !== "none",
+      chapterControlCount: document.querySelectorAll("#navigation > div[chapter]").length,
+      canvasCount: document.querySelectorAll("main canvas").length,
+    }));
+    const initial = await readState();
+    await page.waitForTimeout(250);
+    const settled = await readState();
+    assert(initial.busy === "false" && initial.chapter === "Preloader" && initial.slideIndex === 0, "crowds read-only probe did not reach its initial slideshow state");
+    assert(!initial.transitioning && !initial.playDisabled && /let's play/i.test(initial.playText), "crowds read-only probe did not expose its ready start control");
+    assert(!initial.navigationVisible && initial.chapterControlCount === 9, "crowds read-only probe did not preserve its initial native navigation state");
+    assert(initial.canvasCount >= 1, "crowds read-only probe did not expose its intrinsic canvas runtime");
+    assert(JSON.stringify(settled) === JSON.stringify(initial), "crowds read-only probe changed semantic state without an action");
+    assertRuntimeClean("crowds read-only probe");
+    console.log("OK crowds explicit read-only probe");
+  } finally {
+    await page.close();
   }
 }
 
@@ -854,9 +1671,15 @@ async function assertRouteViewportUsable(context, relativePath, selector, readyS
   await page.close();
 }
 
-async function assertPrimaryControlVisible(page, label, selector = "[data-primary-control]") {
-  await page.locator(selector).scrollIntoViewIfNeeded();
+async function scrollPrimarySurfaceIntoView(page, label, selector) {
+  const surface = page.locator(selector);
+  assert(await surface.count() === 1, `${label} did not expose one primary surface for ${selector}`);
+  await surface.scrollIntoViewIfNeeded();
   await page.waitForTimeout(150);
+}
+
+async function assertPrimarySurfaceVisible(page, label, selector = "[data-primary-control]") {
+  await scrollPrimarySurfaceIntoView(page, label, selector);
   const state = await page.evaluate((controlSelector) => {
     const control = document.querySelector(controlSelector);
     if (!control) {
@@ -5664,7 +6487,7 @@ async function smokeAbletonLearningMusicPlayground(context) {
     controlSelector: "[data-primary-control]",
     containerSelector: ".playground-route-shell.story-practice-main",
   });
-  await assertPrimaryControlVisible(page, "ableton-learning-music-playground route");
+  await assertPrimarySurfaceVisible(page, "ableton-learning-music-playground route");
   console.log("OK ableton-learning-music-playground practice shell");
 
   await assertViewportUsable(page, "ableton-learning-music-playground route");
@@ -5777,7 +6600,7 @@ async function smokeAbletonLearningMusicLesson(context, config) {
     controlSelector: "[data-primary-control]",
     containerSelector: ".ableton-lesson-shell.story-practice-main",
   });
-  await assertPrimaryControlVisible(page, label);
+  await assertPrimarySurfaceVisible(page, label);
   console.log(`OK ${label} practice shell`);
 
   await assertViewportUsable(page, label);
@@ -5890,7 +6713,7 @@ async function smokeAbletonLearningMusicPlayWithSongStructures(context) {
     controlSelector: "[data-primary-control]",
     containerSelector: ".ableton-lesson-shell.story-practice-main",
   });
-  await assertPrimaryControlVisible(page, "ableton-learning-music-play-with-song-structures route");
+  await assertPrimarySurfaceVisible(page, "ableton-learning-music-play-with-song-structures route");
   console.log("OK ableton-learning-music-play-with-song-structures practice shell");
 
   await assertViewportUsable(page, "ableton-learning-music-play-with-song-structures route");
@@ -6344,6 +7167,10 @@ async function openMusicmapGenreFromSearch(page, searchTerm, resultIndex) {
 }
 
 async function smokeMusicmap(context) {
+  const route = routeManifestBySlug.get("musicmap");
+  const policy = route?.experience.networkPolicy;
+  assert(policy?.mode === "deferred-remote" && policy.actions.length === 2, "musicmap route requires its manifest deferred network policy");
+  const [youtubeAction, spotifyAction] = policy.actions;
   assert(
     countFilesRecursive("musicmap/assets") === 5,
     "musicmap route expected 5 vendored static assets under musicmap/assets",
@@ -6405,7 +7232,7 @@ async function smokeMusicmap(context) {
   console.log("OK musicmap zoom and pan path");
 
   const remoteBeforeYouTubeEmbed = remoteRequests.snapshot().length;
-  await page.click("#youtube-playlist-link", { force: true });
+  await page.click(youtubeAction.selector, { force: true });
   await page.waitForFunction(() => {
     return /youtube-nocookie\.com\/embed\/videoseries/.test(
       document.querySelector("#youtube-player-iframe iframe")?.getAttribute("src") || "",
@@ -6422,7 +7249,7 @@ async function smokeMusicmap(context) {
   );
   assertOnlyAllowedRemoteRequests(
     remoteRequests.diff(remoteBeforeYouTubeEmbed),
-    ["youtube.com", "youtube-nocookie.com", "ytimg.com", "googlevideo.com"],
+    youtubeAction.hosts,
     "musicmap route after deferred YouTube embed",
   );
   console.log("OK musicmap deferred YouTube playback surface");
@@ -6435,7 +7262,7 @@ async function smokeMusicmap(context) {
   });
   await page.waitForTimeout(1000);
   const remoteBeforeSpotifyEmbed = remoteRequests.snapshot().length;
-  await page.click("#spotify-playlist-link", { force: true });
+  await page.click(spotifyAction.selector, { force: true });
   await page.waitForFunction(() => {
     return /open\.spotify\.com\/embed\/playlist/.test(
       document.querySelector("#youtube-player-iframe iframe")?.getAttribute("src") || "",
@@ -6452,7 +7279,7 @@ async function smokeMusicmap(context) {
   );
   assertOnlyAllowedRemoteRequests(
     remoteRequests.diff(remoteBeforeSpotifyEmbed),
-    ["open.spotify.com", "embed-cdn.spotifycdn.com"],
+    spotifyAction.hosts,
     "musicmap route after deferred Spotify embed",
   );
   console.log("OK musicmap deferred Spotify playback surface");
@@ -8102,20 +8929,45 @@ async function createSmokeContext(browser) {
 
 async function main() {
   validateSelections();
-  phaseLog(`Starting smoke run${selectedGroups.size ? ` [groups: ${Array.from(selectedGroups).join(", ")}]` : ""}${selectedRoutes.size ? ` [routes: ${Array.from(selectedRoutes).join(", ")}]` : ""}`);
+  const selectedRoutesForRun = selectedManifestRoutes();
+  const approvedBaseline = loadExperienceBaseline();
+  const recordedRoutes = {};
+  phaseLog(`Starting smoke run${selectedGroups.size ? ` [groups: ${Array.from(selectedGroups).join(", ")}]` : ""}${selectedRoutes.size ? ` [routes: ${Array.from(selectedRoutes).join(", ")}]` : ""}${experience ? " [experience gates]" : ""}${recordBaseline ? " [recording baseline]" : ""}`);
   const server = await startServer();
   const browser = await chromium.launch({ headless: true });
   let context = await createSmokeContext(browser);
 
   try {
-    for (const route of selectedManifestRoutes()) {
-      await assertManifestRouteBaseline(context, route);
+    for (const route of selectedRoutesForRun) {
+      const approvedRoute = approvedBaseline?.routes[route.slug] || null;
+      const geometry = await measureRouteGeometry(
+        browser,
+        route,
+        approvedRoute?.geometry,
+        !recordBaseline,
+      );
+      if (experience) {
+        await assertManifestRouteExperience(browser, route, recordBaseline ? geometry : approvedRoute.geometry);
+      } else {
+        await assertManifestRouteCompatibility(context, route, {
+          enforceViewportFit: !recordBaseline,
+        });
+      }
+      recordedRoutes[route.slug] = {
+        ...await measureRoutePerformance(
+          browser,
+          route,
+          approvedRoute,
+          !recordBaseline,
+        ),
+        geometry,
+      };
     }
 
     const routePage = await context.newPage();
     const routeChecks = [
       ["", "[data-page-list]"],
-      ...selectedManifestRoutes().flatMap((route) => [
+      ...selectedRoutesForRun.flatMap((route) => [
         [`${route.slug}/`, "#reference-footer"],
         [`docs/${route.slug}/`, "[data-parity-list]"],
       ]),
@@ -8153,6 +9005,9 @@ async function main() {
     }
     if (exists("watch-mesh-explorer")) {
       await smokeWatchMeshExplorer(context);
+    }
+    if (exists("crowds")) {
+      await smokeCrowdsReadOnly(context);
     }
     if (exists("remember")) {
       await smokeRemember(context);
@@ -8406,6 +9261,10 @@ async function main() {
     }
     if (exists("double-descent2")) {
       await smokeDoubleDescent2(context);
+    }
+    if (recordBaseline) {
+      writeExperienceBaseline(mergeExperienceBaseline(approvedBaseline, recordedRoutes));
+      phaseLog(`Recorded experience baseline at ${baselinePath}`);
     }
     phaseLog("Smoke checks completed");
   } finally {

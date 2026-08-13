@@ -433,6 +433,10 @@ body[data-page-type="home"] .inventory-section {
   margin-top: 8px;
 }
 
+.docs-page .plain-list li {
+  overflow-wrap: anywhere;
+}
+
 .back-link {
   display: inline-flex;
   margin-bottom: 20px;

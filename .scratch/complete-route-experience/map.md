@@ -35,6 +35,7 @@ Behavior, content, URLs, assets, accessibility, and runtime dimensions remain in
 - [Encode the manifest experience contract](issues/11-encode-manifest-experience-contract.md) — make the manifest authoritative for all 83 Route shell, theme, surface, interaction, network, and Suggested Next Route declarations; validate exact schema and cross-Route invariants while preserving generated `pages.json` parity.
 - [Synchronize universal Route HTML seams](issues/12-synchronize-universal-route-html-seams.md) — deterministically synchronize canonical body metadata and shared theme/Sandbox assets across all 83 top-level Routes while preserving authored main/runtime placement, script order, child documents, and parity evidence.
 - [Render shared Route and Atlas continuation UI](issues/13-render-shared-continuation-ui.md) — consume the canonical manifest to render one accessible local continuation on every Route and Atlas card while preserving subpath URLs, footer geometry, focus behavior, and Guided Path Progress isolation.
+- [Enforce complete-experience acceptance gates](issues/14-enforce-complete-experience-gates.md) — freeze manifest-driven viewport, theme, navigation, continuation, surface, accessibility, network, persisted geometry, and comparative performance gates; keep strict `--experience` checks scoped to migrated Routes and baseline recording explicit and atomic.
 
 ## Not yet specified
 

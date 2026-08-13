@@ -146,8 +146,8 @@
     "suggestedNextSlug": "simulating",
     "experience": {
       "themeOwnership": "fixed-runtime",
-      "primarySurface": "main",
-      "runtimeSurface": "[data-runtime-main], main",
+      "primarySurface": "#sidebar",
+      "runtimeSurface": "#canvasses",
       "interactionProbe": "read-only",
       "networkPolicy": {
         "mode": "local-only"
@@ -395,8 +395,8 @@
     "suggestedNextSlug": "primary-interactive-hub",
     "experience": {
       "themeOwnership": "fixed-runtime",
-      "primarySurface": "main",
-      "runtimeSurface": "[data-runtime-main], main",
+      "primarySurface": "main[data-runtime-main][aria-busy=\"false\"] #editor_container",
+      "runtimeSurface": "main[data-runtime-main][aria-busy=\"false\"] #editor_container",
       "interactionProbe": "read-only",
       "networkPolicy": {
         "mode": "local-only"
@@ -2048,8 +2048,8 @@
     "suggestedNextSlug": "music-interactive-hub",
     "experience": {
       "themeOwnership": "fixed-runtime",
-      "primarySurface": "main",
-      "runtimeSurface": "[data-runtime-main], main",
+      "primarySurface": "#genres",
+      "runtimeSurface": "#genres",
       "interactionProbe": "read-only",
       "networkPolicy": {
         "mode": "deferred-remote",
