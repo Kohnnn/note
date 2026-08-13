@@ -2769,7 +2769,7 @@ async function smokeSim(context) {
 async function smokeDecisionTree(context) {
   const page = await context.newPage();
   await assertRoute(page, "decision-tree/", "#reference-footer");
-  await assertEngineeringSandboxShell(page, "decision-tree route", { minimumChapters: 6, navMode: "generated" });
+  await assertEngineeringSandboxShell(page, "decision-tree route", { minimumChapters: 6, navMode: "generated", expectedFamily: "mlu-pilot" });
   await page.waitForFunction(() => {
     return document.querySelector("#chart svg") &&
       document.querySelector("#entropy-chart svg") &&
@@ -2828,7 +2828,7 @@ async function smokeDecisionTree(context) {
 async function smokeRandomForest(context) {
   const page = await context.newPage();
   await assertRoute(page, "random-forest/", "#reference-footer");
-  await assertEngineeringSandboxShell(page, "random-forest route", { minimumChapters: 5, navMode: "generated" });
+  await assertEngineeringSandboxShell(page, "random-forest route", { minimumChapters: 5, navMode: "generated", expectedFamily: "mlu-pilot" });
   await page.waitForFunction(() => {
     return document.querySelector("#gridOfTrees svg") &&
       document.querySelector("#chart-rf") &&
@@ -8304,7 +8304,7 @@ async function smokeBiasVariance(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "bias-variance/", "#reference-footer");
-  await assertEngineeringSandboxShell(page, "bias-variance route", { minimumChapters: 6, navMode: "generated" });
+  await assertEngineeringSandboxShell(page, "bias-variance route", { minimumChapters: 6, navMode: "generated", expectedFamily: "mlu-pilot" });
   await page.waitForFunction(() => {
     return document.querySelector("#scroll-viz svg") &&
       document.querySelector("#errorBarSvg") &&
@@ -8400,6 +8400,7 @@ async function smokeTrainTestValidation(context) {
     minimumChapters: 6,
     navMode: "native",
     nativeSelector: "#toc a[href^='#']",
+    expectedFamily: "mlu-pilot",
   });
   await page.waitForFunction(() => {
     return document.querySelector("#chart svg") &&
@@ -8464,7 +8465,7 @@ async function smokeDoubleDescent(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "double-descent/", "#reference-footer");
-  await assertEngineeringSandboxShell(page, "double-descent route", { minimumChapters: 5, navMode: "generated" });
+  await assertEngineeringSandboxShell(page, "double-descent route", { minimumChapters: 5, navMode: "generated", expectedFamily: "mlu-pilot" });
   await page.waitForFunction(() => {
     return document.querySelector("#doubledescent-container svg") &&
       document.querySelector("#scatter-container svg") &&
@@ -8564,7 +8565,7 @@ async function smokeDoubleDescent2(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
   await assertRoute(page, "double-descent2/", "#reference-footer");
-  await assertEngineeringSandboxShell(page, "double-descent2 route", { minimumChapters: 6, navMode: "generated" });
+  await assertEngineeringSandboxShell(page, "double-descent2 route", { minimumChapters: 6, navMode: "generated", expectedFamily: "mlu-pilot" });
   await page.waitForFunction(() => {
     return document.querySelectorAll(".katex").length > 20 &&
       document.querySelector("#chart1 svg") &&

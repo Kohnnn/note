@@ -419,7 +419,37 @@
     "shell": {
       "family": "mlu-pilot",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#intro",
+          "title": "Build the tree"
+        },
+        {
+          "selector": "#splits",
+          "title": "Choose the split"
+        },
+        {
+          "selector": "#informationgain",
+          "title": "Measure the gain"
+        },
+        {
+          "selector": "#anotherlook",
+          "title": "Read the trained tree"
+        },
+        {
+          "selector": "#pertubations",
+          "title": "Stress-test the tree"
+        },
+        {
+          "selector": "#limitations",
+          "title": "Why forests help"
+        },
+        {
+          "selector": "#final",
+          "title": "References"
+        }
+      ]
     },
     "suggestedNextSlug": "random-forest",
     "experience": {
@@ -448,7 +478,37 @@
     "shell": {
       "family": "mlu-pilot",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#introduction",
+          "title": "Vote before you trust"
+        },
+        {
+          "selector": "#ensemble",
+          "title": "Why ensembles work"
+        },
+        {
+          "selector": "#random-forest",
+          "title": "Build the forest"
+        },
+        {
+          "selector": "#barcode",
+          "title": "Read disagreement"
+        },
+        {
+          "selector": "#cantor-section",
+          "title": "Compare predictions"
+        },
+        {
+          "selector": "#conclusion",
+          "title": "Takeaways"
+        },
+        {
+          "selector": "#resources",
+          "title": "References"
+        }
+      ]
     },
     "suggestedNextSlug": "linear-regression",
     "experience": {
@@ -2381,7 +2441,37 @@
     "shell": {
       "family": "mlu-pilot",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#intro",
+          "title": "Meet the tradeoff"
+        },
+        {
+          "selector": "#scrolly",
+          "title": "From underfit to overfit"
+        },
+        {
+          "selector": "#loess-section",
+          "title": "Tune LOESS smoothing"
+        },
+        {
+          "selector": "#knn-section",
+          "title": "Tune K-nearest neighbors"
+        },
+        {
+          "selector": "#double-descent-section",
+          "title": "See the double-descent echo"
+        },
+        {
+          "selector": "#double-descent-section + hr + section",
+          "title": "Wrap up the lesson"
+        },
+        {
+          "selector": "#outro",
+          "title": "References"
+        }
+      ]
     },
     "suggestedNextSlug": "double-descent",
     "experience": {
@@ -2445,7 +2535,33 @@
     "shell": {
       "family": "mlu-pilot",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#intro",
+          "title": "Meet double descent"
+        },
+        {
+          "selector": "#scrolly",
+          "title": "Watch the second descent"
+        },
+        {
+          "selector": "#section2",
+          "title": "Set up the experiment"
+        },
+        {
+          "selector": "#scrolly-side",
+          "title": "Move across the threshold"
+        },
+        {
+          "selector": "#gap",
+          "title": "Mind the interpolation gap"
+        },
+        {
+          "selector": "#conclusion",
+          "title": "References"
+        }
+      ]
     },
     "suggestedNextSlug": "double-descent2",
     "experience": {
@@ -2474,7 +2590,33 @@
     "shell": {
       "family": "mlu-pilot",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#intro",
+          "title": "Set up the mathematics"
+        },
+        {
+          "selector": "#piecewise-model",
+          "title": "Define the model"
+        },
+        {
+          "selector": "#below-threshold",
+          "title": "Below the interpolation threshold"
+        },
+        {
+          "selector": "#at-threshold",
+          "title": "At the interpolation threshold"
+        },
+        {
+          "selector": "#to-infinity",
+          "title": "In the spline limit"
+        },
+        {
+          "selector": "#references",
+          "title": "Resources"
+        }
+      ]
     },
     "suggestedNextSlug": "decision-tree",
     "experience": {

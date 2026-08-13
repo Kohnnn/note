@@ -1724,6 +1724,490 @@ body[data-story-route="blockchain-101-combined-flow"] .story-callout[data-story-
   background: var(--surface-card-strong);
 }
 
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] {
+  --ie-mlu-inverse-surface: color-mix(in srgb, var(--body-grad-to) 18%, #10202b);
+  --ie-mlu-on-inverse: #f7f2e6;
+  background:
+    radial-gradient(circle at top left, var(--body-grad-1), transparent 28%),
+    radial-gradient(circle at 82% 10%, var(--body-grad-2), transparent 22%),
+    linear-gradient(180deg, var(--body-grad-from) 0%, var(--paper) 18%, var(--body-grad-to) 100%);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] :is(
+  .story-chip,
+  .story-callout[data-story-callout],
+  .story-rail__panel,
+  .story-mobile-sheet__panel
+) {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] .story-hero::before {
+  background: linear-gradient(90deg, transparent, var(--line), transparent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] :is(
+  .story-hero__title,
+  .story-companion-panel__title,
+  .story-mobile-bar__current,
+  .story-mobile-sheet__title
+) {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] :is(
+  .story-hero__summary,
+  .story-shell-caption,
+  .story-inline-note p,
+  .story-rail__count,
+  .story-rail__position,
+  .story-mobile-bar__position,
+  .story-mobile-sheet__position,
+  .story-progress__value,
+  .story-rail__current,
+  .story-mobile-sheet__current
+) {
+  color: var(--muted);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] :is(
+  .story-hero__eyebrow,
+  .story-callout__label,
+  .story-rail__label,
+  .story-mobile-bar__eyebrow
+) {
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] .story-button {
+  border-color: var(--line);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] .story-button:hover,
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] .story-button:focus-visible {
+  background: var(--accent-deep);
+  color: var(--on-accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] .story-button--secondary,
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] .story-button--secondary:hover,
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] .story-button--secondary:focus-visible {
+  background: var(--surface-card-strong);
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] .story-mobile-bar {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  box-shadow: 0 -10px 22px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] :is(
+  .story-mobile-bar__toggle,
+  .story-mobile-sheet__close
+) {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] .story-progress {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] .story-progress__bar {
+  background: linear-gradient(90deg, var(--accent), var(--accent-deep));
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] :is(
+  .story-rail__link,
+  .story-mobile-bar__link,
+  .story-mobile-sheet__link
+) {
+  color: var(--muted);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] :is(
+  .story-rail__link,
+  .story-mobile-bar__link,
+  .story-mobile-sheet__link
+)::before {
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] :is(
+  .story-rail__link,
+  .story-mobile-bar__link,
+  .story-mobile-sheet__link
+):is(:hover, :focus-visible, .is-active) {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] :is(
+  .story-rail__link,
+  .story-mobile-bar__link,
+  .story-mobile-sheet__link
+).is-complete {
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] :is(
+  .story-rail__link,
+  .story-mobile-bar__link,
+  .story-mobile-sheet__link
+).is-active::before {
+  border-color: var(--accent-deep);
+  background: var(--accent-deep);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] :is(
+  .story-rail__link,
+  .story-mobile-bar__link,
+  .story-mobile-sheet__link
+).is-complete::before {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 34%, transparent);
+}
+
+@media (max-width: 390px) {
+  body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="linear-regression"] #equation-math,
+  body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="logistic-regression"] #app {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 750px) {
+  body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="train-test-validation"] header {
+    position: fixed;
+    inset: 0 0 auto;
+    display: block;
+  }
+
+  body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="train-test-validation"] .cardSpan {
+    display: none;
+  }
+
+  body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="train-test-validation"] #toc {
+    flex-wrap: wrap;
+  }
+
+  body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="train-test-validation"] #toc a {
+    display: block;
+    min-height: 24px;
+    padding: 0.2rem 0.35rem;
+  }
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-nav="native"] header {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-nav="native"] #toc {
+  border-color: var(--line);
+  background: var(--surface-pill);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-nav="native"] #toc a {
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-nav="native"] #toc a.is-active,
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-nav="native"] #toc a[aria-current="true"] {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="decision-tree"] :is(
+  #intro-text,
+  #splits,
+  #informationgain,
+  #anotherlook,
+  #pertubations,
+  #limitations,
+  #final
+) {
+  background-color: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="decision-tree"] #scrolly > article > section > :is(h2, p) {
+  background-color: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="decision-tree"] :is(
+  #intro-text > p,
+  #splits > p.center-text,
+  #informationgain > p.center-text,
+  #informationgain #ig-text > p,
+  #anotherlook > p.center-text,
+  #pertubations > p.center-text,
+  #limitations > p.center-text,
+  #final > p
+) {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="decision-tree"] :is(
+  #splits > h2,
+  #splits > .boxed > h3,
+  #informationgain > h3,
+  #anotherlook > h3,
+  #pertubations > h3,
+  #limitations > h3,
+  #final > h3
+) {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="decision-tree"] :is(
+  #splits > .boxed,
+  #informationgain > .boxed
+) {
+  border-color: var(--line);
+  background: var(--surface-panel);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="decision-tree"] :is(
+  #splits,
+  #informationgain,
+  #anotherlook,
+  #pertubations,
+  #limitations,
+  #final
+) > p a {
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="random-forest"] :is(
+  #introduction,
+  #resources
+) {
+  background-color: var(--ie-mlu-inverse-surface);
+  color: var(--ie-mlu-on-inverse);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="random-forest"] :is(
+  #introduction > #subtitle,
+  #resources > p
+) {
+  color: var(--ie-mlu-on-inverse);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="random-forest"] :is(
+  #article-condurcet,
+  #article-rf,
+  #ensemble,
+  #barcode,
+  #cantor-section,
+  #conclusion
+) {
+  background-color: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="random-forest"] :is(
+  #article-condurcet,
+  #article-rf
+) > section > :is(h2, h3, p) {
+  background-color: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="random-forest"] :is(
+  #ensemble,
+  #random-forest,
+  #barcode,
+  #cantor-section,
+  #conclusion
+) > h2,
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="random-forest"] :is(
+  #ensemble,
+  #barcode,
+  #cantor-section,
+  #conclusion
+) > p {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="random-forest"] :is(
+  #article-condurcet,
+  #article-rf,
+  #ensemble,
+  #barcode,
+  #cantor-section,
+  #conclusion
+) a {
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="random-forest"] #resources > p > a {
+  color: var(--ie-mlu-on-inverse);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="random-forest"] #chart-wrapper-condurcet .sliderText {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="random-forest"] #chart-wrapper-condurcet input.slider {
+  background-color: var(--surface-input);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="random-forest"] #chart-wrapper-condurcet input.slider::-webkit-slider-thumb {
+  background-color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="random-forest"] #chart-wrapper-condurcet input.slider::-moz-range-thumb {
+  background-color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="bias-variance"] :is(
+  #intro,
+  .step,
+  .model-text-wrapper,
+  #outro
+) {
+  background-color: var(--surface-card-strong);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="bias-variance"] :is(
+  #intro-icon .logo,
+  #intro__hed,
+  #intro__date,
+  #intro__dek,
+  .step > p,
+  .model-header,
+  .model-text,
+  #outro li
+) {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="bias-variance"] :is(
+  #intro__dek,
+  .step > p,
+  .model-text,
+  #outro li
+) a {
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="bias-variance"] .data-button {
+  border-color: var(--line);
+  background-color: var(--accent);
+  color: var(--on-accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="bias-variance"] .data-button:is(:hover, :focus-visible) {
+  border-color: var(--focus-border);
+  background-color: var(--accent-deep);
+  color: var(--on-accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="train-test-validation"] #scrolly > article > section > :is(h2, p),
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="train-test-validation"] :is(
+  #intro-mobile,
+  #summary-mobile
+) > :is(h2, h4, p) {
+  background-color: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="train-test-validation"] .item-text,
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="train-test-validation"] .button-container > p {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="train-test-validation"] .button-container .button {
+  border-color: var(--line);
+  background-color: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="train-test-validation"] .button-container .button:is(:hover, :focus-visible) {
+  border-color: var(--focus-border);
+  background-color: var(--accent-soft);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="train-test-validation"] .button-container .button.active {
+  border-color: var(--accent);
+  background-color: var(--accent);
+  color: var(--on-accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="double-descent"] #intro,
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="double-descent"] :is(.step, .step-side),
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="double-descent"] #scrolly .step > p,
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="double-descent"] #scrolly-side .step-side > p {
+  background-color: var(--surface-card-strong);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="double-descent"] :is(
+  #intro-icon .logo,
+  #intro-hed,
+  .intro-sub,
+  #intro__date,
+  .model-header,
+  #top-note,
+  .model-text,
+  .step > p,
+  .step-side > p,
+  .body-text,
+  #conclusion li
+) {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="double-descent"] :is(
+  .model-text,
+  .step > p,
+  .step-side > p,
+  .body-text,
+  #conclusion li
+) a {
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="double-descent2"] :is(
+  #intro-icon .logo,
+  #intro-hed,
+  .intro-sub,
+  #intro__date,
+  .subtitle,
+  .model-header,
+  #top-note,
+  .body-text,
+  .model-text,
+  .block-text,
+  .list-text,
+  #intro li
+) {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="double-descent2"] .block-text {
+  border-color: var(--line);
+  background-color: var(--surface-card-strong);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"][data-story-route="double-descent2"] :is(
+  .body-text,
+  .model-text,
+  .block-text,
+  .list-text,
+  #intro li
+) a {
+  color: var(--accent);
+}
+
 body[data-story-family="engineering-longform"] .segmented_control_on,
 body[data-story-family="engineering-longform"] .segmented_control_off {
   border: 0;

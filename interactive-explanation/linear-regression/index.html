@@ -22,6 +22,20 @@
   <link rel="stylesheet" href="../shared/public-footer.css">
   <link rel="stylesheet" href="../shared/engineering-sandbox.css">
   <script defer src="../shared/engineering-sandbox.js"></script>
+  <script>
+    (() => {
+      const selector = 'iframe[aria-hidden="true"][tabindex="-1"]';
+      const titleFrames = () => {
+        document.querySelectorAll(selector).forEach((frame, index) => {
+          frame.title = `Linear Regression hidden resize listener ${index + 1}`;
+        });
+      };
+      const observer = new MutationObserver(titleFrames);
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+      titleFrames();
+      window.addEventListener("pagehide", () => observer.disconnect(), { once: true });
+    })();
+  </script>
   <script defer src="./build/bundle.js"></script>
   <script defer src="../shared/public-footer.js"></script>
 </head>
