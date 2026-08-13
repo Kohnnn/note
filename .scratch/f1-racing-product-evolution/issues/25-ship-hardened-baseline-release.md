@@ -1,7 +1,7 @@
 # 25 — Ship the hardened baseline release
 
 Type: task
-Status: open
+Status: claimed
 Blocked by: 19, 21, 22, 23, 24
 
 **What to build:** The canonical production site receives one verified baseline release whose source, generated packs, static artifact, deployment identity, browser behavior, and rollback target can be tied together and independently checked.
