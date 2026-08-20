@@ -28591,32 +28591,32 @@
         },
         "narrow": {
           "rect": {
-            "top": 122,
-            "right": 360,
-            "bottom": 722,
+            "top": 155.33334350585938,
+            "right": 320,
+            "bottom": 688.6665954589844,
             "left": 0,
-            "width": 360,
-            "height": 600
+            "width": 320,
+            "height": 533.333251953125
           },
           "css": {
             "width": "360px",
             "height": "600px",
-            "transform": "none",
+            "transform": "matrix(0.888889, 0, 0, 0.888889, 0, 0)",
             "touchAction": "auto",
             "pointerEvents": "auto"
           },
-          "aspectRatio": 0.6,
+          "aspectRatio": 0.6000000915527484,
           "intrinsic": [
             {
               "key": "canvas:game_canvas",
               "tag": "canvas",
               "rect": {
-                "top": 122,
-                "right": 360,
-                "bottom": 722,
+                "top": 155.33334350585938,
+                "right": 320,
+                "bottom": 688.6665954589844,
                 "left": 0,
-                "width": 360,
-                "height": 600
+                "width": 320,
+                "height": 533.333251953125
               },
               "width": 720,
               "height": 1200,
@@ -28627,12 +28627,12 @@
               "key": "canvas:1",
               "tag": "canvas",
               "rect": {
-                "top": 22,
-                "right": 360,
-                "bottom": 122,
+                "top": 66.44445037841797,
+                "right": 320,
+                "bottom": 155.33334350585938,
                 "left": 0,
-                "width": 360,
-                "height": 100
+                "width": 320,
+                "height": 88.8888931274414
               },
               "width": 720,
               "height": 200,

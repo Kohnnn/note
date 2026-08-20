@@ -19,7 +19,7 @@ const expectedContractBySlug = new Map([
   ["loopy", ["ncase", "essay", "none", "fixed-runtime", "simulating"]],
   ["neurons", ["ncase", "essay", "native", "fixed-runtime", "anxiety"]],
   ["remember", ["ncase", "essay", "generated", "fixed-runtime", "primary-interactive-hub"]],
-  ["anxiety", ["ncase", "essay", "native", "fixed-runtime", "remember"]],
+  ["anxiety", ["ncase", "essay", "none", "fixed-runtime", "remember"]],
   ["wbwwb", ["ncase", "essay", "none", "fixed-runtime", "crowds"]],
   ["coming-out-simulator-2014", ["ncase", "essay", "none", "fixed-runtime", "anxiety"]],
   ["covid-19", ["ncase", "essay", "generated", "fixed-runtime", "crowds"]],
@@ -116,7 +116,6 @@ const expectedNativeControlBySlug = new Map([
   ["trust", { selector: "#select .dot", minimum: 10, kind: "state" }],
   ["crowds", { selector: "#navigation > div[chapter]", minimum: 9, kind: "state" }],
   ["neurons", { selector: "iframe[title=\"Neurotic Neurons interactive\"]", minimum: 1, kind: "state", childSelector: "#control_play, #control_volume, #control_captions" }],
-  ["anxiety", { selector: "#game_choices > button", minimum: 1, kind: "state" }],
   ["simulating", { selector: ".links a[href=\"../sim/\"], .links a[href=\"./original/\"]", minimum: 2, kind: "link", fragmentOnly: false }],
   ["blockchain", { selector: "nav a", minimum: 6, kind: "link", fragmentOnly: false }],
   ["public-private-keys", { selector: "nav a", minimum: 4, kind: "link", fragmentOnly: false }],
@@ -274,6 +273,14 @@ test("all route HTML files carry canonical Engineering Sandbox seams", () => {
     assert.ok(module.notes.includes("Ticket 12 synchronizes the manifest-owned Engineering Sandbox body contract and shared head seams without moving existing Route runtimes or scripts."), `${route.slug} parity notes Ticket 12`);
     assert.ok(module.evidence.includes("Route HTML declares canonical data-story metadata plus one color-scheme meta, synchronous theme init before Route styles, Sandbox CSS after Route styles, and one deferred Sandbox runtime whose existing position is preserved."), `${route.slug} parity evidence Ticket 12`);
   }
+});
+
+test("anxiety exposes its pre-start control and fits its fixed game stage at narrow widths", () => {
+  const route = manifest.find((entry) => entry.slug === "anxiety");
+  const css = fs.readFileSync(path.join(root, "anxiety", "styles", "game.css"), "utf8");
+
+  assert.equal(route.experience.primarySurface, "#loading");
+  assert.match(css, /@media screen and \(max-width: 359px\)[\s\S]*#game_container[\s\S]*transform: scale\(calc\(100vw \/ 360px\)\);[\s\S]*transform-origin: left center;/);
 });
 
 test("sim emoji fallback resolves to its shipped font asset", () => {

@@ -176,5 +176,24 @@
     "evidence": [
       "Route HTML declares canonical data-story metadata plus one color-scheme meta, synchronous theme init before Route styles, Sandbox CSS after Route styles, and one deferred Sandbox runtime whose existing position is preserved."
     ]
+  },
+  {
+    "moduleId": "pre-start-navigation-and-narrow-stage-fit",
+    "originalBehavior": "The story waits behind a full-stage loading control before creating dialogue choices in its fixed 360 by 600 game runtime.",
+    "localStatus": "The manifest treats the route as having no always-visible route navigation, declares the loading overlay as the pre-start primary control, and scales the fixed stage only below 360 CSS pixels.",
+    "sourceFiles": [
+      "../../anxiety/index.html",
+      "../../anxiety/styles/game.css",
+      "../../routes.manifest.json",
+      "../../tools/experience-baselines.json"
+    ],
+    "notes": [
+      "Dialogue choices remain native buttons and continue to be verified after the loading control starts the story.",
+      "The narrow transform preserves the 720 by 1200 canvas backing dimensions and the runtime's internal 360 by 600 coordinate system."
+    ],
+    "evidence": [
+      "Focused strict smoke covers stored and system light and dark states at 1400, 390, and 320 CSS pixel widths without horizontal page pan.",
+      "The approved narrow geometry records a 320 by 533.33 CSS pixel presentation while retaining the original canvas backing dimensions."
+    ]
   }
 ]

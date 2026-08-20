@@ -234,17 +234,12 @@
     "shell": {
       "family": "ncase",
       "variant": "essay",
-      "navigation": "native",
-      "nativeControl": {
-        "selector": "#game_choices > button",
-        "minimum": 1,
-        "kind": "state"
-      }
+      "navigation": "none"
     },
     "suggestedNextSlug": "remember",
     "experience": {
       "themeOwnership": "fixed-runtime",
-      "primarySurface": "main",
+      "primarySurface": "#loading",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
       "networkPolicy": {
