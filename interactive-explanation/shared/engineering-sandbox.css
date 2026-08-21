@@ -1394,29 +1394,148 @@ body[data-story-shell="engineering-sandbox"] #introduction.story-intro-compact #
   margin-bottom: 0.25rem;
 }
 
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] {
+  --story-paper: var(--paper);
+  --story-paper-deep: var(--body-grad-to);
+  --story-paper-strong: var(--paper-strong);
+  --story-ink: var(--ink);
+  --story-ink-soft: var(--muted);
+  --story-border: var(--line);
+  --story-border-strong: var(--focus-border);
+  --story-steel: var(--accent);
+  --story-steel-bright: var(--accent-deep);
+  --story-accent: var(--accent-deep);
+  --story-mint: var(--accent-soft);
+  --story-shadow: var(--shadow);
+  background:
+    radial-gradient(circle at top left, var(--body-grad-1), transparent 28%),
+    radial-gradient(circle at 82% 10%, var(--body-grad-2), transparent 22%),
+    linear-gradient(180deg, var(--body-grad-from) 0%, var(--paper) 18%, var(--body-grad-to) 100%);
+  color: var(--ink);
+}
+
 body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] .story-hero {
   margin-bottom: 2.4rem;
   padding: clamp(1.75rem, 3vw, 2.5rem);
-  background:
-    radial-gradient(circle at top right, rgba(203, 226, 228, 0.45), transparent 36%),
-    linear-gradient(180deg, rgba(255, 252, 246, 0.97), rgba(247, 241, 232, 0.94));
+  background: var(--surface-hero);
 }
 
-body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] .story-hero__eyebrow {
-  color: #5e6f7a;
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] :is(
+  .story-chip,
+  .story-callout[data-story-callout],
+  .story-rail__panel,
+  .story-mobile-bar,
+  .story-mobile-sheet__panel
+) {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] .story-hero::before {
+  background: linear-gradient(90deg, transparent, var(--line), transparent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] :is(
+  .story-hero__title,
+  .story-companion-panel__title,
+  .story-mobile-bar__current,
+  .story-mobile-sheet__title
+),
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] main > section[data-story-chapter] :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] :is(
+  .story-hero__summary,
+  .story-shell-caption,
+  .story-inline-note p,
+  .story-rail__count,
+  .story-rail__position,
+  .story-mobile-bar__position,
+  .story-mobile-sheet__position,
+  .story-progress__value,
+  .story-rail__current,
+  .story-mobile-sheet__current,
+  .by-line,
+  .local-note
+) {
+  color: var(--muted);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] :is(
+  .story-hero__eyebrow,
+  .story-callout__label,
+  .story-rail__label,
+  .story-mobile-bar__eyebrow
+) {
+  color: var(--accent);
 }
 
 body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] .story-hero__title {
   font-size: clamp(2.2rem, 5vw, 4rem);
 }
 
-body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] .story-chip {
-  background: rgba(32, 71, 88, 0.08);
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] .story-button {
+  border-color: var(--line);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
-body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] .story-rail__panel,
-body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] .story-mobile-bar {
-  background: rgba(248, 243, 235, 0.97);
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] .story-button:is(:hover, :focus-visible) {
+  background: var(--accent-deep);
+  color: var(--on-accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] .story-button--secondary,
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] .story-button--secondary:is(:hover, :focus-visible) {
+  background: var(--surface-card-strong);
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] :is(
+  .story-mobile-bar__toggle,
+  .story-mobile-sheet__close
+) {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] :is(
+  .story-rail__link,
+  .story-mobile-bar__link,
+  .story-mobile-sheet__link
+) {
+  color: var(--muted);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] :is(
+  .story-rail__link,
+  .story-mobile-bar__link,
+  .story-mobile-sheet__link
+):is(:hover, :focus-visible, .is-active) {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"][data-story-route="exponentiation"] section.title > .title-region > .title {
+  letter-spacing: -0.04em;
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"][data-story-route="eigenvectors-and-eigenvalues"] main > section[data-story-chapter],
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"][data-story-route="ordinary-least-squares-regression"] main {
+  overflow-x: auto;
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] main > section[data-story-chapter] :is(button, select, input[type="number"]) {
+  border-color: var(--focus-border);
+  background-color: var(--surface-input);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] main > section[data-story-chapter] input[type="range"] {
+  accent-color: var(--accent);
 }
 
 body[data-story-shell="engineering-sandbox"][data-reference-text="Double Descent"] #doubledescent-container,

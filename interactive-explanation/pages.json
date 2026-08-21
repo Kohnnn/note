@@ -532,7 +532,26 @@
     "shell": {
       "family": "ev-essay",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "[data-story-chapter=\"Meet conditional probability\"]",
+          "title": "Meet conditional probability",
+          "id": "conditional-probability-intro"
+        },
+        {
+          "selector": "#event-probabilities",
+          "title": "Set the event probabilities"
+        },
+        {
+          "selector": "#waterfall-view",
+          "title": "Watch the conditional view"
+        },
+        {
+          "selector": "#expected-vs-actual",
+          "title": "Compare actual and expected"
+        }
+      ]
     },
     "suggestedNextSlug": "logistic-regression",
     "experience": {
@@ -561,7 +580,30 @@
     "shell": {
       "family": "ev-essay",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "[data-story-chapter=\"Meet Markov chains\"]",
+          "title": "Meet Markov chains",
+          "id": "markov-chains-intro"
+        },
+        {
+          "selector": "#two-state-demo",
+          "title": "Watch a two-state chain"
+        },
+        {
+          "selector": "#transition-matrix",
+          "title": "Tune the transition matrix"
+        },
+        {
+          "selector": "#sticky-weather",
+          "title": "Model sticky weather"
+        },
+        {
+          "selector": "#playground",
+          "title": "Experiment in the playground"
+        }
+      ]
     },
     "suggestedNextSlug": "eigenvectors-and-eigenvalues",
     "experience": {
@@ -590,7 +632,21 @@
     "shell": {
       "family": "ev-essay",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#pca-2d",
+          "title": "Start in 2D"
+        },
+        {
+          "selector": "#pca-3d",
+          "title": "Rotate the 3D view"
+        },
+        {
+          "selector": "#pca-uk",
+          "title": "Read the 17D food dataset"
+        }
+      ]
     },
     "suggestedNextSlug": "eigenvectors-and-eigenvalues",
     "experience": {
@@ -619,7 +675,32 @@
     "shell": {
       "family": "ev-essay",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "[data-story-chapter=\"Meet repeated multiplication\"]",
+          "title": "Meet repeated multiplication",
+          "id": "exponentiation-intro"
+        },
+        {
+          "selector": "#growth-intuition",
+          "title": "Build the intuition"
+        },
+        {
+          "selector": "[data-story-chapter=\"Compare linear growth\"]",
+          "title": "Compare linear growth",
+          "id": "linear-growth"
+        },
+        {
+          "selector": "[data-story-chapter=\"Compare exponential growth\"]",
+          "title": "Compare exponential growth",
+          "id": "exponential-growth"
+        },
+        {
+          "selector": "#virus-example",
+          "title": "Model a real outbreak"
+        }
+      ]
     },
     "suggestedNextSlug": "conditional-probability",
     "experience": {
@@ -648,7 +729,27 @@
     "shell": {
       "family": "ev-essay",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "[data-story-chapter=\"Meet the circle vocabulary\"]",
+          "title": "Meet the circle vocabulary",
+          "id": "pi-intro"
+        },
+        {
+          "selector": "#circle-basics",
+          "title": "Define the circle"
+        },
+        {
+          "selector": "[data-story-chapter=\"Frame pi as a ratio\"]",
+          "title": "Frame pi as a ratio",
+          "id": "pi-ratio"
+        },
+        {
+          "selector": "#unwrap-pi",
+          "title": "Unwrap circumference against diameter"
+        }
+      ]
     },
     "suggestedNextSlug": "sine-and-cosine",
     "experience": {
@@ -677,7 +778,42 @@
     "shell": {
       "family": "ev-essay",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "[data-story-chapter=\"Meet sine and cosine\"]",
+          "title": "Meet sine and cosine",
+          "id": "sine-and-cosine-intro"
+        },
+        {
+          "selector": "[data-story-chapter=\"Frame the right triangle\"]",
+          "title": "Frame the right triangle",
+          "id": "right-triangle"
+        },
+        {
+          "selector": "#similar-triangles-story",
+          "title": "See similar triangles stay consistent"
+        },
+        {
+          "selector": "[data-story-chapter=\"Watch cosine unfold\"]",
+          "title": "Watch cosine unfold",
+          "id": "cosine-transform"
+        },
+        {
+          "selector": "[data-story-chapter=\"Bridge to the formulas\"]",
+          "title": "Bridge to the formulas",
+          "id": "trig-formulas"
+        },
+        {
+          "selector": "[data-story-chapter=\"Translate between coordinate systems\"]",
+          "title": "Translate between coordinate systems",
+          "id": "coordinate-systems"
+        },
+        {
+          "selector": "#linked-coordinates-story",
+          "title": "Link polar and Cartesian views"
+        }
+      ]
     },
     "suggestedNextSlug": "eigenvectors-and-eigenvalues",
     "experience": {
@@ -706,7 +842,32 @@
     "shell": {
       "family": "ev-essay",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "[data-story-chapter=\"Meet eigenvectors and eigenvalues\"]",
+          "title": "Meet eigenvectors and eigenvalues",
+          "id": "eigenvectors-intro"
+        },
+        {
+          "selector": "#eigen-intro",
+          "title": "Build the geometric intuition"
+        },
+        {
+          "selector": "[data-story-chapter=\"Follow Fibonacci growth\"]",
+          "title": "Follow Fibonacci growth",
+          "id": "fibonacci-growth"
+        },
+        {
+          "selector": "[data-story-chapter=\"Find steady states\"]",
+          "title": "Find steady states",
+          "id": "steady-states"
+        },
+        {
+          "selector": "#complex-story",
+          "title": "Watch complex eigenvalues spiral"
+        }
+      ]
     },
     "suggestedNextSlug": "tesseract",
     "experience": {
@@ -735,7 +896,26 @@
     "shell": {
       "family": "ev-essay",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "[data-story-chapter=\"Meet image kernels\"]",
+          "title": "Meet image kernels",
+          "id": "image-kernels-intro"
+        },
+        {
+          "selector": "#kernel-basics",
+          "title": "Read convolution as local arithmetic"
+        },
+        {
+          "selector": "#kernel-matrix-story",
+          "title": "Walk through the kernel math"
+        },
+        {
+          "selector": "#kernel-playground-story",
+          "title": "Experiment in the playground"
+        }
+      ]
     },
     "suggestedNextSlug": "alpha-compositing",
     "experience": {
@@ -764,7 +944,23 @@
     "shell": {
       "family": "ev-essay",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "[data-story-chapter=\"Meet least squares\"]",
+          "title": "Meet least squares",
+          "id": "ols-intro"
+        },
+        {
+          "selector": "#ols-app",
+          "title": "Move the line and read the loss"
+        },
+        {
+          "selector": "[data-story-chapter=\"Carry the model back to the notes\"]",
+          "title": "Carry the model back to the notes",
+          "id": "ols-notes"
+        }
+      ]
     },
     "suggestedNextSlug": "linear-regression",
     "experience": {

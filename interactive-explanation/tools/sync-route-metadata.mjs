@@ -58,6 +58,15 @@ const CHAPTER_ROUTE_SLUGS = new Set([
   "bias-variance",
   "double-descent",
   "double-descent2",
+  "conditional-probability",
+  "markov-chains",
+  "principal-component-analysis",
+  "exponentiation",
+  "pi",
+  "sine-and-cosine",
+  "eigenvectors-and-eigenvalues",
+  "image-kernels",
+  "ordinary-least-squares-regression",
 ]);
 const MUSICMAP_DEFERRED_ACTIONS = [
   {
