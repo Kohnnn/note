@@ -22,6 +22,10 @@ This map is complete when every release in the train has shipped to the canonica
 - Prefer progressive disclosure and the accessible 2D track; 3D supports evidence where it materially improves understanding.
 - Reuse existing routes and components where possible. A whole-product visual overhaul does not authorize a framework or architecture rewrite.
 - Local `npm run check:featured` and `npm run quality:source` passed on 2026-08-11; this does not establish full artifact or production parity.
+- Ticket 25 local Node.js 22 quality, build, static smoke, release-data, release-gate, and targeted Chromium probes passed on 2026-08-13, including observable 2D keyboard transforms and legacy redirect coverage; no finalized candidate or remote release evidence exists, so the baseline remains unshipped.
+- Tickets 26–30 passed local acceptance on 2026-08-21 and are committed in `f1-racing` source `33bc9c978a574a1aa03a1da3d7261b623cb43113`: deterministic generated Monza/Mexico/Zandvoort briefs, canonical Dashboard rendering, exact Replay/Learn/Modelview handoffs, visible evidence ceilings, browser-local Resume, and 390 px/1440 px browser journeys all pass. The source remains undeployed.
+- Ticket 31 remains claimed: zero-client measurement and privacy checks pass locally in `33bc9c978a574a1aa03a1da3d7261b623cb43113`, but Netlify analytics availability, host reports, the 30-day baseline, owner review, operator contact, and production verification remain external blockers.
+- `npm run release:artifact` passed the clean-source gate on 2026-08-22 for `33bc9c978a574a1aa03a1da3d7261b623cb43113`, retained candidate `candidate-8LwYib`, and failed the initial release-data audit before build or Netlify access. Missing provenance ledger, normalized results/weather, digest coverage, valid stints, canonical brief mirror, unique 2024 United States identifiers, and current manifest selection block tickets 25 and 32; no release ID, promotion, baseline-window start, retained rollback target, or rollback drill is claimed.
 - Consult `frontend-skill`, `diagnosing-bugs`, `playwright`, `web-perf`, `security-best-practices`, `domain-modeling`, `git-workflow-and-versioning`, and `code-review` when their work enters the frontier.
 
 ## Decisions so far
@@ -49,6 +53,7 @@ This map is complete when every release in the train has shipped to the canonica
 - [Make Modelview self-contained and accessible](issues/21-make-modelview-self-contained-and-accessible.md) — local Draco delivery, correct keyboard and pressed-state controls, reduced-motion behavior, recovery fallbacks, and strict production-artifact browser acceptance now pass.
 - [Make Replay keyboard-complete and recoverable](issues/22-make-replay-keyboard-complete-and-recoverable.md) — pointer-equivalent keyboard driver selection, explicit optional degradation, independent concurrent chunk recovery, cached-context preservation, and stable focus now pass deterministic source and production-artifact browser acceptance.
 - [Produce and audit one releasable pack tree](issues/23-produce-and-audit-releasable-pack-tree.md) — marker-owned isolated candidates now fail closed across provenance, freshness, pack, replay, mirror, model, and artifact identity checks; production inputs remain blocked until their missing evidence is regenerated truthfully.
+- [Retire duplicate full-replay delivery](issues/24-retire-duplicate-full-replay-delivery.md) — Replay and Historical Race Desk now consume strict metadata and ordered bounded chunks only; full-payload delivery paths are removed while playback, recovery, release-audit, and browser gates pass.
 
 ## Not yet specified
 
