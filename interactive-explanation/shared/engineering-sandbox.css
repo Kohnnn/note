@@ -1697,6 +1697,160 @@ body[data-story-shell="engineering-sandbox"] #introduction.story-intro-compact #
   margin-bottom: 0.25rem;
 }
 
+body[data-story-shell="engineering-sandbox"]:is(
+  [data-story-family="samwho-essay"],
+  [data-story-family="systems-essay"]
+) {
+  --story-paper: var(--paper);
+  --story-paper-deep: var(--body-grad-to);
+  --story-paper-strong: var(--paper-strong);
+  --story-ink: var(--ink);
+  --story-ink-soft: var(--muted);
+  --story-border: var(--line);
+  --story-border-strong: var(--focus-border);
+  --story-steel: var(--accent);
+  --story-steel-bright: var(--accent-deep);
+  --story-accent: var(--accent-deep);
+  --story-mint: var(--accent-soft);
+  --story-shadow: var(--shadow);
+  background:
+    radial-gradient(circle at top left, var(--body-grad-1), transparent 28%),
+    radial-gradient(circle at 82% 10%, var(--body-grad-2), transparent 22%),
+    linear-gradient(180deg, var(--body-grad-from) 0%, var(--paper) 18%, var(--body-grad-to) 100%);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"]:is(
+  [data-story-family="samwho-essay"],
+  [data-story-family="systems-essay"]
+) :is(
+  .story-chip,
+  .story-callout[data-story-callout],
+  .story-rail__panel,
+  .story-mobile-bar,
+  .story-mobile-sheet__panel
+) {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"]:is(
+  [data-story-family="samwho-essay"],
+  [data-story-family="systems-essay"]
+) .story-callout.story-hero__panel {
+  background: var(--paper-strong);
+}
+
+body[data-story-shell="engineering-sandbox"]:is(
+  [data-story-family="samwho-essay"],
+  [data-story-family="systems-essay"]
+) :is(
+  .story-hero__title,
+  .story-mobile-bar__current,
+  .story-mobile-sheet__title
+) {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"]:is(
+  [data-story-family="samwho-essay"],
+  [data-story-family="systems-essay"]
+) :is(
+  .story-hero__summary,
+  .story-shell-caption,
+  .story-rail__count,
+  .story-rail__position,
+  .story-mobile-bar__position,
+  .story-mobile-sheet__position,
+  .story-progress__value,
+  .story-rail__current,
+  .story-mobile-sheet__current
+) {
+  color: var(--muted);
+}
+
+body[data-story-shell="engineering-sandbox"]:is(
+  [data-story-family="samwho-essay"],
+  [data-story-family="systems-essay"]
+) :is(
+  .story-hero__eyebrow,
+  .story-callout__label,
+  .story-rail__label,
+  .story-mobile-bar__eyebrow,
+  .story-rail__link,
+  .story-mobile-bar__link,
+  .story-mobile-sheet__link
+) {
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"]:is(
+  [data-story-family="samwho-essay"],
+  [data-story-family="systems-essay"]
+) :is(
+  .story-mobile-bar__toggle,
+  .story-mobile-sheet__close
+) {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"]:is(
+  [data-story-family="samwho-essay"],
+  [data-story-family="systems-essay"]
+) .story-button {
+  border-color: var(--line);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+body[data-story-shell="engineering-sandbox"]:is(
+  [data-story-family="samwho-essay"],
+  [data-story-family="systems-essay"]
+) .story-button--secondary {
+  background: var(--surface-card-strong);
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="samwho-essay"] main#content {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="samwho-essay"] main#content :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="samwho-essay"] main#content a:not(.anchor) {
+  color: var(--link-color);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="systems-essay"][data-story-route="hysteresis-slack"] main.container {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="systems-essay"][data-story-route="hysteresis-slack"] main.container :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="systems-essay"][data-story-route="hysteresis-slack"] main.container a {
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="systems-essay"][data-story-route="rigid-body-collisions"] :is(
+  .story-rail,
+  .story-mobile-bar
+) {
+  z-index: 30;
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="systems-essay"][data-story-route="rigid-body-collisions"] .story-mobile-sheet {
+  z-index: 31;
+}
+
 body[data-story-shell="engineering-sandbox"][data-story-family="ev-essay"] {
   --story-paper: var(--paper);
   --story-paper-deep: var(--body-grad-to);

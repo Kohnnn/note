@@ -25,13 +25,7 @@
   <script defer src="../shared/engineering-sandbox.js"></script>
   <script defer src="../shared/public-footer.js"></script>
   <script>
-    const url = new URL(window.location.href);
-    const params = url.searchParams;
-    if (params.get("theme") === "dark") {
-      document.documentElement.dataset.theme = "dark";
-    } else {
-      document.documentElement.dataset.theme = "light";
-    }
+    document.documentElement.dataset.theme = document.documentElement.getAttribute("saved-theme");
   </script>
 
   

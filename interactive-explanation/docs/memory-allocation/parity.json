@@ -93,6 +93,24 @@
     ]
   },
   {
+    "moduleId": "complete-systems-family-experience",
+    "originalBehavior": "The article used its native light and dark hook, authored section order, allocator timelines, sliders, Pixi canvases, and route-local allocator modules without a manifest-owned chapter contract.",
+    "localStatus": "The completed systems-family route maps the pre-paint saved theme into the existing data-theme hook, themes the declared main#content root, and renders nine exact manifest-owned chapters while preserving allocator state and intrinsic canvas output.",
+    "sourceFiles": [
+      "../../memory-allocation/index.html",
+      "../../routes.manifest.json",
+      "../../shared/engineering-sandbox.css",
+      "../../tools/smoke-bundle.mjs"
+    ],
+    "notes": [
+      "The native runtime hook follows the canonical html[saved-theme] state before the Route is ready.",
+      "Allocator canvases, GSAP and Pixi state, slider values, backing dimensions, transforms, and route-local module loading remain runtime-owned."
+    ],
+    "evidence": [
+      "Focused strict systems-family coverage validates stored and system themes, authored-root contrast, exact generated chapter titles and order, persisted intrinsic geometry, the hexadecimal slider, and an allocator-backed timeline transition."
+    ]
+  },
+  {
     "moduleId": "universal-route-html-seams",
     "originalBehavior": "The Route keeps its authored top-level document, runtime roots, and script order.",
     "localStatus": "Manifest synchronization owns the body Engineering Sandbox metadata and shared head seams while preserving Route runtime placement.",

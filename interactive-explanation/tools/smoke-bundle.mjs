@@ -128,6 +128,19 @@ const themedEngineeringLongformSlugs = new Set([
   "naval-architecture",
 ]);
 
+const authoredThemeRootBySlug = new Map([
+  ...Array.from(themedEngineeringLongformSlugs, (slug) => [slug, "#main_container"]),
+  ["memory-allocation", "main#content"],
+  ["load-balancing", "main#content"],
+  ["hysteresis-slack", "main.container"],
+  ["rigid-body-collisions", ".story-hero__panel"],
+]);
+
+const samwhoRuntimeThemeSlugs = new Set([
+  "memory-allocation",
+  "load-balancing",
+]);
+
 const routeManifestPath = path.join(rootDir, "routes.manifest.json");
 const routeManifest = fs.existsSync(routeManifestPath)
   ? JSON.parse(fs.readFileSync(routeManifestPath, "utf8"))
@@ -937,11 +950,12 @@ async function assertDocumentTheme(page, expectedTheme, label) {
   return state;
 }
 
-async function readThemeTokens(page, label, routeSlug = "") {
-  const tokens = await page.evaluate((inspectAuthoredTheme) => {
+async function readThemeTokens(page, label, routeSlug = "", expectedRuntimeTheme = "") {
+  const authoredRootSelector = authoredThemeRootBySlug.get(routeSlug) || "";
+  const tokens = await page.evaluate(({ inspectCompanion, rootSelector }) => {
     const style = getComputedStyle(document.documentElement);
-    const authoredRoot = inspectAuthoredTheme ? document.querySelector("#main_container") : null;
-    const companionCard = inspectAuthoredTheme ? document.querySelector(".story-companion-card") : null;
+    const authoredRoot = rootSelector ? document.querySelector(rootSelector) : null;
+    const companionCard = inspectCompanion ? document.querySelector(".story-companion-card") : null;
     const readColors = (element) => {
       if (!element) {
         return null;
@@ -956,19 +970,26 @@ async function readThemeTokens(page, label, routeSlug = "") {
       background: style.getPropertyValue("--paper").trim(),
       foreground: style.getPropertyValue("--ink").trim(),
       interactive: style.getPropertyValue("--topbar-hover").trim(),
+      runtimeTheme: document.documentElement.dataset.theme || "",
       authored: readColors(authoredRoot),
       companion: readColors(companionCard),
     };
-  }, themedEngineeringLongformSlugs.has(routeSlug));
+  }, {
+    inspectCompanion: themedEngineeringLongformSlugs.has(routeSlug),
+    rootSelector: authoredRootSelector,
+  });
   assert(tokens.background && tokens.foreground && tokens.interactive, `${label} did not expose shared theme tokens`);
   assert(contrastRatio(tokens.foreground, tokens.background) >= 4.5, `${label} shared foreground contrast fell below 4.5:1`);
   assert(contrastRatio(tokens.interactive, tokens.background) >= 3, `${label} shared interactive contrast fell below 3:1`);
-  if (themedEngineeringLongformSlugs.has(routeSlug)) {
-    assert(tokens.authored, `${label} did not expose the authored engineering root`);
+  if (authoredRootSelector) {
+    assert(tokens.authored, `${label} did not expose the declared authored root`);
     assert(contrastRatio(tokens.authored.foreground, tokens.authored.background) >= 4.5, `${label} authored foreground contrast fell below 4.5:1`);
     if (tokens.companion) {
       assert(contrastRatio(tokens.companion.foreground, tokens.companion.background) >= 4.5, `${label} companion foreground contrast fell below 4.5:1`);
     }
+  }
+  if (samwhoRuntimeThemeSlugs.has(routeSlug)) {
+    assert(tokens.runtimeTheme === expectedRuntimeTheme, `${label} did not map saved-theme into the SamWho runtime hook`);
   }
   return tokens;
 }
@@ -1489,7 +1510,7 @@ async function runStoredThemeGate(browser, route, theme, approvedGeometry) {
         await assertDocumentTheme(page, theme, label);
         await assertRouteExperienceState(page, route, viewport, label, approvedGeometry[viewport.name]);
         assertRuntimeClean(label);
-        routeTokens ||= await readThemeTokens(page, label, route.slug);
+        routeTokens ||= await readThemeTokens(page, label, route.slug, theme);
         console.log(`OK ${label}`);
       } finally {
         await page.close();
@@ -1531,7 +1552,7 @@ async function runSystemThemeGate(browser, route, theme, approvedGeometry, expec
         const themeState = await assertDocumentTheme(page, theme, label);
         assert(themeState.stored === null, `${label} unexpectedly retained a stored theme`);
         await assertRouteExperienceState(page, route, viewport, label, approvedGeometry[viewport.name]);
-        const tokens = await readThemeTokens(page, label, route.slug);
+        const tokens = await readThemeTokens(page, label, route.slug, theme);
         assert(JSON.stringify(tokens) === JSON.stringify(expectedTokens.routeTokens), `${label} did not match the ${theme} stored shell state`);
         assertRuntimeClean(label);
       } finally {

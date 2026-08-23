@@ -3138,7 +3138,45 @@
     "shell": {
       "family": "samwho-essay",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#malloc-and-free",
+          "title": "Meet malloc and free"
+        },
+        {
+          "selector": "#what-is-memory",
+          "title": "See memory as bytes"
+        },
+        {
+          "selector": "#the-simplest-malloc",
+          "title": "Start with the simplest allocator"
+        },
+        {
+          "selector": "#the-simplest-general-purpose-malloc",
+          "title": "Generalize the allocator"
+        },
+        {
+          "selector": "#fragmentation",
+          "title": "Feel fragmentation happen"
+        },
+        {
+          "selector": "#a-quick-malloc-puzzle",
+          "title": "Test yourself with the puzzle"
+        },
+        {
+          "selector": "#inline-bookkeeping",
+          "title": "Track bookkeeping overhead"
+        },
+        {
+          "selector": "#playground",
+          "title": "Experiment in the playground"
+        },
+        {
+          "selector": "#conclusion",
+          "title": "Take the allocator mental model with you"
+        }
+      ]
     },
     "suggestedNextSlug": "load-balancing",
     "experience": {
@@ -3168,7 +3206,41 @@
     "shell": {
       "family": "samwho-essay",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#visualising-the-problem",
+          "title": "Visualize the problem"
+        },
+        {
+          "selector": "#when-round-robin-doesn-t-cut-it",
+          "title": "See round robin break"
+        },
+        {
+          "selector": "#improving-on-round-robin",
+          "title": "Improve the baseline"
+        },
+        {
+          "selector": "#moving-away-from-round-robin",
+          "title": "Move beyond round robin"
+        },
+        {
+          "selector": "#optimizing-for-latency",
+          "title": "Optimize for latency"
+        },
+        {
+          "selector": "#one-last-algorithm",
+          "title": "Add one last algorithm"
+        },
+        {
+          "selector": "#conclusion",
+          "title": "Take the tradeoffs with you"
+        },
+        {
+          "selector": "#playground",
+          "title": "Experiment in the playground"
+        }
+      ]
     },
     "suggestedNextSlug": "primary-interactive-hub",
     "experience": {
@@ -3198,7 +3270,21 @@
     "shell": {
       "family": "systems-essay",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#intro",
+          "title": "Meet hysteresis through slack"
+        },
+        {
+          "selector": "#two-machines",
+          "title": "Control two machines"
+        },
+        {
+          "selector": "#trajectory",
+          "title": "Set a trajectory and inspect the future"
+        }
+      ]
     },
     "suggestedNextSlug": "rigid-body-collisions",
     "experience": {
