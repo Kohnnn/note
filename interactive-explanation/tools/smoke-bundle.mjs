@@ -130,8 +130,6 @@ const themedEngineeringLongformSlugs = new Set([
 
 const authoredThemeRootBySlug = new Map([
   ...Array.from(themedEngineeringLongformSlugs, (slug) => [slug, "#main_container"]),
-  ["memory-allocation", "main#content"],
-  ["load-balancing", "main#content"],
   ["hysteresis-slack", "main.container"],
   ["rigid-body-collisions", ".story-hero__panel"],
 ]);
@@ -951,7 +949,7 @@ async function assertDocumentTheme(page, expectedTheme, label) {
 }
 
 async function readThemeTokens(page, label, routeSlug = "", expectedRuntimeTheme = "") {
-  const authoredRootSelector = authoredThemeRootBySlug.get(routeSlug) || "";
+  const authoredRootSelector = routeManifestBySlug.get(routeSlug)?.experience.themeRoot || authoredThemeRootBySlug.get(routeSlug) || "";
   const tokens = await page.evaluate(({ inspectCompanion, rootSelector }) => {
     const style = getComputedStyle(document.documentElement);
     const authoredRoot = rootSelector ? document.querySelector(rootSelector) : null;
@@ -3776,6 +3774,33 @@ async function smokeOrdinaryLeastSquaresRegression(context) {
   await page.close();
 }
 
+async function assertAndersNativeToggle(context, relativePath, label, toggleSelector, collapseSelector, minimumLinks) {
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await assertRoute(page, relativePath, "#reference-footer");
+  const toggle = page.locator(toggleSelector);
+  const links = page.locator(`${collapseSelector} a[href]`);
+  await page.waitForFunction(({ selector, minimum }) => {
+    return document.querySelectorAll(`${selector} a[href]`).length >= minimum;
+  }, { selector: collapseSelector, minimum: minimumLinks }, { timeout: 15000 });
+  assert(await renderedControlCount(links) >= minimumLinks, `${label} did not start with its native links visible`);
+  await assertFocusVisible(toggle, `${label} native toggle`);
+  await assertPointerTargets(toggle, `${label} native toggle`);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(({ toggle, collapse }) => {
+    const control = document.querySelector(toggle);
+    const links = Array.from(document.querySelectorAll(`${collapse} a[href]`));
+    return control?.getAttribute("aria-expanded") === "false" && links.every((link) => link.getClientRects().length === 0);
+  }, { toggle: toggleSelector, collapse: collapseSelector }, { timeout: 5000 });
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(({ toggle, collapse, minimum }) => {
+    const control = document.querySelector(toggle);
+    const links = Array.from(document.querySelectorAll(`${collapse} a[href]`));
+    return control?.getAttribute("aria-expanded") === "true" && links.filter((link) => link.getClientRects().length > 0).length >= minimum;
+  }, { toggle: toggleSelector, collapse: collapseSelector, minimum: minimumLinks }, { timeout: 5000 });
+  await page.close();
+}
+
 async function smokeBlockchain(context) {
   const page = await context.newPage();
   const assertPageRuntimeClean = createRuntimeMonitor(page);
@@ -3861,6 +3886,8 @@ async function smokeBlockchain(context) {
   assertPageRuntimeClean("blockchain route");
   console.log("OK blockchain distributed scene");
   await page.close();
+  await assertAndersNativeToggle(context, "blockchain/", "blockchain route", ".navbar-toggle", "#navbar", 6);
+  console.log("OK blockchain native mobile navigation");
 }
 
 async function smokePublicPrivateKeys(context) {
@@ -3960,6 +3987,8 @@ async function smokePublicPrivateKeys(context) {
   assertPageRuntimeClean("public-private-keys route");
   console.log("OK public-private-keys blockchain scene");
   await page.close();
+  await assertAndersNativeToggle(context, "public-private-keys/", "public-private-keys route", ".navbar-toggler", "#collapsingNavbar", 4);
+  console.log("OK public-private-keys native mobile navigation");
 }
 
 async function smokeZeroKnowledgeProofDemo(context) {

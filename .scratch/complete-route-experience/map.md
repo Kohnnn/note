@@ -41,6 +41,7 @@ Behavior, content, URLs, assets, accessibility, and runtime dimensions remain in
 - [Migrate Explained Visually Routes](issues/17-migrate-explained-visually-routes.md) — migrate all nine Explained Visually Routes with exact-family authored-surface theming, manifest-owned generated chapters, intrinsic runtime and MathJax output, authored-root narrow containment, and green focused, family, static, and full smoke gates.
 - [Migrate authored engineering longforms](issues/18-migrate-authored-engineering-longforms.md) — migrate all 11 authored engineering longforms with exact-route authored-surface theming, manifest-owned generated chapters, preserved media and interaction geometry, the canonical Lights and Shadows continuation, and green static, focused strict experience, Bicycle regression, and full 83-Route smoke gates.
 - [Migrate systems Routes](issues/19-migrate-systems-routes.md) — migrate all four systems Routes with exact manifest chapters, canonical SamWho runtime hooks, authored-only Hysteresis theming, intrinsic Nuxt/WebGL output, preserved state and geometry, and green static, focused strict experience, final review, and full 83-Route smoke gates.
+- [Migrate Anders Brownworth labs](issues/20-migrate-anders-labs.md) — migrate all three Anders labs with declared authored runtime roots, semantic Bootstrap state theming, native keyboard-owned navigation, intrinsic jVectorMap output, preserved cryptographic behavior and dimensions, and green static, focused strict experience, final review, and full 83-Route smoke gates.
 
 ## Not yet specified
 

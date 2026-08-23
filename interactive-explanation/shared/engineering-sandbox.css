@@ -2300,6 +2300,159 @@ body[data-story-route="blockchain-101-combined-flow"] .story-callout[data-story-
   background: var(--surface-card-strong);
 }
 
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] {
+  --story-paper: var(--paper);
+  --story-paper-deep: var(--body-grad-to);
+  --story-paper-strong: var(--paper-strong);
+  --story-ink: var(--ink);
+  --story-ink-soft: var(--muted);
+  --story-border: var(--line);
+  --story-border-strong: var(--focus-border);
+  --story-steel: var(--accent);
+  --story-steel-bright: var(--accent-deep);
+  --story-accent: var(--accent-deep);
+  --story-mint: var(--accent-soft);
+  --story-shadow: var(--shadow);
+  background:
+    radial-gradient(circle at top left, var(--body-grad-1), transparent 22%),
+    radial-gradient(circle at 88% 14%, var(--body-grad-2), transparent 18%),
+    linear-gradient(180deg, var(--body-grad-from) 0%, var(--body-grad-to) 100%);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] :is(
+  .story-chip,
+  .story-callout[data-story-callout],
+  .story-lab-panel
+) {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] .story-lab-main {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] :is(
+  .story-hero__title,
+  .story-checklist,
+  .story-lab-main label,
+  .story-lab-main legend
+) {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] :is(
+  .story-hero__summary,
+  .story-shell-caption,
+  .text-muted
+) {
+  color: var(--muted);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] .story-lab-main :is(
+  .well:not(.well-success):not(.well-error),
+  .card:not(.card-success):not(.card-error):not(.sig-success),
+  .card-body
+) {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] .story-lab-main :is(
+  .card-header,
+  .card-footer
+) {
+  border-color: var(--line);
+  background: var(--surface-toolbar);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] .story-lab-main :is(
+  .form-control,
+  input,
+  textarea
+) {
+  border-color: var(--focus-border);
+  background: var(--surface-input);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] .story-lab-main :is(
+  .btn-secondary,
+  .btn-default
+) {
+  border-color: var(--focus-border);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] .story-lab-main .btn-outline-secondary {
+  border-color: var(--accent);
+  background: transparent;
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] .story-lab-main :is(
+  .well-success,
+  .card-success,
+  .sig-success,
+  .alert-success
+) {
+  border-color: color-mix(in srgb, #4f8b5b 48%, var(--line));
+  background: color-mix(in srgb, #4f8b5b 22%, var(--surface-card-strong));
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] .story-lab-main :is(
+  .well-error,
+  .card-error,
+  .alert-danger
+) {
+  border-color: color-mix(in srgb, #b14c4c 52%, var(--line));
+  background: color-mix(in srgb, #b14c4c 22%, var(--surface-card-strong));
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"] .story-lab-main #map {
+  color-scheme: light;
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"][data-story-nav="native"] :is(
+  .navbar-toggle,
+  .navbar-toggler
+):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"][data-story-nav="native"] .navbar {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+  }
+
+  body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"][data-story-nav="native"] .navbar-collapse {
+    padding-inline: 0;
+    border: 0;
+    box-shadow: none;
+  }
+
+  body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"][data-story-nav="native"] .navbar-nav {
+    display: flex;
+    flex-direction: row;
+    margin-block: 0;
+  }
+
+  body[data-story-shell="engineering-sandbox"][data-story-family="anders-lab"][data-story-nav="native"] .navbar-nav > li {
+    float: none;
+  }
+}
+
 body[data-story-shell="engineering-sandbox"][data-story-family="mlu-pilot"] {
   --ie-mlu-inverse-surface: color-mix(in srgb, var(--body-grad-to) 18%, #10202b);
   --ie-mlu-on-inverse: #f7f2e6;

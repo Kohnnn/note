@@ -1005,7 +1005,8 @@
     },
     "suggestedNextSlug": "public-private-keys",
     "experience": {
-      "themeOwnership": "shell-only",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-lab-main",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -1048,7 +1049,8 @@
     },
     "suggestedNextSlug": "zero-knowledge-proof-demo",
     "experience": {
-      "themeOwnership": "shell-only",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-lab-main",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -1085,7 +1087,8 @@
     },
     "suggestedNextSlug": "blockchain-101-combined-flow",
     "experience": {
-      "themeOwnership": "shell-only",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-lab-main",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
