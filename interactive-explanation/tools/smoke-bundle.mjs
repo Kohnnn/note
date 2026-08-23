@@ -114,6 +114,20 @@ const abletonSynthLessonSlugs = [
   "ableton-learning-synths-recipes",
 ];
 
+const themedEngineeringLongformSlugs = new Set([
+  "alpha-compositing",
+  "color-spaces",
+  "sound",
+  "cameras-and-lenses",
+  "lights-and-shadows",
+  "tesseract",
+  "gears",
+  "gps",
+  "earth-and-sun",
+  "curves-and-surfaces",
+  "naval-architecture",
+]);
+
 const routeManifestPath = path.join(rootDir, "routes.manifest.json");
 const routeManifest = fs.existsSync(routeManifestPath)
   ? JSON.parse(fs.readFileSync(routeManifestPath, "utf8"))
@@ -923,18 +937,39 @@ async function assertDocumentTheme(page, expectedTheme, label) {
   return state;
 }
 
-async function readThemeTokens(page, label) {
-  const tokens = await page.evaluate(() => {
+async function readThemeTokens(page, label, routeSlug = "") {
+  const tokens = await page.evaluate((inspectAuthoredTheme) => {
     const style = getComputedStyle(document.documentElement);
+    const authoredRoot = inspectAuthoredTheme ? document.querySelector("#main_container") : null;
+    const companionCard = inspectAuthoredTheme ? document.querySelector(".story-companion-card") : null;
+    const readColors = (element) => {
+      if (!element) {
+        return null;
+      }
+      const elementStyle = getComputedStyle(element);
+      return {
+        background: elementStyle.backgroundColor,
+        foreground: elementStyle.color,
+      };
+    };
     return {
       background: style.getPropertyValue("--paper").trim(),
       foreground: style.getPropertyValue("--ink").trim(),
       interactive: style.getPropertyValue("--topbar-hover").trim(),
+      authored: readColors(authoredRoot),
+      companion: readColors(companionCard),
     };
-  });
+  }, themedEngineeringLongformSlugs.has(routeSlug));
   assert(tokens.background && tokens.foreground && tokens.interactive, `${label} did not expose shared theme tokens`);
   assert(contrastRatio(tokens.foreground, tokens.background) >= 4.5, `${label} shared foreground contrast fell below 4.5:1`);
   assert(contrastRatio(tokens.interactive, tokens.background) >= 3, `${label} shared interactive contrast fell below 3:1`);
+  if (themedEngineeringLongformSlugs.has(routeSlug)) {
+    assert(tokens.authored, `${label} did not expose the authored engineering root`);
+    assert(contrastRatio(tokens.authored.foreground, tokens.authored.background) >= 4.5, `${label} authored foreground contrast fell below 4.5:1`);
+    if (tokens.companion) {
+      assert(contrastRatio(tokens.companion.foreground, tokens.companion.background) >= 4.5, `${label} companion foreground contrast fell below 4.5:1`);
+    }
+  }
   return tokens;
 }
 
@@ -942,6 +977,14 @@ function assertThemePair(light, dark, label) {
   assert(light.background !== dark.background, `${label} light and dark shell backgrounds were identical`);
   assert(light.foreground !== dark.foreground, `${label} light and dark shell foregrounds were identical`);
   assert(light.interactive !== dark.interactive, `${label} light and dark interactive chrome was identical`);
+  if (light.authored || dark.authored) {
+    assert(light.authored?.background !== dark.authored?.background, `${label} light and dark authored backgrounds were identical`);
+    assert(light.authored?.foreground !== dark.authored?.foreground, `${label} light and dark authored foregrounds were identical`);
+  }
+  if (light.companion || dark.companion) {
+    assert(light.companion?.background !== dark.companion?.background, `${label} light and dark companion backgrounds were identical`);
+    assert(light.companion?.foreground !== dark.companion?.foreground, `${label} light and dark companion foregrounds were identical`);
+  }
 }
 
 async function assertMainLandmark(page, route, label) {
@@ -1169,8 +1212,19 @@ async function assertFrameTitles(page, label) {
   assert(new Set(titles).size === titles.length, `${label} exposed duplicate iframe titles`);
 }
 
+function assertGeneratedChapterLinks(state, route, label) {
+  assert(state.linksValid, `${label} chapter links did not resolve locally`);
+  const expectedChapters = route.shell.chapters;
+  if (!Array.isArray(expectedChapters)) {
+    assert(state.linkCount >= 1, `${label} did not expose a chapter link`);
+    return;
+  }
+  const expectedTitles = expectedChapters.map((chapter) => chapter.title);
+  assert(state.linkCount === expectedTitles.length, `${label} exposed ${state.linkCount} chapter links instead of ${expectedTitles.length}`);
+  assert(JSON.stringify(state.titles) === JSON.stringify(expectedTitles), `${label} chapter titles or order did not match the manifest`);
+}
+
 async function assertGeneratedNavigation(page, route, viewport, label) {
-  const expectedMinimum = route.shell.chapters?.length || 1;
   if (viewport.name === "desktop") {
     await page.waitForSelector(".story-rail__nav a", { timeout: 15000 });
     const state = await page.evaluate(() => {
@@ -1186,15 +1240,16 @@ async function assertGeneratedNavigation(page, route, viewport, label) {
         mobileHidden: !mobileRect || mobileRect.width === 0 || mobileRect.height === 0,
         noOverlap: Boolean(railRect && chapterRect && railRect.right <= chapterRect.left - 12),
         linkCount: links.length,
+        titles: links.map((link) => link.dataset.storyFullTitle || ""),
         linksValid: links.every((link) => {
           const url = new URL(link.href);
-          return url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash.length > 1 && document.getElementById(url.hash.slice(1));
+          return url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash.length > 1 && document.getElementById(decodeURIComponent(url.hash.slice(1)));
         }),
       };
     });
     assert(state.railVisible && state.mobileHidden, `${label} did not fit generated desktop navigation`);
     assert(state.noOverlap, `${label} generated desktop rail overlapped the first chapter`);
-    assert(state.linkCount >= expectedMinimum && state.linksValid, `${label} generated desktop chapter links did not resolve locally`);
+    assertGeneratedChapterLinks(state, route, `${label} generated desktop`);
     await assertFocusVisible(page.locator(".story-rail__nav a").first(), `${label} first generated chapter link`);
     await assertPointerTargets(page.locator(".story-rail__nav a"), `${label} generated chapter links`);
     return;
@@ -1215,14 +1270,15 @@ async function assertGeneratedNavigation(page, route, viewport, label) {
       barFitted: Boolean(barRect && barRect.left >= -1 && barRect.right <= window.innerWidth + 1),
       toggleFitted: Boolean(toggleRect && toggleRect.left >= -1 && toggleRect.right <= window.innerWidth + 1),
       linkCount: links.length,
+      titles: links.map((link) => link.dataset.storyFullTitle || ""),
       linksValid: links.every((link) => {
         const url = new URL(link.href);
-        return url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash.length > 1 && document.getElementById(url.hash.slice(1));
+        return url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash.length > 1 && document.getElementById(decodeURIComponent(url.hash.slice(1)));
       }),
     };
   });
   assert(state.barVisible && state.railHidden && state.barFitted && state.toggleFitted, `${label} did not fit generated mobile navigation`);
-  assert(state.linkCount >= expectedMinimum && state.linksValid, `${label} generated mobile chapter links did not resolve locally`);
+  assertGeneratedChapterLinks(state, route, `${label} generated mobile`);
   const toggle = page.locator(".story-mobile-bar__toggle");
   await assertFocusVisible(toggle, `${label} mobile chapter tray toggle`);
   await assertPointerTargets(toggle, `${label} mobile chapter tray toggle`);
@@ -1235,14 +1291,15 @@ async function assertGeneratedNavigation(page, route, viewport, label) {
       tagName: dialog?.tagName,
       labelled: Boolean(dialog?.getAttribute("aria-labelledby") && document.getElementById(dialog.getAttribute("aria-labelledby"))),
       linkCount: links.length,
+      titles: links.map((link) => link.dataset.storyFullTitle || ""),
       linksValid: links.every((link) => {
         const url = new URL(link.href);
-        return url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash.length > 1 && document.getElementById(url.hash.slice(1));
+        return url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash.length > 1 && document.getElementById(decodeURIComponent(url.hash.slice(1)));
       }),
     };
   });
   assert(dialogState.tagName === "DIALOG" && dialogState.labelled, `${label} mobile chapter tray was not a labelled dialog`);
-  assert(dialogState.linkCount >= expectedMinimum && dialogState.linksValid, `${label} mobile chapter tray links did not resolve locally`);
+  assertGeneratedChapterLinks(dialogState, route, `${label} mobile chapter tray`);
   await page.keyboard.press("Escape");
   await page.waitForFunction(() => !document.querySelector(".story-mobile-sheet")?.open, null, { timeout: 5000 });
   assert(await page.evaluate(() => document.activeElement?.classList.contains("story-mobile-bar__toggle")), `${label} did not restore focus after Escape`);
@@ -1432,7 +1489,7 @@ async function runStoredThemeGate(browser, route, theme, approvedGeometry) {
         await assertDocumentTheme(page, theme, label);
         await assertRouteExperienceState(page, route, viewport, label, approvedGeometry[viewport.name]);
         assertRuntimeClean(label);
-        routeTokens ||= await readThemeTokens(page, label);
+        routeTokens ||= await readThemeTokens(page, label, route.slug);
         console.log(`OK ${label}`);
       } finally {
         await page.close();
@@ -1474,7 +1531,7 @@ async function runSystemThemeGate(browser, route, theme, approvedGeometry, expec
         const themeState = await assertDocumentTheme(page, theme, label);
         assert(themeState.stored === null, `${label} unexpectedly retained a stored theme`);
         await assertRouteExperienceState(page, route, viewport, label, approvedGeometry[viewport.name]);
-        const tokens = await readThemeTokens(page, label);
+        const tokens = await readThemeTokens(page, label, route.slug);
         assert(JSON.stringify(tokens) === JSON.stringify(expectedTokens.routeTokens), `${label} did not match the ${theme} stored shell state`);
         assertRuntimeClean(label);
       } finally {
@@ -4063,7 +4120,7 @@ async function smokeAlphaCompositing(context) {
         "alpha-compositing route",
         {
           expectedRoute: "alpha-compositing",
-          minimumChapters: 8,
+          minimumChapters: 6,
           playHref: "#alpha_rose_glasses_container",
         },
       );
@@ -4162,7 +4219,7 @@ async function smokeColorSpaces(context) {
     "color-spaces route",
     {
       expectedRoute: "color-spaces",
-      minimumChapters: 12,
+      minimumChapters: 6,
       playHref: "#color_plain_srgb_slider_container",
     },
   );
@@ -4631,7 +4688,7 @@ async function smokeLightsAndShadows(context) {
     "lights-and-shadows route",
     {
       expectedRoute: "lights-and-shadows",
-      minimumChapters: 10,
+      minimumChapters: 7,
       playHref: "#lns_shadow2",
     },
   );
@@ -4772,7 +4829,7 @@ async function smokeTesseract(context) {
     "tesseract route",
     {
       expectedRoute: "tesseract",
-      minimumChapters: 10,
+      minimumChapters: 6,
       playHref: "#ts_3D_demo_slice_container",
     },
   );
@@ -4856,7 +4913,7 @@ async function smokeGears(context) {
     "gears route",
     {
       expectedRoute: "gears",
-      minimumChapters: 10,
+      minimumChapters: 6,
       playHref: "#gears_demo",
     },
   );
@@ -5050,7 +5107,7 @@ async function smokeGps(context) {
     "gps route",
     {
       expectedRoute: "gps",
-      minimumChapters: 15,
+      minimumChapters: 7,
       playHref: "#gps_orbits_hero",
     },
   );
@@ -5130,7 +5187,7 @@ async function smokeEarthAndSun(context) {
     "earth-and-sun route",
     {
       expectedRoute: "earth-and-sun",
-      minimumChapters: 11,
+      minimumChapters: 6,
       playHref: "#es_earth_sunlight",
     },
   );
@@ -5411,7 +5468,7 @@ async function smokeCurvesAndSurfaces(context) {
     "curves-and-surfaces route",
     {
       expectedRoute: "curves-and-surfaces",
-      minimumChapters: 13,
+      minimumChapters: 7,
       playHref: "#cs_subdiv_hero",
     },
   );
@@ -6091,7 +6148,7 @@ async function smokeNavalArchitecture(context) {
     "naval-architecture route",
     {
       expectedRoute: "naval-architecture",
-      minimumChapters: 10,
+      minimumChapters: 7,
       playHref: "#na_hero",
     },
   );

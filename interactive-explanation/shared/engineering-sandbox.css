@@ -1317,6 +1317,70 @@ body[data-story-shell="engineering-sandbox"][data-story-family="engineering-long
   box-sizing: border-box;
 }
 
+body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+  [data-story-route="alpha-compositing"],
+  [data-story-route="color-spaces"],
+  [data-story-route="sound"],
+  [data-story-route="cameras-and-lenses"],
+  [data-story-route="lights-and-shadows"],
+  [data-story-route="tesseract"],
+  [data-story-route="gears"],
+  [data-story-route="gps"],
+  [data-story-route="earth-and-sun"],
+  [data-story-route="curves-and-surfaces"],
+  [data-story-route="naval-architecture"]
+) {
+  --ie-engineering-paper: #f6f0e7;
+  --ie-engineering-surface: #fffdf8;
+  --ie-engineering-surface-soft: #eee5d8;
+  --ie-engineering-ink: #263742;
+  --ie-engineering-muted: #53636d;
+  --ie-engineering-line: rgba(38, 55, 66, 0.18);
+  --ie-engineering-accent: #255f78;
+  --ie-engineering-on-accent: #f8fbfc;
+  background:
+    radial-gradient(circle at top left, rgba(52, 126, 149, 0.11), transparent 28%),
+    radial-gradient(circle at 82% 10%, rgba(211, 133, 47, 0.11), transparent 22%),
+    linear-gradient(180deg, #fcf8f2 0%, var(--ie-engineering-paper) 18%, #f2e8da 100%);
+  color: var(--ie-engineering-ink);
+}
+
+:root[saved-theme="dark"] body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+  [data-story-route="alpha-compositing"],
+  [data-story-route="color-spaces"],
+  [data-story-route="sound"],
+  [data-story-route="cameras-and-lenses"],
+  [data-story-route="lights-and-shadows"],
+  [data-story-route="tesseract"],
+  [data-story-route="gears"],
+  [data-story-route="gps"],
+  [data-story-route="earth-and-sun"],
+  [data-story-route="curves-and-surfaces"],
+  [data-story-route="naval-architecture"]
+) {
+  --ie-engineering-paper: #101721;
+  --ie-engineering-surface: #18222e;
+  --ie-engineering-surface-soft: #222e3a;
+  --ie-engineering-ink: #e5edf2;
+  --ie-engineering-muted: #adbbc4;
+  --ie-engineering-line: rgba(213, 227, 236, 0.18);
+  --ie-engineering-accent: #83c9e5;
+  --ie-engineering-on-accent: #0d2029;
+  --story-paper: var(--ie-engineering-paper);
+  --story-paper-deep: #0b1119;
+  --story-paper-strong: var(--ie-engineering-surface);
+  --story-ink: var(--ie-engineering-ink);
+  --story-ink-soft: var(--ie-engineering-muted);
+  --story-border: var(--ie-engineering-line);
+  --story-border-strong: rgba(213, 227, 236, 0.28);
+  --story-steel: var(--ie-engineering-accent);
+  --story-steel-bright: #a6dcf0;
+  background:
+    radial-gradient(circle at top left, rgba(49, 110, 137, 0.24), transparent 28%),
+    radial-gradient(circle at 82% 10%, rgba(178, 111, 42, 0.18), transparent 22%),
+    linear-gradient(180deg, #111a25 0%, var(--ie-engineering-paper) 18%, #0b1119 100%);
+}
+
 body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"] .story-hero {
   max-width: min(var(--story-shell-max), calc(100vw - 2rem));
   margin-bottom: 1rem;
@@ -1336,6 +1400,24 @@ body[data-story-shell="engineering-sandbox"][data-story-family="engineering-long
 body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"] #main_container {
   max-width: min(var(--story-shell-max), calc(100vw - 2rem));
   margin: 0 auto;
+}
+
+@media (max-width: 390px) {
+  body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+    [data-story-route="alpha-compositing"],
+    [data-story-route="color-spaces"],
+    [data-story-route="sound"],
+    [data-story-route="cameras-and-lenses"],
+    [data-story-route="lights-and-shadows"],
+    [data-story-route="tesseract"],
+    [data-story-route="gears"],
+    [data-story-route="gps"],
+    [data-story-route="earth-and-sun"],
+    [data-story-route="curves-and-surfaces"],
+    [data-story-route="naval-architecture"]
+  ) #main_container {
+    overflow-x: clip;
+  }
 }
 
 body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"] #content {
@@ -1364,6 +1446,227 @@ body[data-story-shell="engineering-sandbox"][data-story-family="engineering-long
   color: #535353;
   font-family: system-ui, "Helvetica Neue", Arial, sans-serif;
   letter-spacing: 0;
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+  [data-story-route="alpha-compositing"],
+  [data-story-route="color-spaces"],
+  [data-story-route="sound"],
+  [data-story-route="cameras-and-lenses"],
+  [data-story-route="lights-and-shadows"],
+  [data-story-route="tesseract"],
+  [data-story-route="gears"],
+  [data-story-route="gps"],
+  [data-story-route="earth-and-sun"],
+  [data-story-route="curves-and-surfaces"],
+  [data-story-route="naval-architecture"]
+) :is(
+  .story-chip,
+  .story-callout[data-story-callout],
+  .story-companion-card,
+  .story-rail__panel,
+  .story-mobile-bar,
+  .story-mobile-sheet__panel
+) {
+  border-color: var(--ie-engineering-line);
+  background: var(--ie-engineering-surface);
+  color: var(--ie-engineering-ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+  [data-story-route="alpha-compositing"],
+  [data-story-route="color-spaces"],
+  [data-story-route="sound"],
+  [data-story-route="cameras-and-lenses"],
+  [data-story-route="lights-and-shadows"],
+  [data-story-route="tesseract"],
+  [data-story-route="gears"],
+  [data-story-route="gps"],
+  [data-story-route="earth-and-sun"],
+  [data-story-route="curves-and-surfaces"],
+  [data-story-route="naval-architecture"]
+) :is(
+  .story-hero__title,
+  .story-companion-card__link,
+  .story-mobile-bar__current,
+  .story-mobile-sheet__title,
+  #main_container h1,
+  #main_container h2,
+  #main_container h3,
+  #main_container h4,
+  #main_container h5,
+  #main_container h6
+) {
+  color: var(--ie-engineering-ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+  [data-story-route="alpha-compositing"],
+  [data-story-route="color-spaces"],
+  [data-story-route="sound"],
+  [data-story-route="cameras-and-lenses"],
+  [data-story-route="lights-and-shadows"],
+  [data-story-route="tesseract"],
+  [data-story-route="gears"],
+  [data-story-route="gps"],
+  [data-story-route="earth-and-sun"],
+  [data-story-route="curves-and-surfaces"],
+  [data-story-route="naval-architecture"]
+) :is(
+  .story-hero__summary,
+  .story-shell-caption,
+  .story-companion-card p,
+  .story-rail__count,
+  .story-rail__position,
+  .story-mobile-bar__position,
+  .story-mobile-sheet__position,
+  .story-progress__value,
+  .story-rail__current,
+  .story-mobile-sheet__current
+) {
+  color: var(--ie-engineering-muted);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+  [data-story-route="alpha-compositing"],
+  [data-story-route="color-spaces"],
+  [data-story-route="sound"],
+  [data-story-route="cameras-and-lenses"],
+  [data-story-route="lights-and-shadows"],
+  [data-story-route="tesseract"],
+  [data-story-route="gears"],
+  [data-story-route="gps"],
+  [data-story-route="earth-and-sun"],
+  [data-story-route="curves-and-surfaces"],
+  [data-story-route="naval-architecture"]
+) :is(
+  .story-hero__eyebrow,
+  .story-callout__label,
+  .story-rail__label,
+  .story-mobile-bar__eyebrow,
+  .story-rail__link,
+  .story-mobile-bar__link,
+  .story-mobile-sheet__link
+) {
+  color: var(--ie-engineering-accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+  [data-story-route="alpha-compositing"],
+  [data-story-route="color-spaces"],
+  [data-story-route="sound"],
+  [data-story-route="cameras-and-lenses"],
+  [data-story-route="lights-and-shadows"],
+  [data-story-route="tesseract"],
+  [data-story-route="gears"],
+  [data-story-route="gps"],
+  [data-story-route="earth-and-sun"],
+  [data-story-route="curves-and-surfaces"],
+  [data-story-route="naval-architecture"]
+) :is(
+  .story-mobile-bar__toggle,
+  .story-mobile-sheet__close
+) {
+  border-color: var(--ie-engineering-line);
+  background: var(--ie-engineering-surface);
+  color: var(--ie-engineering-accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+  [data-story-route="alpha-compositing"],
+  [data-story-route="color-spaces"],
+  [data-story-route="sound"],
+  [data-story-route="cameras-and-lenses"],
+  [data-story-route="lights-and-shadows"],
+  [data-story-route="tesseract"],
+  [data-story-route="gears"],
+  [data-story-route="gps"],
+  [data-story-route="earth-and-sun"],
+  [data-story-route="curves-and-surfaces"],
+  [data-story-route="naval-architecture"]
+) #main_container {
+  background: var(--ie-engineering-paper);
+  color: var(--ie-engineering-ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+  [data-story-route="alpha-compositing"],
+  [data-story-route="color-spaces"],
+  [data-story-route="sound"],
+  [data-story-route="cameras-and-lenses"],
+  [data-story-route="lights-and-shadows"],
+  [data-story-route="tesseract"],
+  [data-story-route="gears"],
+  [data-story-route="gps"],
+  [data-story-route="earth-and-sun"],
+  [data-story-route="curves-and-surfaces"],
+  [data-story-route="naval-architecture"]
+) #main_container .article a {
+  color: var(--ie-engineering-accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+  [data-story-route="alpha-compositing"],
+  [data-story-route="color-spaces"],
+  [data-story-route="sound"],
+  [data-story-route="cameras-and-lenses"],
+  [data-story-route="lights-and-shadows"],
+  [data-story-route="tesseract"],
+  [data-story-route="gears"],
+  [data-story-route="gps"],
+  [data-story-route="earth-and-sun"],
+  [data-story-route="curves-and-surfaces"],
+  [data-story-route="naval-architecture"]
+) #main_container :is(
+  code,
+  .equation,
+  .color_matrix,
+  .ts_space_list
+) {
+  border-color: var(--ie-engineering-line);
+  background-color: var(--ie-engineering-surface-soft);
+  color: var(--ie-engineering-ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+  [data-story-route="alpha-compositing"],
+  [data-story-route="color-spaces"],
+  [data-story-route="sound"],
+  [data-story-route="cameras-and-lenses"],
+  [data-story-route="lights-and-shadows"],
+  [data-story-route="tesseract"],
+  [data-story-route="gears"],
+  [data-story-route="gps"],
+  [data-story-route="earth-and-sun"],
+  [data-story-route="curves-and-surfaces"],
+  [data-story-route="naval-architecture"]
+) #main_container :is(
+  .segmented_control_on,
+  .segmented_control_off,
+  .play_pause_button,
+  .restart_button,
+  .undo_button
+) {
+  border-color: var(--ie-engineering-line);
+  background-color: var(--ie-engineering-surface);
+  color: var(--ie-engineering-ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"]:is(
+  [data-story-route="alpha-compositing"],
+  [data-story-route="color-spaces"],
+  [data-story-route="sound"],
+  [data-story-route="cameras-and-lenses"],
+  [data-story-route="lights-and-shadows"],
+  [data-story-route="tesseract"],
+  [data-story-route="gears"],
+  [data-story-route="gps"],
+  [data-story-route="earth-and-sun"],
+  [data-story-route="curves-and-surfaces"],
+  [data-story-route="naval-architecture"]
+) #main_container .segmented_control_on {
+  background-color: var(--ie-engineering-accent);
+  color: var(--ie-engineering-on-accent);
 }
 
 body[data-story-shell="engineering-sandbox"][data-story-family="engineering-longform"] .article > .post_date,

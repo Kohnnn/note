@@ -1110,7 +1110,33 @@
     "shell": {
       "family": "engineering-longform",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#opacity",
+          "title": "Opacity and coverage"
+        },
+        {
+          "selector": "#simple-compositing",
+          "title": "Compose the layers"
+        },
+        {
+          "selector": "#premultiplied-alpha",
+          "title": "Premultiply alpha"
+        },
+        {
+          "selector": "#porter-duff",
+          "title": "Choose an operator"
+        },
+        {
+          "selector": "#group-opacity",
+          "title": "Handle grouped layers"
+        },
+        {
+          "selector": "#final-words",
+          "title": "Final words"
+        }
+      ]
     },
     "suggestedNextSlug": "color-spaces",
     "experience": {
@@ -1139,7 +1165,33 @@
     "shell": {
       "family": "engineering-longform",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#color-pickers",
+          "title": "Compare color pickers"
+        },
+        {
+          "selector": "#intensity-mismatch",
+          "title": "Correct intensity"
+        },
+        {
+          "selector": "#seeing-the-matrix",
+          "title": "Convert with matrices"
+        },
+        {
+          "selector": "#the-color-matching-experiments",
+          "title": "Match visible color"
+        },
+        {
+          "selector": "#gamut",
+          "title": "Map the gamut"
+        },
+        {
+          "selector": "#srgb-color-space",
+          "title": "Assemble sRGB"
+        }
+      ]
     },
     "suggestedNextSlug": "lights-and-shadows",
     "experience": {
@@ -1168,7 +1220,33 @@
     "shell": {
       "family": "engineering-longform",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#air",
+          "title": "Move the air"
+        },
+        {
+          "selector": "#making-sounds",
+          "title": "Make a waveform"
+        },
+        {
+          "selector": "#pure-tones",
+          "title": "Build pure tones"
+        },
+        {
+          "selector": "#masses-and-springs",
+          "title": "Couple masses and springs"
+        },
+        {
+          "selector": "#pressure-waves",
+          "title": "Propagate pressure waves"
+        },
+        {
+          "selector": "#final-words",
+          "title": "Final words"
+        }
+      ]
     },
     "suggestedNextSlug": "ableton-learning-synths-get-started",
     "experience": {
@@ -1197,7 +1275,33 @@
     "shell": {
       "family": "engineering-longform",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#recording-light",
+          "title": "Record the light"
+        },
+        {
+          "selector": "#glass",
+          "title": "Bend light with glass"
+        },
+        {
+          "selector": "#waves",
+          "title": "Follow the wave model"
+        },
+        {
+          "selector": "#manipulating-rays",
+          "title": "Manipulate the rays"
+        },
+        {
+          "selector": "#aberrations",
+          "title": "Inspect aberrations"
+        },
+        {
+          "selector": "#final-words",
+          "title": "Final words"
+        }
+      ]
     },
     "suggestedNextSlug": "lights-and-shadows",
     "experience": {
@@ -1226,7 +1330,37 @@
     "shell": {
       "family": "engineering-longform",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#power",
+          "title": "Measure emitted power"
+        },
+        {
+          "selector": "#position",
+          "title": "Place the light"
+        },
+        {
+          "selector": "#solid-angles",
+          "title": "Measure solid angles"
+        },
+        {
+          "selector": "#radiance",
+          "title": "Track radiance"
+        },
+        {
+          "selector": "#reflections",
+          "title": "Model reflections"
+        },
+        {
+          "selector": "#shadow",
+          "title": "Shape shadows"
+        },
+        {
+          "selector": "#bounces",
+          "title": "Follow bounced light"
+        }
+      ]
     },
     "suggestedNextSlug": "primary-interactive-hub",
     "experience": {
@@ -1255,7 +1389,33 @@
     "shell": {
       "family": "engineering-longform",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#building-cubes",
+          "title": "Build across dimensions"
+        },
+        {
+          "selector": "#fourth-dimension",
+          "title": "Enter the fourth dimension"
+        },
+        {
+          "selector": "#tesseract",
+          "title": "Construct the tesseract"
+        },
+        {
+          "selector": "#stepping-into-the-shadows",
+          "title": "Project into shadows"
+        },
+        {
+          "selector": "#plane-of-rotation",
+          "title": "Rotate through planes"
+        },
+        {
+          "selector": "#leaving-platos-cave",
+          "title": "Slice through 4D space"
+        }
+      ]
     },
     "suggestedNextSlug": "curves-and-surfaces",
     "experience": {
@@ -1284,7 +1444,33 @@
     "shell": {
       "family": "engineering-longform",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#spinning",
+          "title": "Measure rotation"
+        },
+        {
+          "selector": "#transmission",
+          "title": "Transfer motion"
+        },
+        {
+          "selector": "#torque",
+          "title": "Trade speed for torque"
+        },
+        {
+          "selector": "#gears",
+          "title": "Shape the teeth"
+        },
+        {
+          "selector": "#strings-attached",
+          "title": "Draw the involute"
+        },
+        {
+          "selector": "#multiple-gears",
+          "title": "Build a gear train"
+        }
+      ]
     },
     "suggestedNextSlug": "bicycle",
     "experience": {
@@ -1313,7 +1499,37 @@
     "shell": {
       "family": "engineering-longform",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#simple-positioning",
+          "title": "Locate with distance"
+        },
+        {
+          "selector": "#time-of-flight",
+          "title": "Measure time of flight"
+        },
+        {
+          "selector": "#leveling-up",
+          "title": "Solve in three dimensions"
+        },
+        {
+          "selector": "#gps-orbits",
+          "title": "Arrange the constellation"
+        },
+        {
+          "selector": "#time",
+          "title": "Keep precise time"
+        },
+        {
+          "selector": "#navigation-message",
+          "title": "Decode navigation data"
+        },
+        {
+          "selector": "#gps-signals",
+          "title": "Correlate GPS signals"
+        }
+      ]
     },
     "suggestedNextSlug": "stargazing-dashboard",
     "experience": {
@@ -1342,7 +1558,33 @@
     "shell": {
       "family": "engineering-longform",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#size",
+          "title": "Compare Earth and Sun"
+        },
+        {
+          "selector": "#ellipse",
+          "title": "Shape the ellipse"
+        },
+        {
+          "selector": "#orbit",
+          "title": "Follow the orbit"
+        },
+        {
+          "selector": "#axial-rotation",
+          "title": "Measure the day"
+        },
+        {
+          "selector": "#axial-tilt",
+          "title": "Tilt into the seasons"
+        },
+        {
+          "selector": "#year",
+          "title": "Define the year"
+        }
+      ]
     },
     "suggestedNextSlug": "stargazing-dashboard",
     "experience": {
@@ -1429,7 +1671,37 @@
     "shell": {
       "family": "engineering-longform",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#defining-the-shape",
+          "title": "Place control points"
+        },
+        {
+          "selector": "#linear-segment",
+          "title": "Interpolate a segment"
+        },
+        {
+          "selector": "#a-step-further",
+          "title": "Extend into surfaces"
+        },
+        {
+          "selector": "#bézier-patches",
+          "title": "Build Bézier patches"
+        },
+        {
+          "selector": "#splines",
+          "title": "Join curves with splines"
+        },
+        {
+          "selector": "#cutting-corners",
+          "title": "Subdivide the curve"
+        },
+        {
+          "selector": "#subdivision-surfaces",
+          "title": "Subdivide the surface"
+        }
+      ]
     },
     "suggestedNextSlug": "image-kernels",
     "experience": {
@@ -1516,7 +1788,37 @@
     "shell": {
       "family": "engineering-longform",
       "variant": "essay",
-      "navigation": "generated"
+      "navigation": "generated",
+      "chapters": [
+        {
+          "selector": "#pressure",
+          "title": "Build pressure with depth"
+        },
+        {
+          "selector": "#buoyancy",
+          "title": "Balance buoyancy"
+        },
+        {
+          "selector": "#hull",
+          "title": "Shape the hull"
+        },
+        {
+          "selector": "#stability",
+          "title": "Test stability"
+        },
+        {
+          "selector": "#free-surface",
+          "title": "Track free surfaces"
+        },
+        {
+          "selector": "#waves",
+          "title": "Move through waves"
+        },
+        {
+          "selector": "#propulsion",
+          "title": "Generate propulsion"
+        }
+      ]
     },
     "suggestedNextSlug": "airfoil",
     "experience": {

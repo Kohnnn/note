@@ -936,6 +936,11 @@
     while (Date.now() < deadline) {
       const targets = entries.map((entry) => resolveConfigTarget(entry));
       if (targets.every(Boolean)) {
+        if (document.body?.dataset.storyFamily === "engineering-longform") {
+          document.querySelectorAll("[data-story-chapter]").forEach((section) => {
+            delete section.dataset.storyChapter;
+          });
+        }
         targets.forEach((target, index) => {
           ensureSectionId(target, index, entries[index].id);
           target.dataset.storyChapter = entries[index].title;

@@ -39,6 +39,7 @@ Behavior, content, URLs, assets, accessibility, and runtime dimensions remain in
 - [Migrate local hubs and Guided Paths](issues/15-migrate-local-hubs-and-guided-paths.md) — theme authored Music, Primary, and Blockchain bridge surfaces; preserve numbered Music and Blockchain Progress, keep Primary unnumbered, and verify manifest navigation, continuation, parity, and complete-experience gates.
 - [Migrate MLU Explain Routes](issues/16-migrate-mlu-routes.md) — migrate all ten MLU Routes with exact-family authored-surface theming, manifest chapters for nine Routes, the preserved responsive native TOC for Train/Test/Validation, intrinsic compiled scenes, Route-owned cold-jump compatibility for Bias-Variance, and green focused, family, static, and full smoke gates.
 - [Migrate Explained Visually Routes](issues/17-migrate-explained-visually-routes.md) — migrate all nine Explained Visually Routes with exact-family authored-surface theming, manifest-owned generated chapters, intrinsic runtime and MathJax output, authored-root narrow containment, and green focused, family, static, and full smoke gates.
+- [Migrate authored engineering longforms](issues/18-migrate-authored-engineering-longforms.md) — migrate all 11 authored engineering longforms with exact-route authored-surface theming, manifest-owned generated chapters, preserved media and interaction geometry, the canonical Lights and Shadows continuation, and green static, focused strict experience, Bicycle regression, and full 83-Route smoke gates.
 
 ## Not yet specified
 
