@@ -91,6 +91,25 @@
     ]
   },
   {
+    "moduleId": "complete-theme-and-widget-state",
+    "originalBehavior": "The Playground keeps four synchronized widget tracks, generated transport and chooser controls, local sample banks, and intrinsic SVG sequencer output inside the authored multitrack frame.",
+    "localStatus": "The authored frame and verified generated widget controls now follow the stored light or dark theme through `.playground-route-shell`, while local audio and intrinsic SVG grid output remain Route-owned.",
+    "sourceFiles": [
+      "../../shared/engineering-sandbox.css",
+      "../../ableton-learning-music-playground/css/playground-shell.css",
+      "../../routes.manifest.json",
+      "../../tools/smoke-bundle.mjs"
+    ],
+    "notes": [
+      "The adapter uses stable family, Playground main-root, and generated-control selectors without editing vendored widget, Tone, sample, canvas, SVG, or image assets.",
+      "Intrinsic SVG output keeps its runtime palette and exact geometry; only authored HTML surfaces and verified generated HTML controls receive shared theme colors."
+    ],
+    "evidence": [
+      "Strict experience gates verify stored and system light and dark themes, authored-root contrast, unchanged runtime geometry, local-only networking, and no generated navigation.",
+      "Music smoke verifies four widgets, five hydrated generated roots, four grids, eight transport controls, visible focus, matching pointer and keyboard transport and root-choice states, 31 local audio files, and unchanged SVG dimensions after interaction."
+    ]
+  },
+  {
     "moduleId": "universal-route-html-seams",
     "originalBehavior": "The Route keeps its authored top-level document, runtime roots, and script order.",
     "localStatus": "Manifest synchronization owns the body Engineering Sandbox metadata and shared head seams while preserving Route runtime placement.",

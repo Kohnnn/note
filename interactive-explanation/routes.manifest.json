@@ -2137,7 +2137,8 @@
     },
     "suggestedNextSlug": "ableton-learning-synths-get-started",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".playground-route-shell",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -2174,7 +2175,8 @@
     },
     "suggestedNextSlug": "ableton-learning-music-playground",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-practice-surface",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -2203,7 +2205,8 @@
     },
     "suggestedNextSlug": "ableton-learning-music-play-with-chords",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-practice-surface",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -2232,7 +2235,8 @@
     },
     "suggestedNextSlug": "ableton-learning-music-play-with-basslines",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-practice-surface",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -2261,7 +2265,8 @@
     },
     "suggestedNextSlug": "ableton-learning-music-play-with-melodies",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-practice-surface",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -2290,7 +2295,8 @@
     },
     "suggestedNextSlug": "ableton-learning-music-play-with-song-structures",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-practice-surface",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -2319,7 +2325,8 @@
     },
     "suggestedNextSlug": "chrome-music-lab-song-maker",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-practice-surface",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",

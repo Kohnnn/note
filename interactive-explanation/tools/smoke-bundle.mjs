@@ -104,6 +104,10 @@ const abletonLessonBatchSlugs = [
   "ableton-learning-music-play-with-melodies",
   "ableton-learning-music-play-with-song-structures",
 ];
+const abletonMusicWidgetSlugs = new Set([
+  "ableton-learning-music-playground",
+  ...abletonLessonBatchSlugs.filter((slug) => slug !== "ableton-learning-music-play-with-song-structures"),
+]);
 
 const abletonSynthLessonSlugs = [
   "ableton-learning-synths-get-started",
@@ -1477,6 +1481,25 @@ async function assertRouteAccessibility(page, label) {
   await assertPointerTargets(shellControls, `${label} shell controls`);
 }
 
+async function readAbletonGridPaint(page, route) {
+  if (!abletonMusicWidgetSlugs.has(route.slug)) {
+    return null;
+  }
+  await page.waitForFunction(() => document.querySelectorAll(".widget-pianoroll__grid").length > 0, null, { timeout: 30000 });
+  return page.locator(".widget-pianoroll__grid").evaluateAll((grids) => grids.map((grid) => ({
+    widget: grid.closest(".widget")?.id || "",
+    paint: [grid, ...grid.querySelectorAll("*")].map((node) => {
+      const style = getComputedStyle(node);
+      return {
+        tag: node.localName,
+        className: node.getAttribute("class") || "",
+        fill: style.fill,
+        stroke: style.stroke,
+      };
+    }),
+  })));
+}
+
 async function assertRouteExperienceState(page, route, viewport, label, approvedGeometry) {
   await assertMainLandmark(page, route, label);
   await assertPrimarySurfaceVisible(page, label, route.experience.primarySurface);
@@ -1495,6 +1518,7 @@ async function runStoredThemeGate(browser, route, theme, approvedGeometry) {
   const context = await createThemeContext(browser, { theme, stored: true });
   let routeTokens = null;
   let docsTokens = null;
+  let intrinsicPaint = null;
   try {
     for (const viewport of experienceViewports) {
       const label = `${route.slug} ${viewport.name} stored ${theme}`;
@@ -1509,6 +1533,7 @@ async function runStoredThemeGate(browser, route, theme, approvedGeometry) {
         await assertRouteExperienceState(page, route, viewport, label, approvedGeometry[viewport.name]);
         assertRuntimeClean(label);
         routeTokens ||= await readThemeTokens(page, label, route.slug, theme);
+        intrinsicPaint ||= await readAbletonGridPaint(page, route);
         console.log(`OK ${label}`);
       } finally {
         await page.close();
@@ -1532,7 +1557,7 @@ async function runStoredThemeGate(browser, route, theme, approvedGeometry) {
   } finally {
     await context.close();
   }
-  return { routeTokens, docsTokens };
+  return { routeTokens, docsTokens, intrinsicPaint };
 }
 
 async function runSystemThemeGate(browser, route, theme, approvedGeometry, expectedTokens) {
@@ -1666,6 +1691,12 @@ async function assertManifestRouteExperience(browser, route, approvedGeometry) {
   }
   assertThemePair(tokensByTheme.get("light").routeTokens, tokensByTheme.get("dark").routeTokens, `${route.slug} Route shell`);
   assertThemePair(tokensByTheme.get("light").docsTokens, tokensByTheme.get("dark").docsTokens, `docs/${route.slug} shell`);
+  if (abletonMusicWidgetSlugs.has(route.slug)) {
+    assert(
+      JSON.stringify(tokensByTheme.get("light").intrinsicPaint) === JSON.stringify(tokensByTheme.get("dark").intrinsicPaint),
+      `${route.slug} intrinsic SVG paint changed across stored themes`,
+    );
+  }
   for (const theme of experienceThemes) {
     await runSystemThemeGate(browser, route, theme, approvedGeometry, tokensByTheme.get(theme));
   }
@@ -6577,6 +6608,165 @@ async function smokeTeoriaIntervalIdentificationAndInversion(context) {
   });
 }
 
+async function readAbletonSvgGeometry(page) {
+  return page.locator("main .widget svg").evaluateAll((elements) => elements.map((element, index) => {
+    const rect = element.getBoundingClientRect();
+    const widget = element.closest(".widget");
+    const paint = element.classList.contains("widget-pianoroll__grid")
+      ? [element, ...element.querySelectorAll("*")].map((node) => {
+          const style = getComputedStyle(node);
+          return {
+            tag: node.localName,
+            className: node.getAttribute("class") || "",
+            fill: style.fill,
+            stroke: style.stroke,
+          };
+        })
+      : null;
+    return {
+      key: `${widget?.id || "widget"}:${index}`,
+      width: rect.width,
+      height: rect.height,
+      viewBox: element.getAttribute("viewBox"),
+      paint,
+    };
+  }));
+}
+
+function assertAbletonSvgGeometry(actual, expected, label) {
+  assert(actual.length === expected.length, `${label} changed intrinsic SVG count`);
+  actual.forEach((surface, index) => {
+    const baseline = expected[index];
+    assert(surface.key === baseline.key, `${label} changed intrinsic SVG order`);
+    assert(Math.abs(surface.width - baseline.width) <= 1, `${label} changed ${surface.key} width`);
+    assert(Math.abs(surface.height - baseline.height) <= 1, `${label} changed ${surface.key} height`);
+    assert(surface.viewBox === baseline.viewBox, `${label} changed ${surface.key} viewBox`);
+    assert(JSON.stringify(surface.paint) === JSON.stringify(baseline.paint), `${label} changed ${surface.key} intrinsic paint`);
+  });
+}
+
+async function assertAbletonGeneratedControls(page, config) {
+  const state = await page.evaluate(({ controlRoot, widgetCount, transportCount, gridCount, generatedRootCount }) => {
+    const root = document.querySelector(controlRoot);
+    const controls = Array.from(root?.querySelectorAll("button, input") || []);
+    const pianoRolls = Array.from(document.querySelectorAll(".widget-pianoroll"));
+    const drumPads = Array.from(document.querySelectorAll(".widget-drumpad"));
+    const roots = [...pianoRolls, ...drumPads];
+    return {
+      widgetCount: document.querySelectorAll(".widget").length,
+      transportCount: document.querySelectorAll("button.widget__transport-btn").length,
+      gridCount: document.querySelectorAll(".widget-pianoroll__grid").length,
+      generatedRootCount: roots.length,
+      hydrated: roots.every((generatedRoot) => generatedRoot.id && Boolean(window[generatedRoot.id])),
+      joined: pianoRolls.every((pianoRoll) => pianoRoll.getAttribute("data-onplay") === "join"),
+      recorderLinks: drumPads.every((drumPad) => {
+        const recorder = drumPad.getAttribute("data-recorder") || "";
+        return Boolean(window[recorder]) && pianoRolls.some((pianoRoll) => pianoRoll.getAttribute("data-recorder") === recorder);
+      }),
+      named: controls.every((control) => (
+        control.getAttribute("aria-label") || control.getAttribute("title") || control.textContent || ""
+      ).trim()),
+      expected: { widgetCount, transportCount, gridCount, generatedRootCount },
+    };
+  }, config);
+  assert(state.widgetCount === state.expected.widgetCount, `${config.label} changed widget count`);
+  assert(state.transportCount === state.expected.transportCount, `${config.label} changed transport control count`);
+  assert(state.gridCount === state.expected.gridCount, `${config.label} changed sequencer grid count`);
+  assert(state.generatedRootCount === state.expected.generatedRootCount, `${config.label} changed generated runtime root count`);
+  assert(state.hydrated, `${config.label} did not hydrate every generated widget root`);
+  assert(state.joined, `${config.label} lost shared-transport join wiring`);
+  assert(state.recorderLinks, `${config.label} lost sequencer and drumpad recorder synchronization`);
+  assert(state.named, `${config.label} exposed an unnamed generated control`);
+  await assertPointerTargets(
+    page.locator(`${config.controlRoot} button, ${config.controlRoot} input`),
+    `${config.label} generated controls`,
+  );
+}
+
+async function assertAbletonLocalSampleBank(page, label) {
+  const handle = await page.waitForFunction(() => {
+    const declarations = Array.from(document.querySelectorAll("[data-instrument], [data-kit]"));
+    const samplePaths = declarations.flatMap((declaration) => {
+      const source = declaration.getAttribute("data-instrument") || declaration.getAttribute("data-kit") || "{}";
+      return (JSON.parse(source).samples || []).map((sample) => sample.path);
+    });
+    const expected = Array.from(new Set(samplePaths)).map((samplePath) => (
+      new URL(`./lessons/sounds/${samplePath}.ogg`, window.location.href).href
+    ));
+    const loaded = performance.getEntriesByType("resource").map((entry) => entry.name);
+    if (expected.length === 0 || !expected.every((sampleUrl) => loaded.includes(sampleUrl))) {
+      return false;
+    }
+    return { declaredCount: expected.length, local: expected.every((sampleUrl) => new URL(sampleUrl).origin === window.location.origin) };
+  }, null, { timeout: 30000 });
+  const state = await handle.jsonValue();
+  await handle.dispose();
+  assert(state.declaredCount > 0, `${label} did not declare an archived sample bank`);
+  assert(state.local, `${label} did not load its declared samples locally`);
+}
+
+async function assertAbletonTransportParity(page, label) {
+  const transport = page.locator("button.widget__transport-btn:not(.hidden)").first();
+  const iconClass = () => transport.locator("i").getAttribute("class");
+  assert((await iconClass()) === "icon-play", `${label} did not start with a stopped transport`);
+  await assertFocusVisible(transport, `${label} transport`);
+  await transport.click();
+  await page.waitForFunction((button) => button.querySelector("i")?.classList.contains("icon-pause"), await transport.elementHandle());
+  await page.waitForFunction(() => window.Tone?.Transport?.state === "started");
+  const pointerState = await iconClass();
+  await transport.click();
+  await page.waitForFunction((button) => button.querySelector("i")?.classList.contains("icon-play"), await transport.elementHandle());
+  await page.waitForFunction(() => window.Tone?.Transport?.state === "stopped");
+  await transport.focus();
+  await page.keyboard.press("Space");
+  await page.waitForFunction((button) => button.querySelector("i")?.classList.contains("icon-pause"), await transport.elementHandle());
+  await page.waitForFunction(() => window.Tone?.Transport?.state === "started");
+  const keyboardState = await iconClass();
+  assert(pointerState === keyboardState, `${label} pointer and keyboard transport paths diverged`);
+  await page.keyboard.press("Space");
+  await page.waitForFunction((button) => button.querySelector("i")?.classList.contains("icon-play"), await transport.elementHandle());
+  await page.waitForFunction(() => window.Tone?.Transport?.state === "stopped");
+}
+
+async function assertAbletonJoinedTransport(page, label) {
+  const roots = page.locator(".widget-pianoroll[data-onplay='join']");
+  if ((await roots.count()) < 2) {
+    return;
+  }
+  const firstTransport = roots.first().locator("button.widget__transport-btn:not(.hidden)").first();
+  const secondTransport = roots.nth(1).locator("button.widget__transport-btn:not(.hidden)").first();
+  await firstTransport.click();
+  await page.waitForFunction(() => window.Tone?.Transport?.state === "started");
+  await secondTransport.click();
+  await page.waitForFunction((button) => button.querySelector("i")?.classList.contains("widget_transport-icon--queued"), await secondTransport.elementHandle());
+  assert(await page.evaluate(() => window.Tone?.Transport?.state === "started"), `${label} did not preserve the shared transport while joining a widget`);
+}
+
+async function assertAbletonRootChoiceParity(page, rootSelector, label) {
+  const choices = page.locator(`${rootSelector} .widget-pianoroll__root-chooser .widget__choice`);
+  const selectedRoot = () => page.locator(`${rootSelector} .widget-pianoroll__root-chooser .widget__choice--selected`).textContent();
+  assert((await choices.count()) >= 3, `${label} did not expose the root chooser`);
+  await choices.nth(2).click();
+  await page.waitForFunction((selector) => document.querySelector(`${selector} .widget-pianoroll__root-chooser .widget__choice--selected`)?.textContent?.trim() === "D", rootSelector);
+  const pointerState = (await selectedRoot()).trim();
+  await choices.first().click();
+  await choices.first().focus();
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Tab");
+  const focusState = await choices.nth(2).evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      focused: document.activeElement === element,
+      outlined: style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0,
+    };
+  });
+  assert(focusState.focused && focusState.outlined, `${label} root choice did not expose visible keyboard focus`);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction((selector) => document.querySelector(`${selector} .widget-pianoroll__root-chooser .widget__choice--selected`)?.textContent?.trim() === "D", rootSelector);
+  const keyboardState = (await selectedRoot()).trim();
+  assert(pointerState === "D" && keyboardState === pointerState, `${label} pointer and keyboard root-choice paths diverged`);
+}
+
 async function smokeAbletonLearningMusicPlayground(context) {
   assert(
     countFilesRecursive("ableton-learning-music-playground/lessons/sounds") === 31,
@@ -6611,44 +6801,47 @@ async function smokeAbletonLearningMusicPlayground(context) {
   );
   await page.waitForFunction(() => {
     return document.querySelectorAll(".widget").length === 4 &&
-      document.querySelectorAll(".widget__transport-btn").length >= 4 &&
+      document.querySelectorAll("button.widget__transport-btn").length === 8 &&
+      document.querySelectorAll(".widget-pianoroll__grid").length === 4 &&
       Boolean(document.querySelector("#_theplaygroundplaygroundbass .widget__choice"));
   }, null, { timeout: 30000 });
+  await assertAbletonGeneratedControls(page, {
+    label: "ableton-learning-music-playground route",
+    controlRoot: ".playground-route-shell",
+    widgetCount: 4,
+    transportCount: 8,
+    gridCount: 4,
+    generatedRootCount: 5,
+  });
+  const svgGeometry = await readAbletonSvgGeometry(page);
+  await assertAbletonLocalSampleBank(page, "ableton-learning-music-playground route");
   await assertNoRemotePlayableMediaRequests(page, "ableton-learning-music-playground route");
   console.log("OK ableton-learning-music-playground local assets");
 
-  const transportBefore = await page.evaluate(() => ({
-    widgetCount: document.querySelectorAll(".widget").length,
-    transportCount: document.querySelectorAll(".widget__transport-btn").length,
-    bassSelectedRoot: document.querySelector("#_theplaygroundplaygroundbass .widget__choice--selected")?.textContent?.trim() || "",
-  }));
-  assert(transportBefore.widgetCount === 4, "ableton-learning-music-playground route did not mount all four widgets");
-  assert(transportBefore.transportCount >= 4, "ableton-learning-music-playground route did not expose transport controls");
-
-  await page.locator("button.widget__transport-btn").first().click();
-  await page.waitForTimeout(700);
+  await assertAbletonTransportParity(page, "ableton-learning-music-playground route");
+  await assertAbletonJoinedTransport(page, "ableton-learning-music-playground route");
   const playbackState = await page.evaluate(() => ({
     toneState: window.Tone?.getContext?.().state || "",
     widgetGlobals: [
       "_theplaygroundplaygrounddrumssequencer",
+      "_theplaygroundplaygrounddrumsdrumpad",
       "_theplaygroundplaygroundbass",
       "_theplaygroundplaygroundpiano",
       "_theplaygroundplaygroundsynth",
     ].every((key) => Boolean(window[key])),
   }));
-  assert(playbackState.toneState === "running", "ableton-learning-music-playground route did not start the local transport");
+  assert(playbackState.toneState === "running", "ableton-learning-music-playground route did not initialize the local audio context");
   assert(playbackState.widgetGlobals, "ableton-learning-music-playground route did not hydrate all widget globals");
   console.log("OK ableton-learning-music-playground transport");
 
-  const bassChoices = page.locator("#_theplaygroundplaygroundbass .widget__choice");
-  await bassChoices.nth(2).click();
-  await page.waitForTimeout(250);
+  await assertAbletonRootChoiceParity(page, "#_theplaygroundplaygroundbass", "ableton-learning-music-playground route");
   const editState = await page.evaluate(() => ({
-    selectedRoot: document.querySelector("#_theplaygroundplaygroundbass .widget__choice--selected")?.textContent?.trim() || "",
+    selectedRoot: document.querySelector("#_theplaygroundplaygroundbass .widget-pianoroll__root-chooser .widget__choice--selected")?.textContent?.trim() || "",
     selectedScale: document.querySelectorAll("#_theplaygroundplaygroundbass .widget__choice--selected").length,
   }));
   assert(editState.selectedRoot === "D", `ableton-learning-music-playground route expected D root after edit, got ${editState.selectedRoot || "none"}`);
   assert(editState.selectedScale >= 2, "ableton-learning-music-playground route lost synchronized chooser state after edit");
+  assertAbletonSvgGeometry(await readAbletonSvgGeometry(page), svgGeometry, "ableton-learning-music-playground route");
   await assertNoRemotePlayableMediaRequests(page, "ableton-learning-music-playground route");
   console.log("OK ableton-learning-music-playground edit path");
 
@@ -6717,20 +6910,31 @@ async function smokeAbletonLearningMusicLesson(context, config) {
     label,
   );
   await page.waitForFunction(({ widgetCount, transportCount }) => {
-    return document.querySelectorAll(".widget").length >= widgetCount &&
-      document.querySelectorAll("button.widget__transport-btn").length >= transportCount;
+    return document.querySelectorAll(".widget").length === widgetCount &&
+      document.querySelectorAll("button.widget__transport-btn").length === transportCount &&
+      document.querySelectorAll(".widget-pianoroll__grid").length === widgetCount;
   }, { widgetCount, transportCount }, { timeout: 30000 });
+  await assertAbletonGeneratedControls(page, {
+    label,
+    controlRoot: ".story-practice-surface",
+    widgetCount,
+    transportCount,
+    gridCount: widgetCount,
+    generatedRootCount: widgetCount + 1,
+  });
+  const svgGeometry = await readAbletonSvgGeometry(page);
+  await assertAbletonLocalSampleBank(page, label);
   await assertNoRemotePlayableMediaRequests(page, label);
   console.log(`OK ${label} local assets`);
 
-  await page.locator("button.widget__transport-btn").first().click();
-  await page.waitForTimeout(700);
+  await assertAbletonTransportParity(page, label);
+  await assertAbletonJoinedTransport(page, label);
   const playbackState = await page.evaluate(() => ({
     toneState: window.Tone?.getContext?.().state || "",
     transportCount: document.querySelectorAll("button.widget__transport-btn").length,
   }));
-  assert(playbackState.toneState === "running", `${label} did not start the local transport`);
-  assert(playbackState.transportCount >= 2, `${label} lost transport controls after playback start`);
+  assert(playbackState.toneState === "running", `${label} did not initialize the local audio context`);
+  assert(playbackState.transportCount === transportCount, `${label} lost transport controls after playback`);
   console.log(`OK ${label} transport`);
 
   if (editKind === "tempo") {
@@ -6752,16 +6956,17 @@ async function smokeAbletonLearningMusicLesson(context, config) {
     assert(tempoState, `${label} did not expose a tempo slider`);
     assert(tempoState.after === "96", `${label} did not accept the new tempo value`);
   } else if (editKind === "root-choice") {
-    const choices = page.locator(".widget__choice");
-    await choices.nth(2).click();
-    await page.waitForTimeout(250);
-    const editState = await page.evaluate(() => ({
-      selectedRoot: document.querySelector(".widget__choice--selected")?.textContent?.trim() || "",
-      selectedCount: document.querySelectorAll(".widget__choice--selected").length,
-    }));
+    const tonalWidgetId = await page.locator(".widget.widget-pianoroll").first().getAttribute("id");
+    const rootSelector = `#${tonalWidgetId}`;
+    await assertAbletonRootChoiceParity(page, rootSelector, label);
+    const editState = await page.evaluate((selector) => ({
+      selectedRoot: document.querySelector(`${selector} .widget-pianoroll__root-chooser .widget__choice--selected`)?.textContent?.trim() || "",
+      selectedCount: document.querySelectorAll(`${selector} .widget__choice--selected`).length,
+    }), rootSelector);
     assert(editState.selectedRoot === "D", `${label} expected D root after edit, got ${editState.selectedRoot || "none"}`);
     assert(editState.selectedCount >= 2, `${label} lost synchronized chooser state after edit`);
   }
+  assertAbletonSvgGeometry(await readAbletonSvgGeometry(page), svgGeometry, label);
   await assertNoRemotePlayableMediaRequests(page, label);
   console.log(`OK ${label} edit path`);
 

@@ -43,6 +43,7 @@ Behavior, content, URLs, assets, accessibility, and runtime dimensions remain in
 - [Migrate systems Routes](issues/19-migrate-systems-routes.md) — migrate all four systems Routes with exact manifest chapters, canonical SamWho runtime hooks, authored-only Hysteresis theming, intrinsic Nuxt/WebGL output, preserved state and geometry, and green static, focused strict experience, final review, and full 83-Route smoke gates.
 - [Migrate Anders Brownworth labs](issues/20-migrate-anders-labs.md) — migrate all three Anders labs with declared authored runtime roots, semantic Bootstrap state theming, native keyboard-owned navigation, intrinsic jVectorMap output, preserved cryptographic behavior and dimensions, and green static, focused strict experience, final review, and full 83-Route smoke gates.
 - [Migrate Teoria practice Routes](issues/21-migrate-teoria-practice-routes.md) — migrate all six Teoria practices with an exact generated-DOM theme hook, intrinsic audio/notation exclusions, preserved mount and score state, pointer/keyboard reveal parity, and green static, focused strict experience, final review, and full 83-Route smoke gates.
+- [Migrate Ableton Learning Music Routes](issues/22-migrate-ableton-music-routes.md) — migrate all seven Ableton Learning Music Routes with declared widget runtime hooks, exact local sample and synchronization checks, preserved sequencer geometry and intrinsic grid paint, and green static, focused strict experience, final review, and full 83-Route smoke gates.
 
 ## Not yet specified
 
