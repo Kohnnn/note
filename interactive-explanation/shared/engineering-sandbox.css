@@ -1132,6 +1132,181 @@ body[data-story-shell="engineering-sandbox"][data-story-variant="practice"] #ref
   margin-right: auto;
 }
 
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] {
+  --story-paper: var(--paper);
+  --story-paper-deep: var(--body-grad-to);
+  --story-paper-strong: var(--paper-strong);
+  --story-ink: var(--ink);
+  --story-ink-soft: var(--muted);
+  --story-border: var(--line);
+  --story-border-strong: var(--focus-border);
+  --story-steel: var(--accent);
+  --story-steel-bright: var(--accent);
+  --story-accent: var(--accent-deep);
+  --story-mint: var(--accent-soft);
+  --story-shadow: var(--shadow);
+  background:
+    radial-gradient(circle at top left, var(--body-grad-1), transparent 28%),
+    radial-gradient(circle at 82% 10%, var(--body-grad-2), transparent 22%),
+    linear-gradient(180deg, var(--body-grad-from) 0%, var(--paper) 18%, var(--body-grad-to) 100%);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .story-practice-checklist strong,
+  .story-practice-focus__label strong,
+  .story-practice-hint strong
+) {
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] :is(
+  .story-hero__summary,
+  .story-practice-panel p,
+  .page-header p,
+  .story-practice-hint
+) {
+  color: var(--muted);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] :is(
+  .story-chip,
+  .story-callout,
+  .story-practice-hint,
+  .story-practice-focus
+) {
+  border-color: var(--line);
+  background: var(--surface-card-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] :is(
+  .story-practice-callout,
+  .story-callout[data-story-callout="play"]
+) {
+  background: var(--surface-hero);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-practice-checklist__step {
+  border-color: var(--line);
+  background: var(--surface-pill);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-practice-focus::before {
+  border-top-color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-practice-focus__label {
+  border-bottom-color: var(--line);
+  background: var(--surface-toolbar);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-button {
+  border-color: var(--focus-border);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-button--secondary,
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-button--secondary:hover,
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-button--secondary:focus-visible {
+  background: var(--surface-card-strong);
+  color: var(--accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-practice-surface {
+  background: var(--paper-strong);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-practice-surface :is(
+  .well,
+  .panel,
+  .thumbnail,
+  .modal-content
+) {
+  border-color: var(--line);
+  background: var(--surface-panel);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-practice-surface :is(
+  .panel-heading,
+  .panel-footer,
+  .modal-header,
+  .modal-footer
+) {
+  border-color: var(--line);
+  background: var(--surface-toolbar);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-practice-surface :is(
+  input,
+  select,
+  textarea,
+  .form-control
+) {
+  border-color: var(--focus-border);
+  background: var(--surface-input);
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-practice-surface :is(
+  .btn-default,
+  .btn-primary,
+  .btn-info
+) {
+  border-color: var(--focus-border);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-practice-surface .btn-success {
+  border-color: color-mix(in srgb, #4f8b5b 55%, var(--line));
+  background: color-mix(in srgb, #4f8b5b 24%, var(--surface-card-strong));
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-practice-surface :is(
+  .btn-danger,
+  .alert-danger
+) {
+  border-color: color-mix(in srgb, #b14c4c 55%, var(--line));
+  background: color-mix(in srgb, #b14c4c 24%, var(--surface-card-strong));
+  color: var(--ink);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-practice-surface :is(
+  .control-label,
+  .help-block,
+  .text-muted,
+  #tsp_mess,
+  #tsp_score
+) {
+  color: var(--muted);
+}
+
+body[data-story-shell="engineering-sandbox"][data-story-family="teoria-practice"] .story-practice-surface :is(
+  a[href],
+  button,
+  input,
+  select,
+  textarea,
+  [role="button"]
+):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 body[data-story-shell="engineering-sandbox"][data-story-family="ableton-practice"] {
   --story-practice-max: 76rem;
   --story-shadow: 0 18px 38px rgba(2, 8, 18, 0.22);

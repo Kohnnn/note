@@ -1949,7 +1949,8 @@
     },
     "suggestedNextSlug": "ableton-learning-music-play-with-beats",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-practice-surface",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -1978,7 +1979,8 @@
     },
     "suggestedNextSlug": "teoria-key-and-note-ear-training",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-practice-surface",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -2007,7 +2009,8 @@
     },
     "suggestedNextSlug": "teoria-random-key-and-note-ear-training",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-practice-surface",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -2036,7 +2039,8 @@
     },
     "suggestedNextSlug": "teoria-scale-construction",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-practice-surface",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -2065,7 +2069,8 @@
     },
     "suggestedNextSlug": "teoria-interval-identification-and-inversion",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-practice-surface",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",
@@ -2094,7 +2099,8 @@
     },
     "suggestedNextSlug": "ableton-learning-music-play-with-beats",
     "experience": {
-      "themeOwnership": "fixed-runtime",
+      "themeOwnership": "runtime-hook",
+      "themeRoot": ".story-practice-surface",
       "primarySurface": "main",
       "runtimeSurface": "[data-runtime-main], main",
       "interactionProbe": "read-only",

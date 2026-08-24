@@ -6321,14 +6321,40 @@ async function startTeoriaExercise(page, config) {
 }
 
 async function assertTeoriaCanvasInteraction(page, config) {
-  const beforeCanvas = await page.locator(config.canvasSelector).evaluate((canvas) => canvas.toDataURL());
+  const canvas = page.locator(config.canvasSelector);
+  const before = await canvas.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      pixels: element.toDataURL(),
+      width: element.width,
+      height: element.height,
+      cssWidth: rect.width,
+      cssHeight: rect.height,
+    };
+  });
   const selectors = config.interactionSelectors || [config.interactionSelector];
 
   for (const selector of selectors) {
     await page.click(selector);
     await page.waitForTimeout(300);
-    const afterCanvas = await page.locator(config.canvasSelector).evaluate((canvas) => canvas.toDataURL());
-    if (afterCanvas !== beforeCanvas) {
+    const after = await canvas.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        pixels: element.toDataURL(),
+        width: element.width,
+        height: element.height,
+        cssWidth: rect.width,
+        cssHeight: rect.height,
+      };
+    });
+    assert(
+      after.width === before.width &&
+        after.height === before.height &&
+        Math.abs(after.cssWidth - before.cssWidth) <= 1 &&
+        Math.abs(after.cssHeight - before.cssHeight) <= 1,
+      `${config.label} changed notation dimensions during interaction`,
+    );
+    if (after.pixels !== before.pixels) {
       return;
     }
   }
@@ -6345,25 +6371,52 @@ async function assertTeoriaMessageInteraction(page, config) {
 }
 
 async function assertTeoriaRevealFlow(page, label) {
-  const scoreBeforeReveal = ((await page.locator("#tsp_score").textContent()) || "").trim();
-  const messageBeforeReveal = ((await page.locator("#tsp_mess").textContent()) || "").trim();
-  await page.click("#pp_tellMe");
-  await page.waitForFunction((previousMessage) => {
-    return getComputedStyle(document.querySelector("#ev_next")).display !== "none" ||
-      ((document.querySelector("#tsp_mess")?.textContent || "").trim()) !== previousMessage;
-  }, messageBeforeReveal, { timeout: 5000 });
-  const revealState = await page.evaluate(() => ({
+  const readState = () => page.evaluate(() => ({
     message: (document.querySelector("#tsp_mess")?.textContent || "").trim(),
     score: (document.querySelector("#tsp_score")?.textContent || "").trim(),
     nextVisible: getComputedStyle(document.querySelector("#ev_next")).display,
   }));
+  const reveal = page.locator("#pp_tellMe");
+  const pointerBefore = await readState();
+  await assertFocusVisible(reveal, `${label} reveal control`);
+  await reveal.click();
+  await page.waitForFunction((previousMessage) => {
+    return getComputedStyle(document.querySelector("#ev_next")).display !== "none" ||
+      ((document.querySelector("#tsp_mess")?.textContent || "").trim()) !== previousMessage;
+  }, pointerBefore.message, { timeout: 5000 });
+  const pointerAfter = await readState();
   assert(
-    revealState.message !== messageBeforeReveal ||
-      revealState.score !== scoreBeforeReveal ||
-      revealState.nextVisible !== "none",
-    `${label} did not advance the correctness state after reveal`,
+    pointerAfter.message !== pointerBefore.message ||
+      pointerAfter.score !== pointerBefore.score ||
+      pointerAfter.nextVisible !== "none",
+    `${label} pointer reveal did not advance correctness state`,
   );
-  assert(revealState.nextVisible !== "none", `${label} did not advance to the next-exercise state`);
+  assert(pointerAfter.nextVisible !== "none", `${label} pointer reveal did not expose the next exercise`);
+
+  await page.click("#ev_next");
+  await page.waitForFunction(() => {
+    const next = document.querySelector("#ev_next");
+    const reveal = document.querySelector("#pp_tellMe");
+    return getComputedStyle(next).display === "none" && getComputedStyle(reveal).display !== "none";
+  }, null, { timeout: 5000 });
+  const keyboardBefore = await readState();
+  await assertFocusVisible(reveal, `${label} reveal control after advancing`);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction((previousMessage) => {
+    return getComputedStyle(document.querySelector("#ev_next")).display !== "none" ||
+      ((document.querySelector("#tsp_mess")?.textContent || "").trim()) !== previousMessage;
+  }, keyboardBefore.message, { timeout: 5000 });
+  const keyboardAfter = await readState();
+  assert(
+    keyboardAfter.message !== keyboardBefore.message ||
+      keyboardAfter.score !== keyboardBefore.score ||
+      keyboardAfter.nextVisible !== "none",
+    `${label} keyboard reveal did not advance correctness state`,
+  );
+  assert(
+    keyboardAfter.nextVisible !== "none" && pointerAfter.nextVisible !== "none",
+    `${label} pointer and keyboard reveal paths did not reach the same next-exercise state`,
+  );
 }
 
 async function smokeTeoriaExercise(context, config) {
@@ -6392,6 +6445,16 @@ async function smokeTeoriaExercise(context, config) {
   console.log(`OK ${config.slug} local assets`);
 
   await startTeoriaExercise(page, config);
+  const mountState = await page.evaluate(() => ({
+    ids: Array.from(document.querySelectorAll(".story-practice-surface > [id]")).map((element) => element.id),
+    scoreCount: document.querySelectorAll("#tsp_score").length,
+    messageCount: document.querySelectorAll("#tsp_mess").length,
+  }));
+  assert(
+    JSON.stringify(mountState.ids) === JSON.stringify(["init", "opts", "xml_opts", "exe", "score"]),
+    `${config.label} changed its five vendored exercise mounts`,
+  );
+  assert(mountState.scoreCount === 1 && mountState.messageCount === 1, `${config.label} did not expose generated score and message state`);
   for (const selector of config.requiredSelectors || []) {
     await page.waitForSelector(selector, { timeout: 5000 });
   }
