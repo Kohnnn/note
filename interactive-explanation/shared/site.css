@@ -433,7 +433,7 @@ body[data-page-type="home"] .inventory-section {
   margin-top: 8px;
 }
 
-.docs-page :is(.chip, .plain-list li) {
+.docs-page :is(code, .chip, .plain-list li) {
   overflow-wrap: anywhere;
 }
 

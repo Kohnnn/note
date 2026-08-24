@@ -117,6 +117,14 @@ const abletonSynthLessonSlugs = [
   "ableton-learning-synths-matching-envelopes",
   "ableton-learning-synths-recipes",
 ];
+const abletonSynthAccentBySlug = new Map([
+  ["ableton-learning-synths-get-started", "#ff6577"],
+  ["ableton-learning-synths-how-synths-make-sound", "#febc2d"],
+  ["ableton-learning-synths-filter-resonance", "#dd0c75"],
+  ["ableton-learning-synths-modulating-amplitude-with-envelopes", "#23b2fe"],
+  ["ableton-learning-synths-matching-envelopes", "#23b2fe"],
+  ["ableton-learning-synths-recipes", null],
+]);
 
 const themedEngineeringLongformSlugs = new Set([
   "alpha-compositing",
@@ -894,10 +902,10 @@ const experienceViewports = [
 const experienceThemes = ["light", "dark"];
 
 async function createThemeContext(browser, options) {
-  const { theme, stored, viewport = experienceViewports[0] } = options;
+  const { theme, stored, systemTheme = theme, viewport = experienceViewports[0] } = options;
   const context = await browser.newContext({
     acceptDownloads: true,
-    colorScheme: theme,
+    colorScheme: systemTheme,
     viewport: { width: viewport.width, height: viewport.height },
   });
   await context.addInitScript(({ expectedTheme, useStoredTheme }) => {
@@ -926,6 +934,13 @@ async function createThemeContext(browser, options) {
   return context;
 }
 
+async function waitForDocumentLayout(page) {
+  await page.evaluate(async () => {
+    await document.fonts?.ready;
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+}
+
 async function waitForManifestRouteReady(page, route) {
   await page.waitForFunction((runtimeSelector) => {
     const runtime = document.querySelector(runtimeSelector);
@@ -933,10 +948,7 @@ async function waitForManifestRouteReady(page, route) {
       runtime &&
       runtime.getAttribute("aria-busy") !== "true";
   }, route.experience.runtimeSurface, { timeout: 30000 });
-  await page.evaluate(async () => {
-    await document.fonts?.ready;
-    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  });
+  await waitForDocumentLayout(page);
 }
 
 async function assertDocumentTheme(page, expectedTheme, label) {
@@ -954,7 +966,7 @@ async function assertDocumentTheme(page, expectedTheme, label) {
 
 async function readThemeTokens(page, label, routeSlug = "", expectedRuntimeTheme = "") {
   const authoredRootSelector = routeManifestBySlug.get(routeSlug)?.experience.themeRoot || authoredThemeRootBySlug.get(routeSlug) || "";
-  const tokens = await page.evaluate(({ inspectCompanion, rootSelector }) => {
+  const tokens = await page.evaluate(({ inspectAbletonSynth, inspectCompanion, rootSelector }) => {
     const style = getComputedStyle(document.documentElement);
     const authoredRoot = rootSelector ? document.querySelector(rootSelector) : null;
     const companionCard = inspectCompanion ? document.querySelector(".story-companion-card") : null;
@@ -974,9 +986,18 @@ async function readThemeTokens(page, label, routeSlug = "", expectedRuntimeTheme
       interactive: style.getPropertyValue("--topbar-hover").trim(),
       runtimeTheme: document.documentElement.dataset.theme || "",
       authored: readColors(authoredRoot),
+      authoredRuntimeTokens: inspectAbletonSynth && authoredRoot ? {
+        background: getComputedStyle(authoredRoot).getPropertyValue("--color-background").trim(),
+        foreground: getComputedStyle(authoredRoot).getPropertyValue("--color-foreground").trim(),
+        shade: getComputedStyle(authoredRoot).getPropertyValue("--color-shade").trim(),
+        caption: getComputedStyle(authoredRoot).getPropertyValue("--color-caption").trim(),
+        accent: getComputedStyle(authoredRoot).getPropertyValue("--current-theme-color").trim(),
+        accentShade: getComputedStyle(authoredRoot).getPropertyValue("--current-theme-color-shade").trim(),
+      } : null,
       companion: readColors(companionCard),
     };
   }, {
+    inspectAbletonSynth: abletonSynthLessonSlugs.includes(routeSlug),
     inspectCompanion: themedEngineeringLongformSlugs.has(routeSlug),
     rootSelector: authoredRootSelector,
   });
@@ -1007,6 +1028,19 @@ function assertThemePair(light, dark, label) {
   if (light.companion || dark.companion) {
     assert(light.companion?.background !== dark.companion?.background, `${label} light and dark companion backgrounds were identical`);
     assert(light.companion?.foreground !== dark.companion?.foreground, `${label} light and dark companion foregrounds were identical`);
+  }
+  if (light.authoredRuntimeTokens || dark.authoredRuntimeTokens) {
+    const lightTokens = light.authoredRuntimeTokens;
+    const darkTokens = dark.authoredRuntimeTokens;
+    assert(lightTokens && darkTokens, `${label} did not expose both authored runtime token states`);
+    assert(Object.values(lightTokens).every(Boolean), `${label} light authored runtime tokens were incomplete`);
+    assert(Object.values(darkTokens).every(Boolean), `${label} dark authored runtime tokens were incomplete`);
+    for (const key of ["background", "foreground", "shade", "caption", "accentShade"]) {
+      assert(lightTokens[key] !== darkTokens[key], `${label} light and dark authored runtime ${key} tokens were identical`);
+    }
+    const stableAccent = lightTokens.accent === darkTokens.accent;
+    const themedMonoAccent = lightTokens.accent === lightTokens.foreground && darkTokens.accent === darkTokens.foreground;
+    assert(stableAccent || themedMonoAccent, `${label} authored runtime accent lost its route identity`);
   }
 }
 
@@ -1515,7 +1549,11 @@ async function assertRouteExperienceState(page, route, viewport, label, approved
 }
 
 async function runStoredThemeGate(browser, route, theme, approvedGeometry) {
-  const context = await createThemeContext(browser, { theme, stored: true });
+  const context = await createThemeContext(browser, {
+    theme,
+    stored: true,
+    systemTheme: abletonSynthLessonSlugs.includes(route.slug) ? (theme === "dark" ? "light" : "dark") : theme,
+  });
   let routeTokens = null;
   let docsTokens = null;
   let intrinsicPaint = null;
@@ -1689,8 +1727,20 @@ async function assertManifestRouteExperience(browser, route, approvedGeometry) {
   for (const theme of experienceThemes) {
     tokensByTheme.set(theme, await runStoredThemeGate(browser, route, theme, approvedGeometry));
   }
-  assertThemePair(tokensByTheme.get("light").routeTokens, tokensByTheme.get("dark").routeTokens, `${route.slug} Route shell`);
+  const lightRouteTokens = tokensByTheme.get("light").routeTokens;
+  const darkRouteTokens = tokensByTheme.get("dark").routeTokens;
+  assertThemePair(lightRouteTokens, darkRouteTokens, `${route.slug} Route shell`);
   assertThemePair(tokensByTheme.get("light").docsTokens, tokensByTheme.get("dark").docsTokens, `docs/${route.slug} shell`);
+  if (abletonSynthAccentBySlug.has(route.slug)) {
+    const expectedAccent = abletonSynthAccentBySlug.get(route.slug);
+    if (expectedAccent) {
+      assert(lightRouteTokens.authoredRuntimeTokens.accent === expectedAccent, `${route.slug} light authored runtime accent changed identity`);
+      assert(darkRouteTokens.authoredRuntimeTokens.accent === expectedAccent, `${route.slug} dark authored runtime accent changed identity`);
+    } else {
+      assert(lightRouteTokens.authoredRuntimeTokens.accent === lightRouteTokens.authoredRuntimeTokens.foreground, `${route.slug} light authored runtime accent was not monochrome`);
+      assert(darkRouteTokens.authoredRuntimeTokens.accent === darkRouteTokens.authoredRuntimeTokens.foreground, `${route.slug} dark authored runtime accent was not monochrome`);
+    }
+  }
   if (abletonMusicWidgetSlugs.has(route.slug)) {
     assert(
       JSON.stringify(tokensByTheme.get("light").intrinsicPaint) === JSON.stringify(tokensByTheme.get("dark").intrinsicPaint),
@@ -1756,13 +1806,23 @@ async function assertViewportUsable(page, label) {
     const doc = document.documentElement;
     const body = document.body;
     return {
+      initialX: window.scrollX,
+      initialY: window.scrollY,
       innerWidth: window.innerWidth,
       scrollWidth: Math.max(doc?.scrollWidth || 0, body?.scrollWidth || 0),
     };
   });
+  if (metrics.scrollWidth <= metrics.innerWidth + 32) {
+    return;
+  }
+  await page.mouse.move(1, 1);
+  await page.mouse.wheel(metrics.scrollWidth, 0);
+  await page.waitForTimeout(50);
+  const maximumScrollX = await page.evaluate(() => window.scrollX);
+  await page.evaluate(({ x, y }) => window.scrollTo(x, y), { x: metrics.initialX, y: metrics.initialY });
   assert(
-    metrics.scrollWidth <= metrics.innerWidth + 32,
-    `${label} overflowed at ${metrics.innerWidth}px (${metrics.scrollWidth}px content width vs ${metrics.innerWidth}px viewport)`,
+    maximumScrollX <= 32,
+    `${label} panned ${maximumScrollX}px at ${metrics.innerWidth}px (${metrics.scrollWidth}px content width)`,
   );
 }
 
@@ -6922,6 +6982,7 @@ async function smokeAbletonLearningMusicLesson(context, config) {
     gridCount: widgetCount,
     generatedRootCount: widgetCount + 1,
   });
+  await waitForDocumentLayout(page);
   const svgGeometry = await readAbletonSvgGeometry(page);
   await assertAbletonLocalSampleBank(page, label);
   await assertNoRemotePlayableMediaRequests(page, label);
@@ -7200,6 +7261,23 @@ async function smokeAbletonLearningSynthLesson(context, config) {
   assert(archiveShellState.localizedLinks >= 2, `${label} did not localize the synth lesson cross-links`);
   assert(!archiveShellState.hasRemoteLessonLink, `${label} left a remote Learning Synths body link in place`);
   assert(!archiveShellState.hasFeedbackLink, `${label} left the upstream feedback link in the public body`);
+  const tocToggle = page.locator("#app[data-ableton-synth-lesson] .components_lesson-viewer__toc-toggle");
+  await assertFocusVisible(tocToggle, `${label} native lesson menu toggle`);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => document.body.classList.contains("show-toc"), null, { timeout: 5000 });
+  const localizedLinks = page.locator("#app[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]");
+  const tocState = await localizedLinks.evaluateAll((links) => ({
+    count: links.length,
+    local: links.every((link) => {
+      const url = new URL(link.href);
+      return url.origin === window.location.origin && url.pathname.startsWith("/interactive-explanation/ableton-learning-synths-");
+    }),
+  }));
+  assert(tocState.count >= 2 && tocState.local, `${label} did not expose local synth lesson links inside the native menu`);
+  assert(await renderedControlCount(localizedLinks) >= 1, `${label} did not reveal a localized lesson link inside the native menu`);
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.body.classList.contains("show-toc"), null, { timeout: 5000 });
+  assert(await tocToggle.evaluate((toggle) => document.activeElement === toggle), `${label} did not restore focus to the native lesson menu toggle`);
   await assertNoRemotePlayableMediaRequests(page, label);
   console.log(`OK ${label} local archive shell`);
 

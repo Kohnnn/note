@@ -2361,10 +2361,9 @@
       "variant": "lab",
       "navigation": "native",
       "nativeControl": {
-        "selector": "main[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]",
-        "minimum": 2,
-        "kind": "link",
-        "fragmentOnly": false
+        "selector": "#app[data-ableton-synth-lesson] .components_lesson-viewer__toc-toggle",
+        "minimum": 1,
+        "kind": "state"
       }
     },
     "suggestedNextSlug": "musicmap",
@@ -2376,7 +2375,7 @@
       "networkPolicy": {
         "mode": "local-only"
       },
-      "themeRoot": "main[data-ableton-synth-lesson]"
+      "themeRoot": "#app[data-ableton-synth-lesson]"
     }
   },
   {
@@ -2397,10 +2396,9 @@
       "variant": "lab",
       "navigation": "native",
       "nativeControl": {
-        "selector": "main[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]",
-        "minimum": 2,
-        "kind": "link",
-        "fragmentOnly": false
+        "selector": "#app[data-ableton-synth-lesson] .components_lesson-viewer__toc-toggle",
+        "minimum": 1,
+        "kind": "state"
       }
     },
     "suggestedNextSlug": "ableton-learning-synths-filter-resonance",
@@ -2412,7 +2410,7 @@
       "networkPolicy": {
         "mode": "local-only"
       },
-      "themeRoot": "main[data-ableton-synth-lesson]"
+      "themeRoot": "#app[data-ableton-synth-lesson]"
     }
   },
   {
@@ -2433,10 +2431,9 @@
       "variant": "lab",
       "navigation": "native",
       "nativeControl": {
-        "selector": "main[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]",
-        "minimum": 2,
-        "kind": "link",
-        "fragmentOnly": false
+        "selector": "#app[data-ableton-synth-lesson] .components_lesson-viewer__toc-toggle",
+        "minimum": 1,
+        "kind": "state"
       }
     },
     "suggestedNextSlug": "ableton-learning-synths-modulating-amplitude-with-envelopes",
@@ -2448,7 +2445,7 @@
       "networkPolicy": {
         "mode": "local-only"
       },
-      "themeRoot": "main[data-ableton-synth-lesson]"
+      "themeRoot": "#app[data-ableton-synth-lesson]"
     }
   },
   {
@@ -2469,10 +2466,9 @@
       "variant": "lab",
       "navigation": "native",
       "nativeControl": {
-        "selector": "main[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]",
-        "minimum": 2,
-        "kind": "link",
-        "fragmentOnly": false
+        "selector": "#app[data-ableton-synth-lesson] .components_lesson-viewer__toc-toggle",
+        "minimum": 1,
+        "kind": "state"
       }
     },
     "suggestedNextSlug": "ableton-learning-synths-matching-envelopes",
@@ -2484,7 +2480,7 @@
       "networkPolicy": {
         "mode": "local-only"
       },
-      "themeRoot": "main[data-ableton-synth-lesson]"
+      "themeRoot": "#app[data-ableton-synth-lesson]"
     }
   },
   {
@@ -2505,10 +2501,9 @@
       "variant": "lab",
       "navigation": "native",
       "nativeControl": {
-        "selector": "main[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]",
-        "minimum": 2,
-        "kind": "link",
-        "fragmentOnly": false
+        "selector": "#app[data-ableton-synth-lesson] .components_lesson-viewer__toc-toggle",
+        "minimum": 1,
+        "kind": "state"
       }
     },
     "suggestedNextSlug": "ableton-learning-synths-recipes",
@@ -2520,7 +2515,7 @@
       "networkPolicy": {
         "mode": "local-only"
       },
-      "themeRoot": "main[data-ableton-synth-lesson]"
+      "themeRoot": "#app[data-ableton-synth-lesson]"
     }
   },
   {
@@ -2541,10 +2536,9 @@
       "variant": "lab",
       "navigation": "native",
       "nativeControl": {
-        "selector": "main[data-ableton-synth-lesson] a[data-archive-localized=\"true\"]",
-        "minimum": 2,
-        "kind": "link",
-        "fragmentOnly": false
+        "selector": "#app[data-ableton-synth-lesson] .components_lesson-viewer__toc-toggle",
+        "minimum": 1,
+        "kind": "state"
       }
     },
     "suggestedNextSlug": "musicmap",
@@ -2556,7 +2550,7 @@
       "networkPolicy": {
         "mode": "local-only"
       },
-      "themeRoot": "main[data-ableton-synth-lesson]"
+      "themeRoot": "#app[data-ableton-synth-lesson]"
     }
   },
   {
