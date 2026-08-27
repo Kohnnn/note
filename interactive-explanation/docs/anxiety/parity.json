@@ -195,5 +195,21 @@
       "Focused strict smoke covers stored and system light and dark states at 1400, 390, and 320 CSS pixel widths without horizontal page pan.",
       "The approved narrow geometry records a 320 by 533.33 CSS pixel presentation while retaining the original canvas backing dimensions."
     ]
+  },
+  {
+    "moduleId": "complete-route-experience-ticket-24",
+    "originalBehavior": "The fixed narrative runtime owns choices, chapter persistence, pacing, audio, dialogs, replay, sharing, and intrinsic canvas output.",
+    "localStatus": "Stored and system themes affect only shared shell chrome; the game stage, internal coordinates, state machine, and approved geometry remain unchanged.",
+    "sourceFiles": [
+      "../../routes.manifest.json",
+      "../../tools/smoke-bundle.mjs",
+      "../../tools/experience-baselines.json"
+    ],
+    "notes": [
+      "The Route remains fixed-runtime with no generated navigation and local-only networking."
+    ],
+    "evidence": [
+      "Focused smoke verifies start and replay flows, seeded chapter persistence, native dialogs and focus return, text pacing, automatic advance, volume state, sharing, and exact canvas geometry."
+    ]
   }
 ]

@@ -36,6 +36,8 @@ const ALLOWED_NATIVE_CONTROL_KEYS = new Set([
   "fragmentOnly",
   "childSelector",
   "peerSelectors",
+  "activationSelector",
+  "readySelector",
 ]);
 const ALLOWED_EXPERIENCE_KEYS = new Set([
   "themeOwnership",
@@ -250,6 +252,15 @@ function validateNativeControl(slug, nativeControl) {
       assertManifest(!selectors.has(selector), `route "${slug}" nativeControl has duplicate peer selector "${selector}"`);
       selectors.add(selector);
     });
+  }
+  const preparationSelectors = [nativeControl.activationSelector, nativeControl.readySelector];
+  assertManifest(
+    preparationSelectors.every((selector) => selector === undefined) || preparationSelectors.every((selector) => selector !== undefined),
+    `route "${slug}" nativeControl activationSelector and readySelector must be declared together`,
+  );
+  if (nativeControl.activationSelector !== undefined) {
+    assertNonEmptyString(nativeControl.activationSelector, `route "${slug}" nativeControl activationSelector must be a non-empty trimmed string`);
+    assertNonEmptyString(nativeControl.readySelector, `route "${slug}" nativeControl readySelector must be a non-empty trimmed string`);
   }
 }
 

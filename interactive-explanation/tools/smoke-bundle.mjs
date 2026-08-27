@@ -1437,6 +1437,25 @@ async function assertNativeNavigation(page, route, label) {
   }
 }
 
+async function prepareNativeNavigation(page, route) {
+  const contract = route.shell.nativeControl;
+  if (!contract.activationSelector) {
+    return;
+  }
+  const activation = page.locator(contract.activationSelector);
+  await activation.waitFor({ state: "visible", timeout: 30000 });
+  await activation.click();
+  await page.waitForFunction((readySelector) => {
+    const ready = document.querySelector(readySelector);
+    if (!ready) {
+      return false;
+    }
+    const style = getComputedStyle(ready);
+    const rect = ready.getBoundingClientRect();
+    return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) > 0 && rect.width > 0 && rect.height > 0;
+  }, contract.readySelector, { timeout: 5000 });
+}
+
 async function assertManifestNavigation(page, route, viewport, label) {
   const bodyState = await page.evaluate(() => ({
     shell: document.body?.dataset.storyShell || "",
@@ -1453,6 +1472,7 @@ async function assertManifestNavigation(page, route, viewport, label) {
     return;
   }
   if (route.shell.navigation === "native") {
+    await prepareNativeNavigation(page, route);
     await assertNativeNavigation(page, route, label);
     return;
   }
@@ -1466,17 +1486,25 @@ async function assertManifestNavigation(page, route, viewport, label) {
       const height = Math.max(0, Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0));
       return width * height;
     }
+    const shellChrome = [".top-bar", ".story-rail", ".story-mobile-bar", ".story-mobile-sheet", "#reference-footer"]
+      .flatMap((selector) => Array.from(document.querySelectorAll(selector)))
+      .reduce((total, element) => total + visibleArea(element), 0);
     return {
       generatedCount: document.querySelectorAll(".story-rail, .story-mobile-bar, .story-mobile-sheet").length,
       primaryArea: visibleArea(document.querySelector(primarySelector)),
       runtimeArea: visibleArea(document.querySelector(runtimeSelector)),
+      shellChrome,
     };
   }, {
     primarySelector: route.experience.primarySurface,
     runtimeSelector: route.experience.runtimeSurface,
   });
   assert(state.generatedCount === 0, `${label} rendered generated navigation in none mode`);
-  assert(state.runtimeArea > 0 && state.runtimeArea >= state.primaryArea, `${label} did not keep its primary runtime visually dominant`);
+  assert(state.runtimeArea > 0 && state.primaryArea > 0, `${label} did not keep its declared runtime and primary surfaces visible`);
+  assert(
+    state.primaryArea > state.shellChrome,
+    `${label} did not keep its declared primary surface dominant over shared shell chrome`,
+  );
 }
 
 async function assertReadOnlyProbe(page, route, label) {
@@ -1536,7 +1564,7 @@ async function readAbletonGridPaint(page, route) {
 
 async function assertRouteExperienceState(page, route, viewport, label, approvedGeometry) {
   await assertMainLandmark(page, route, label);
-  await assertPrimarySurfaceVisible(page, label, route.experience.primarySurface);
+  await assertPrimarySurfaceVisible(page, label, route.experience.primarySurface, route.experience.runtimeSurface, approvedGeometry);
   assertRuntimeGeometry(await measureRuntimeSurface(page, route, label), approvedGeometry, label);
   await assertReadOnlyProbe(page, route, label);
   await assertManifestNavigation(page, route, viewport, label);
@@ -1767,17 +1795,20 @@ async function smokeCrowdsReadOnly(context) {
         !play.hasAttribute("disabled") &&
         /let's play/i.test(play.textContent || "");
     }, null, { timeout: 30000 });
-    const readState = () => page.evaluate(() => ({
-      busy: document.querySelector("main")?.getAttribute("aria-busy"),
-      chapter: window.slideshow?.currentSlide?.chapter || "",
-      slideIndex: window.slideshow?.slideIndex,
-      transitioning: window.slideshow?.IS_TRANSITIONING,
-      playDisabled: document.querySelector("#slideshow .next_button")?.hasAttribute("disabled"),
-      playText: (document.querySelector("#slideshow .next_button")?.textContent || "").replace(/\s+/g, " ").trim(),
-      navigationVisible: getComputedStyle(document.querySelector("#navigation")).display !== "none",
-      chapterControlCount: document.querySelectorAll("#navigation > div[chapter]").length,
-      canvasCount: document.querySelectorAll("main canvas").length,
-    }));
+    const readState = () => page.evaluate(() => {
+      const navigation = document.querySelector("#navigation");
+      return {
+        busy: document.querySelector("main")?.getAttribute("aria-busy"),
+        chapter: window.slideshow?.currentSlide?.chapter || "",
+        slideIndex: window.slideshow?.slideIndex,
+        transitioning: window.slideshow?.IS_TRANSITIONING,
+        playDisabled: document.querySelector("#slideshow .next_button")?.hasAttribute("disabled"),
+        playText: (document.querySelector("#slideshow .next_button")?.textContent || "").replace(/\s+/g, " ").trim(),
+        navigationVisible: Boolean(navigation && getComputedStyle(navigation).display !== "none"),
+        chapterControlCount: document.querySelectorAll("#navigation > div[chapter]").length,
+        canvasCount: document.querySelectorAll("main canvas").length,
+      };
+    });
     const initial = await readState();
     await page.waitForTimeout(250);
     const settled = await readState();
@@ -1845,9 +1876,9 @@ async function scrollPrimarySurfaceIntoView(page, label, selector) {
   await page.waitForTimeout(150);
 }
 
-async function assertPrimarySurfaceVisible(page, label, selector = "[data-primary-control]") {
+async function assertPrimarySurfaceVisible(page, label, selector = "[data-primary-control]", runtimeSelector = "", approvedGeometry = null) {
   await scrollPrimarySurfaceIntoView(page, label, selector);
-  const state = await page.evaluate((controlSelector) => {
+  const state = await page.evaluate(({ controlSelector, runtimeSelector }) => {
     const control = document.querySelector(controlSelector);
     if (!control) {
       return null;
@@ -1870,14 +1901,17 @@ async function assertPrimarySurfaceVisible(page, label, selector = "[data-primar
       visibleWidth: Math.max(0, visibleRight - visibleLeft),
       viewportWidth: window.innerWidth,
       viewportHeight: window.innerHeight,
+      sameSurface: runtimeSelector ? control === document.querySelector(runtimeSelector) : false,
     };
-  }, selector);
+  }, { controlSelector: selector, runtimeSelector });
 
   assert(state, `${label} did not expose the primary control surface`);
   assert(state.width > 0 && state.height > 0, `${label} primary control surface collapsed`);
   assert(state.bottom >= 80, `${label} primary control surface was clipped above the viewport`);
   assert(state.left >= -4, `${label} primary control surface was clipped on the left edge`);
-  assert(state.right <= state.viewportWidth + 4, `${label} primary control surface overflowed the viewport width`);
+  const approvedRight = state.sameSurface ? approvedGeometry?.rect?.right : state.viewportWidth;
+  assert(Number.isFinite(approvedRight), `${label} primary control surface lacked approved right-edge evidence`);
+  assert(state.right <= Math.max(state.viewportWidth + 4, approvedRight + 1), `${label} primary control surface overflowed its approved right edge`);
   assert(
     state.top <= state.viewportHeight - 80,
     `${label} primary control surface landed below the viewport fold`,
@@ -2370,6 +2404,18 @@ async function smokeAnxiety(context) {
     const words = document.querySelector("#game_words")?.textContent || "";
     return /Welcome! This is less of a "game," more of an interactive story/i.test(words);
   }, null, { timeout: 20000 });
+  await introPage.mouse.click(10, 10);
+  await introPage.mouse.click(10, 10);
+  await introPage.waitForFunction(() => {
+    const words = document.querySelector("#game_words")?.textContent || "";
+    return /So before we start, how would you like to read/i.test(words);
+  }, null, { timeout: 20000 });
+  await introPage.mouse.click(10, 10);
+  await introPage.mouse.click(10, 10);
+  await introPage.waitForFunction(() => {
+    const options = document.querySelector("#options");
+    return options?.getAttribute("past_intro") === "no" && options.style.top === "447px";
+  }, null, { timeout: 20000 });
   const anxietyControls = await introPage.evaluate(() => ({
     gearIsButton: document.querySelector("#gear")?.tagName === "BUTTON",
     aboutIsButton: document.querySelector("#huh")?.tagName === "BUTTON",
@@ -2378,30 +2424,86 @@ async function smokeAnxiety(context) {
   assert(anxietyControls.gearIsButton && anxietyControls.aboutIsButton, "anxiety persistent controls are not native buttons");
   assert(anxietyControls.choicesAreButtons, "anxiety actionable choices are not native buttons");
 
-  await introPage.evaluate(() => {
+  const initialOptions = await introPage.evaluate(() => ({
+    textSpeed: Game.TEXT_SPEED,
+    clickToAdvance: Game.CLICK_TO_ADVANCE,
+  }));
+  await setRangeValue(introPage, "#text_speed_slider", 0.8);
+  await setRangeValue(introPage, "#volume_slider", 0.35);
+  await introPage.locator("#text_automatic_toggle").click();
+  const changedOptions = await introPage.evaluate(() => ({
+    textSpeed: Game.TEXT_SPEED,
+    volume: Howler.volume(),
+    clickToAdvance: Game.CLICK_TO_ADVANCE,
+  }));
+  assert(changedOptions.textSpeed !== initialOptions.textSpeed, "anxiety text-speed control did not change authored pacing");
+  assert(Math.abs(changedOptions.volume - 0.35) < 0.001, "anxiety volume control did not change runtime audio");
+  assert(changedOptions.clickToAdvance !== initialOptions.clickToAdvance, "anxiety automatic-text control did not change pacing mode");
+  await introPage.locator("#options_ok").click();
+  await introPage.waitForFunction(() => {
+    const words = document.querySelector("#game_words")?.textContent || "";
+    return /THIS IS A HUMAN/i.test(words);
+  }, null, { timeout: 30000 });
+  const automaticAdvance = await introPage.evaluate(() => {
+    const prompt = document.querySelector("#click_to_advance");
+    return {
+      clickToAdvance: Game.CLICK_TO_ADVANCE,
+      promptVisible: Boolean(prompt && getComputedStyle(prompt).display !== "none"),
+      completedText: Game.wordsDOM.textContent || "",
+    };
+  });
+  assert(!automaticAdvance.clickToAdvance && !automaticAdvance.promptVisible, "anxiety automatic pacing did not advance without a click prompt");
+  assert(/THIS IS A HUMAN/.test(automaticAdvance.completedText), "anxiety automatic pacing did not complete the authored intro steps");
+
+  const aboutOpened = await introPage.evaluate(() => {
     const opener = document.querySelector("#huh");
+    if (!opener) {
+      return false;
+    }
     opener.style.display = "block";
     opener.focus();
     opener.click();
+    return true;
   });
+  assert(aboutOpened, "anxiety about opener was missing");
   await introPage.waitForFunction(() => document.querySelector("#about")?.open, null, { timeout: 5000 });
   await introPage.keyboard.press("Escape");
   await introPage.waitForFunction(() => !document.querySelector("#about")?.open, null, { timeout: 5000 });
   const aboutFocusRestored = await introPage.evaluate(() => document.activeElement?.id === "huh");
   assert(aboutFocusRestored, "anxiety about dialog did not restore focus to its opener");
 
-  await introPage.evaluate(() => {
+  const contentNotesOpened = await introPage.evaluate(() => {
     const opener = document.querySelector("#gear");
+    if (!opener) {
+      return false;
+    }
     opener.style.display = "block";
     opener.focus();
     publish("show_cn");
+    return true;
   });
+  assert(contentNotesOpened, "anxiety content-notes opener was missing");
   await introPage.waitForFunction(() => document.querySelector("#content_notes")?.open, null, { timeout: 5000 });
   await introPage.keyboard.press("Escape");
   await introPage.waitForFunction(() => !document.querySelector("#content_notes")?.open, null, { timeout: 5000 });
   const contentNotesFocusRestored = await introPage.evaluate(() => document.activeElement?.id === "gear");
   assert(contentNotesFocusRestored, "anxiety content-notes dialog did not restore focus to its opener");
-  console.log("OK anxiety intro start and native dialogs");
+  const sharing = await introPage.evaluate(() => ({
+    sharingLink: SHARING_LINK,
+    sharingTitle: SHARING_TITLE,
+    sharingDescription: SHARING_DESC,
+    facebookHref: document.querySelector("#share_link_fb")?.href || "",
+    twitterHref: document.querySelector("#share_link_tw")?.href || "",
+    emailHref: document.querySelector("#share_link_em")?.href || "",
+  }));
+  const expectedSharingLink = new URL("anxiety/", baseUrl).href;
+  const expectedSharingTitle = "Adventures With Anxiety!";
+  const expectedSharingDescription = "I just played this story-game about a human and their anxiety! You play *as* the anxiety. 😱";
+  assert(sharing.sharingLink === expectedSharingLink && sharing.sharingTitle === expectedSharingTitle && sharing.sharingDescription === expectedSharingDescription, "anxiety authored sharing payload changed");
+  assert(sharing.facebookHref === `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(expectedSharingLink)}`, "anxiety Facebook share payload changed");
+  assert(sharing.twitterHref === `https://twitter.com/intent/tweet?text=${encodeURIComponent(expectedSharingDescription)}%20${encodeURIComponent(expectedSharingLink)}`, "anxiety Twitter share payload changed");
+  assert(sharing.emailHref === `mailto:?subject=${encodeURIComponent(expectedSharingTitle)}&body=${encodeURIComponent(expectedSharingDescription)}%20${encodeURIComponent(expectedSharingLink)}`, "anxiety email share payload changed");
+  console.log("OK anxiety intro start, automatic pacing, sharing, and native dialogs");
   await introPage.close();
 
   const replayPage = await context.newPage();
@@ -2422,11 +2524,15 @@ async function smokeAnxiety(context) {
     });
   }, null, { timeout: 20000 });
   await clickChoice(replayPage, "IV. The Other Sandwich");
-  await replayPage.waitForFunction(() => window._ && window._.CHAPTER === 4, null, { timeout: 10000 });
+  await replayPage.waitForFunction((expectedState) => {
+    return window.localStorage.getItem("continueChapter") === "act4" &&
+      window.localStorage.getItem("act4") === expectedState &&
+      JSON.stringify(window._) === expectedState;
+  }, replayState.act4, { timeout: 10000 });
   await replayPage.evaluate(() => Game.clearAllTimeouts());
   await replayPage.waitForFunction(() => {
     const words = document.querySelector("#game_words")?.textContent || "";
-    return words.trim().length > 0;
+    return /game auto-saved/i.test(words);
   }, null, { timeout: 10000 });
   await replayPage.goto(new URL("anxiety/sharing/", baseUrl).href, {
     waitUntil: "domcontentloaded",
@@ -2462,18 +2568,28 @@ async function smokeWbwwb(context) {
   await page.waitForFunction(() => Game.scene && Game.scene.constructor && Game.scene.constructor.name === "Scene_Quote", null, { timeout: 10000 });
   await page.evaluate(() => Game.sceneManager.gotoScene("Game"));
   await page.waitForTimeout(1000);
-  const photoResult = await page.evaluate(() => {
-    Game.scene.camera.x = Game.width / 2;
-    Game.scene.camera.y = Game.height / 2;
-    Game.scene.camera.takePhoto();
-    Game.scene.director.takePhoto(Game.scene.camera);
-    return {
-      chyron: Game.scene.director.chyron,
-      audience: Game.scene.director.photoData && Game.scene.director.photoData.audience,
-    };
-  });
+  const stageCanvas = page.locator("#stage canvas");
+  const stageBox = await stageCanvas.boundingBox();
+  assert(stageBox, "wbwwb stage canvas had no pointer geometry");
+  const pointerRatio = { x: 0.64, y: 0.42 };
+  await page.mouse.move(
+    stageBox.x + stageBox.width * pointerRatio.x,
+    stageBox.y + stageBox.height * pointerRatio.y,
+  );
+  await page.mouse.down();
+  await page.mouse.up();
+  const photoResult = await page.evaluate(() => ({
+    cameraX: Game.scene.camera.x,
+    cameraY: Game.scene.camera.y,
+    gameWidth: Game.width,
+    gameHeight: Game.height,
+    chyron: Game.scene.director.chyron,
+    audience: Game.scene.director.photoData && Game.scene.director.photoData.audience,
+  }));
+  assert(Math.abs(photoResult.cameraX - photoResult.gameWidth * pointerRatio.x) <= 2, "wbwwb pointer x-coordinate did not map to the camera");
+  assert(Math.abs(photoResult.cameraY - photoResult.gameHeight * pointerRatio.y) <= 2, "wbwwb pointer y-coordinate did not map to the camera");
   assert(photoResult.chyron && photoResult.chyron !== "[NO CHYRON]", "wbwwb did not generate a chyron after a photo");
-  console.log(`OK wbwwb capture loop (${photoResult.chyron})`);
+  console.log(`OK wbwwb pointer capture loop (${photoResult.chyron})`);
 
   await page.evaluate(() => Game.sceneManager.gotoScene("Post_Post_Credits"));
   await page.waitForTimeout(2500);
@@ -2546,6 +2662,30 @@ async function clickComingOutChoice(page, text) {
 }
 
 async function smokeComingOut(context) {
+  const queuePage = await context.newPage();
+  await assertRoute(queuePage, "coming-out-simulator-2014/", "#game");
+  await queuePage.waitForFunction(() => document.querySelector("#game")?.getAttribute("screen") === "game", null, { timeout: 15000 });
+  const queueState = await queuePage.evaluate(() => {
+    let soundEvent = null;
+    const subscription = subscribe("play", (label, soundLabel) => {
+      soundEvent = { label, soundLabel };
+    });
+    _queue = [];
+    resetTimer();
+    PlaySound("smoke-slot", "coffeehouse");
+    skipStep();
+    unsubscribe(subscription);
+    return {
+      duration: getDuration("one two"),
+      soundEvent,
+    };
+  });
+  const dialogueLeadMs = 800;
+  const dialogueWordMs = 160;
+  assert(queueState.duration === dialogueLeadMs + "one two".split(" ").length * dialogueWordMs, "coming-out authored dialogue timing changed");
+  assert(queueState.soundEvent?.label === "smoke-slot" && queueState.soundEvent?.soundLabel === "coffeehouse", "coming-out authored audio queue did not dispatch");
+  await queuePage.close();
+
   const introPage = await context.newPage();
   await assertRoute(introPage, "coming-out-simulator-2014/", "#game");
   await introPage.waitForFunction(() => document.querySelector("#game")?.getAttribute("screen") === "game", null, { timeout: 15000 });
@@ -2843,6 +2983,17 @@ async function smokeNeurons(context) {
   await page.close();
 }
 
+async function readNormalizedLoopyTopology(page) {
+  return page.evaluate(() => {
+    const origin = loopy.model.nodes[0] || { x: 0, y: 0 };
+    return {
+      nodes: loopy.model.nodes.map(({ id, x, y, init, label, hue }) => ({ id, x: Math.round(x - origin.x), y: Math.round(y - origin.y), init, label, hue })),
+      edges: loopy.model.edges.map(({ from, to, arc, strength }) => ({ from: from.id, to: to.id, arc: Math.round(arc), strength })),
+      labels: loopy.model.labels.map(({ x, y, text }) => ({ x: Math.round(x - origin.x), y: Math.round(y - origin.y), text })),
+    };
+  });
+}
+
 async function smokeLoopy(context) {
   const page = await context.newPage();
   await assertRoute(page, "loopy/", "#sidebar");
@@ -2854,7 +3005,120 @@ async function smokeLoopy(context) {
   await preview.waitFor({ state: "visible", timeout: 5000 });
   const embedCode = await page.locator("#modal_page .component_output:visible").inputValue();
   assert(embedCode.includes('title="LOOPY simulation"'), "LOOPY generated embed code lacked a title");
-  console.log("OK loopy generated iframe titles");
+  await page.evaluate(() => loopy.modal.hide());
+
+  const editorSurface = page.locator("#canvasses");
+  const editorSurfaceBox = await editorSurface.boundingBox();
+  assert(editorSurfaceBox, "LOOPY editor had no pointer geometry");
+  const drawCenter = {
+    x: Math.min(800, editorSurfaceBox.width - 140),
+    y: Math.min(700, editorSurfaceBox.height - 140),
+  };
+  const radius = 40;
+  const initialNodeCount = await page.evaluate(() => loopy.model.nodes.length);
+  const points = Array.from({ length: 13 }, (_, index) => {
+    const angle = Math.PI * 2 * index / 12;
+    return {
+      x: editorSurfaceBox.x + drawCenter.x + Math.cos(angle) * radius,
+      y: editorSurfaceBox.y + drawCenter.y + Math.sin(angle) * radius,
+    };
+  });
+  await page.mouse.move(points[0].x, points[0].y);
+  await page.mouse.down();
+  for (const point of points.slice(1)) {
+    await page.mouse.move(point.x, point.y, { steps: 2 });
+  }
+  await page.mouse.up();
+  await page.waitForFunction((count) => loopy.model.nodes.length === count + 1, initialNodeCount, { timeout: 5000 });
+  const drawnState = await page.evaluate(() => {
+    const node = loopy.model.nodes.at(-1);
+    return {
+      nodeCount: loopy.model.nodes.length,
+      node: { x: Math.round(node.x), y: Math.round(node.y) },
+      serialized: loopy.model.serialize(),
+      savedUrl: loopy.saveToURL(),
+    };
+  });
+  drawnState.model = await readNormalizedLoopyTopology(page);
+  assert(Math.abs(drawnState.node.x - drawCenter.x) <= 2 && Math.abs(drawnState.node.y - drawCenter.y) <= 2, "LOOPY pointer coordinates did not map to the drawn node");
+  const savedNode = JSON.parse(new URL(drawnState.savedUrl).searchParams.get("data"))[0].at(-1);
+  assert(savedNode[1] === drawnState.node.x && savedNode[2] === drawnState.node.y, "LOOPY shared URL did not preserve drawn node coordinates");
+  await page.goto(drawnState.savedUrl, { waitUntil: "load" });
+  await page.waitForFunction(() => Boolean(window.loopy), null, { timeout: 15000 });
+  const restoredState = await page.evaluate(() => ({
+    nodeCount: loopy.model.nodes.length,
+    serialized: loopy.model.serialize(),
+  }));
+  restoredState.model = await readNormalizedLoopyTopology(page);
+  assert(JSON.stringify(restoredState.model) === JSON.stringify(drawnState.model), "LOOPY shared URL did not restore the editor model");
+  assert(restoredState.nodeCount === drawnState.nodeCount, "LOOPY shared URL did not restore every node");
+  await page.locator("#playbar .component_button").filter({ hasText: "Play" }).click();
+  assert(await page.evaluate(() => loopy.mode) === 1, "LOOPY play control did not enter simulation mode");
+  await page.evaluate(() => {
+    loopy.model.nodes[0].value = loopy.model.nodes[0].init + 0.25;
+  });
+  await page.locator("#playbar .component_button").filter({ hasText: "Reset" }).click();
+  const resetState = await page.evaluate(() => ({
+    value: loopy.model.nodes[0].value,
+    initialValue: loopy.model.nodes[0].init,
+  }));
+  assert(resetState.value === resetState.initialValue, "LOOPY reset control did not restore node state");
+  await page.locator("#playbar .component_button").filter({ hasText: "Stop" }).click();
+  await page.evaluate(() => {
+    window.__loopyExportLink = null;
+    HTMLAnchorElement.prototype.click = function smokeAnchorClick() {
+      window.__loopyExportLink = {
+        href: this.getAttribute("href") || "",
+        download: this.getAttribute("download") || "",
+      };
+    };
+  });
+  const exportedModel = await page.evaluate(() => loopy.model.serialize());
+  await page.locator("#sidebar .mini_button").filter({ hasText: "save as file" }).click();
+  const exportLink = await page.evaluate(() => window.__loopyExportLink);
+  assert(exportLink?.download === "system_model.loopy" && exportLink.href.startsWith("data:text/plain"), "LOOPY export control did not emit a local model file");
+  assert(exportLink.href.slice(exportLink.href.indexOf(",") + 1) === exportedModel, "LOOPY export control did not preserve exact model data");
+  await page.evaluate(() => loopy.model.clear());
+  assert(await page.evaluate(() => loopy.model.nodes.length) === 0, "LOOPY import precondition did not clear the editor model");
+  const fileChooserPromise = page.waitForEvent("filechooser");
+  await page.locator("#sidebar .mini_button").filter({ hasText: "load from file" }).click();
+  const fileChooser = await fileChooserPromise;
+  await fileChooser.setFiles({
+    name: "system_model.loopy",
+    mimeType: "text/plain",
+    buffer: Buffer.from(decodeURIComponent(exportedModel)),
+  });
+  await page.waitForFunction((serialized) => loopy.model.serialize() === serialized, exportedModel, { timeout: 5000 });
+  console.log("OK loopy pointer drawing, play/reset, import/export, share persistence, and iframe titles");
+  await page.close();
+}
+
+async function smokeTrust(context) {
+  const page = await context.newPage();
+  await assertRoute(page, "trust/", "#main");
+  await page.waitForFunction(() => {
+    return document.querySelector("#main")?.getAttribute("aria-busy") === "false" &&
+      window.slideshow?.slideIndex === 0 &&
+      window.slideshow?.objects?.loading_button?.active;
+  }, null, { timeout: 30000 });
+  await page.locator("#slideshow .button #hitbox").click();
+  await page.waitForFunction(() => window.slideshow?.slideIndex === 1 && window.slideshow?.currentSlide?.id === "intro", null, { timeout: 5000 });
+  const slideState = await page.evaluate(() => {
+    const select = document.querySelector("#select");
+    return {
+      slideIndex: slideshow.slideIndex,
+      slideId: slideshow.currentSlide.id,
+      nativeControlsVisible: Boolean(select && getComputedStyle(select).display !== "none"),
+    };
+  });
+  assert(slideState.slideIndex === 1 && slideState.slideId === "intro" && slideState.nativeControlsVisible, "Trust start control did not advance the slideshow and reveal native navigation");
+  await page.locator("#sound").click();
+  const soundState = await page.evaluate(() => ({
+    control: document.querySelector("#sound")?.getAttribute("sound"),
+    muted: Howler._muted,
+  }));
+  assert(soundState.control === "off" && soundState.muted === true, "Trust sound control did not mute the runtime audio");
+  console.log("OK trust slideshow and audio controls");
   await page.close();
 }
 
@@ -2890,12 +3154,49 @@ async function smokeSim(context) {
   await simPage.waitForFunction((previousBrush) => {
     return (document.querySelector("#play_draw > div")?.textContent || "") !== previousBrush;
   }, initialBrush || "", { timeout: 5000 });
+  await simPage.setViewportSize({ width: 1399, height: 1000 });
+  await simPage.setViewportSize({ width: 1400, height: 1000 });
+  await simPage.waitForFunction(() => Grid.tileSize > 0, null, { timeout: 5000 });
+  const drawTarget = await simPage.evaluate(() => {
+    const brushState = Model.data.meta.draw;
+    const rect = Grid.dom.getBoundingClientRect();
+    for (let visualY = 0; visualY < Grid.array.length; visualY += 1) {
+      for (let visualX = 0; visualX < Grid.array[visualY].length; visualX += 1) {
+        const clientX = rect.left + (visualX + 0.5) * Grid.tileSize;
+        const clientY = rect.top + (visualY + 0.5) * Grid.tileSize;
+        const x = Math.floor((clientX - Grid.dom.offsetLeft) / Grid.tileSize);
+        const y = Math.floor((clientY - Grid.dom.offsetTop) / Grid.tileSize);
+        if (
+          clientY > 70 &&
+          x >= 0 && x < Grid.array[0].length &&
+          y >= 0 && y < Grid.array.length &&
+          Grid.array[y][x].stateID !== brushState
+        ) {
+          return { x, y, brushState, initialState: Grid.array[y][x].stateID, clientX, clientY };
+        }
+      }
+    }
+    return null;
+  });
+  assert(drawTarget, "sim did not expose a safe cell distinct from the active brush state");
+  await simPage.mouse.click(drawTarget.clientX, drawTarget.clientY);
+  const drawnCellState = await simPage.evaluate(({ x, y }) => Grid.array[y][x].stateID, drawTarget);
+  assert(drawnCellState === drawTarget.brushState && drawnCellState !== drawTarget.initialState, "sim pointer drawing did not apply the active brush state");
+  const expectedModel = await simPage.evaluate(() => JSON.stringify(Model.data));
   await simPage.locator(".editor_fancy_button").filter({ hasText: "save your model" }).first().click();
   await simPage.waitForFunction(() => {
     return Array.from(document.querySelectorAll(".editor_save_link")).some((input) => {
       return /\?lz=/.test(input.value || "");
     });
   }, null, { timeout: 10000 });
+  const savedUrl = await simPage.locator(".editor_save_link").evaluateAll((inputs) => {
+    return inputs.map((input) => input.value || "").find((value) => /\?lz=/.test(value)) || "";
+  });
+  const savedModel = await simPage.evaluate((url) => {
+    const compressed = new URL(url).searchParams.get("lz");
+    return LZString.decompressFromEncodedURIComponent(compressed);
+  }, savedUrl);
+  assert(savedModel === expectedModel, "sim save link did not preserve the edited model payload");
   await simPage.evaluate(() => {
     window.open = function smokeWindowOpen(url) {
       window.__simExportUrl = url;
@@ -2906,8 +3207,19 @@ async function smokeSim(context) {
     return typeof window.__simExportUrl === "string" &&
       window.__simExportUrl.startsWith("data:text/json");
   }, null, { timeout: 5000 });
-  console.log("OK sim controls and save/export");
+  const exportedModel = await simPage.evaluate(() => {
+    return window.__simExportUrl.slice(window.__simExportUrl.indexOf(",") + 1);
+  });
+  assert(exportedModel === expectedModel, "sim export did not preserve the edited model payload");
   await simPage.close();
+
+  const restoredPage = await context.newPage();
+  await restoredPage.goto(savedUrl, { waitUntil: "load" });
+  await restoredPage.waitForFunction(() => document.querySelector("main")?.getAttribute("aria-busy") === "false" && window.Model?.data?.meta?.fps === 12, null, { timeout: 15000 });
+  const restoredModel = await restoredPage.evaluate(() => JSON.stringify(Model.data));
+  assert(restoredModel === expectedModel, "sim save link did not restore the edited model state");
+  console.log("OK sim controls and semantic save/export round trips");
+  await restoredPage.close();
 
   const presetPage = await context.newPage();
   await presetPage.goto(new URL("sim/?s=schelling", baseUrl).href, {
@@ -9499,6 +9811,7 @@ async function main() {
       await smokeLoopy(context);
     }
     if (exists("trust")) {
+      await smokeTrust(context);
       await smokeTrustFallback(context);
     }
     if (exists("anxiety")) {

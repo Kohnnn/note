@@ -165,5 +165,21 @@
     "evidence": [
       "Route HTML declares canonical data-story metadata plus one color-scheme meta, synchronous theme init before Route styles, Sandbox CSS after Route styles, and one deferred Sandbox runtime whose existing position is preserved."
     ]
+  },
+  {
+    "moduleId": "complete-route-experience-ticket-24",
+    "originalBehavior": "The fixed slideshow runtime owns chapter state, native slide controls, timing, audio, and intrinsic artwork.",
+    "localStatus": "Stored and system themes affect only shared shell chrome; the opaque slideshow and its approved geometry remain unchanged.",
+    "sourceFiles": [
+      "../../routes.manifest.json",
+      "../../tools/smoke-bundle.mjs",
+      "../../tools/experience-baselines.json"
+    ],
+    "notes": [
+      "The Route remains fixed-runtime with native navigation and local-only networking."
+    ],
+    "evidence": [
+      "Focused smoke starts the slideshow, reveals native chapter controls, toggles authored audio mute state, verifies failure fallback, and enforces all approved viewport geometry and continuation contracts."
+    ]
   }
 ]

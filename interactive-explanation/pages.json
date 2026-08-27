@@ -19,7 +19,9 @@
       "nativeControl": {
         "selector": "#select .dot",
         "minimum": 10,
-        "kind": "state"
+        "kind": "state",
+        "activationSelector": "#slideshow .button #hitbox",
+        "readySelector": "#select"
       }
     },
     "suggestedNextSlug": "polygons",
@@ -111,7 +113,9 @@
       "nativeControl": {
         "selector": "#navigation > div[chapter]",
         "minimum": 9,
-        "kind": "state"
+        "kind": "state",
+        "activationSelector": "#slideshow .next_button",
+        "readySelector": "#navigation"
       }
     },
     "suggestedNextSlug": "loopy",
@@ -234,7 +238,14 @@
     "shell": {
       "family": "ncase",
       "variant": "essay",
-      "navigation": "none"
+      "navigation": "native",
+      "nativeControl": {
+        "selector": "#game_choices > button",
+        "minimum": 1,
+        "kind": "state",
+        "activationSelector": "#loading",
+        "readySelector": "#game_choices > button:not(.hidden)"
+      }
     },
     "suggestedNextSlug": "remember",
     "experience": {

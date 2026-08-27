@@ -394,6 +394,8 @@ test("native control kind invariants fail validation", () => {
     nativeRoute({ selector: "button", minimum: 1, kind: "state", fragmentOnly: true }),
     nativeRoute({ selector: "button", minimum: 1, kind: "state", peerSelectors: ["button"] }),
     nativeRoute({ selector: "button", minimum: 1, kind: "state", peerSelectors: ["[data-next]", "[data-next]"] }),
+    nativeRoute({ selector: "button", minimum: 1, kind: "state", activationSelector: "#start" }),
+    nativeRoute({ selector: "button", minimum: 1, kind: "state", readySelector: "#ready" }),
   ];
   cases.forEach((route) => {
     assert.notEqual(runSync(makeRootWithManifest([route])).status, 0);
